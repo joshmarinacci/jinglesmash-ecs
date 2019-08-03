@@ -1,13 +1,14 @@
 import {System} from "./node_modules/ecsy/build/ecsy.module.js"
-import {ThreeScene} from './three'
-import {BoxGeometry,
-    Mesh, MeshLambertMaterial,
+import {ThreeScene} from './three.js'
+import {Mesh, MeshLambertMaterial,
     SphereGeometry,
     Raycaster,
     Vector2,
     DoubleSide,
     Vector3} from "./node_modules/three/build/three.module.js"
 import {PhysicsBall} from './physics.js'
+import {Globals} from './common.js'
+import {PlaySoundEffect} from './audio.js'
 
 
 class MouseState {
@@ -40,6 +41,9 @@ export class MouseInputSystem extends System {
                         removed: {event:'EntityRemoved'}
                     }
                 },
+                globals: {
+                    components: [Globals]
+                }
             }
         }
     }
@@ -85,9 +89,12 @@ export class MouseInputSystem extends System {
                 const ball = this.world.createEntity()
                 ball.addComponent(PhysicsBall, {
                     initialPosition: mouse.mouseSphere.position.clone(),
-                    initialVelocity: new Vector3(0,3,-2),
+                    initialVelocity: new Vector3(0,3,-4),
                     radius: 0.25,
                 })
+
+                const globals = this.queries.globals[0].getMutableComponent(Globals)
+                globals.click.addComponent(PlaySoundEffect)
             })
         })
 

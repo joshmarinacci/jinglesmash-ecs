@@ -112,21 +112,11 @@ function setupBackground() {
 }
 
 function setupAudio(world) {
-
-    // game.audioService = new AudioService({enabled:DEBUG.AUDIO})
-    // game.audioService.load("click","./sounds/plink.wav")
-    world.createEntity().addComponent(SoundEffect,{name:'click', src:'./sounds/plink.wav'})
-    // game.audioService.load("crash","./sounds/crash1.wav")
-    world.createEntity().addComponent(SoundEffect,{name:'crash', src:'./sounds/crash1.wav'})
-    // game.audioService.load("thunk","./sounds/thunk.wav")
-    world.createEntity().addComponent(SoundEffect,{name:'thunk', src:'./sounds/thunk.wav'})
-    // game.audioService.load("bg","./music/sugarplum.mp3")
-    //     .then(()=>{
-    //         if(!DEBUG.AUDIO) return
-    //         game.bg_music = game.audioService.play("bg")
-    //         game.bg_music.loop = true
-    //     })
-    world.createEntity().addComponent(SoundEffect,{name:'bg', src:'./music/sugarplum.mp3',autoPlay:true,loop:true})
+    const globals = game.getMutableComponent(Globals)
+    globals.click = world.createEntity().addComponent(SoundEffect,{name:'click', src:'./sounds/plink.wav'})
+    globals.crash = world.createEntity().addComponent(SoundEffect,{name:'crash', src:'./sounds/crash1.wav'})
+    globals.thunk = world.createEntity().addComponent(SoundEffect,{name:'thunk', src:'./sounds/thunk.wav'})
+    globals.bg = world.createEntity().addComponent(SoundEffect,{name:'bg', src:'./music/sugarplum.mp3',autoPlay:true,loop:true})
 }
 
 
