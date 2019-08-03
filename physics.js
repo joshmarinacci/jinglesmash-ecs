@@ -2,8 +2,13 @@ import {BoxGeometry, Mesh, MeshLambertMaterial, Vector3} from "./node_modules/th
 import {System} from "./node_modules/ecsy/build/ecsy.module.js"
 import {Consts} from './common.js'
 
+const wallMaterial = new CANNON.Material()
+
 export class Ball {
 
+}
+
+export class PhysicsFloor {
 }
 
 export class BlockSystem extends System {
@@ -17,8 +22,8 @@ export class BlockSystem extends System {
     execute(delta) {
         this.queries.blocks.forEach(ent => {
             const block = ent.getMutableComponent(Block)
-            block.obj.position.copy(block.position)
-            block.obj.rotation.copy(block.rotation)
+            // block.obj.position.copy(block.position)
+            // block.obj.rotation.copy(block.rotation)
         })
     }
 }
@@ -45,6 +50,11 @@ export class Block {
         // this.rebuildMaterial()
     }
 
+    syncBack() {
+        this.obj.position.copy(this.body.position)
+        this.obj.quaternion.copy(this.body.quaternion)
+    }
+
     set(name, value) {
         if(name === 'width' || name === 'height' || name === 'depth') {
             this[name] = value
@@ -54,11 +64,13 @@ export class Block {
         if(name === 'position') {
             this.position.copy(value)
             this.obj.position.copy(value)
+            if(this.body) this.body.position.copy(value)
             return
         }
         if(name === 'rotation') {
             this.rotation.copy(value)
             this.obj.rotation.setFromVector3(value,'XYZ')
+            if(this.body) this.body.quaternion.setFromEuler(this.rotation.x,this.rotation.y,this.rotation.z,'XYZ')
             return
         }
         if(name === 'physicstype') return this.physicsType = value
@@ -68,33 +80,78 @@ export class Block {
 
     rebuildGeometry() {
         this.obj.geometry = new BoxGeometry(this.width,this.height,this.depth)
-        // if(this.geometryModifier !== null && this.physicsType === BLOCK_TYPES.BLOCK) this.geometryModifier(this.obj.geometry)
-        // if(this.body) {
-        //     this.body.userData.block = null
-        //     pworld.removeBody(this.body)
-        // }
-        /*
-        let type = CANNON.Body.DYNAMIC
-        if(this.physicsType === Consts.BLOCK_TYPES.WALL) {
-            type = CANNON.Body.KINEMATIC
-        }
+    }
+
+    rebuildPhysics() {
         this.body = new CANNON.Body({
             mass: 1,//kg
-            type: type,
+            type: CANNON.Body.DYNAMIC,
             position: new CANNON.Vec3(this.position.x,this.position.y,this.position.z),
             shape: new CANNON.Box(new CANNON.Vec3(this.width/2,this.height/2,this.depth/2)),
-            // material: wallMaterial,
+            material: wallMaterial,
         })
-        this.body.quaternion.setFromEuler(this.rotation.x,this.rotation.y,this.rotation.z,'XYZ')
-        this.body.jtype = this.physicsType
-        this.body.userData = {}
-        this.body.userData.block = this
-        pworld.addBody(this.body)
-         */
+
     }
 }
-export class PhysicsSystem extends System {
 
+const fixedTimeStep = 1.0 / 60.0; // seconds
+const maxSubSteps = 3;
+
+export class PhysicsSystem extends System {
+    init() {
+        this.cannonWorld = new CANNON.World();
+        this.cannonWorld.gravity.set(0, -9.82, 0);
+
+        this.wallMaterial = new CANNON.Material()
+        this.ballMaterial = new CANNON.Material()
+
+
+        return {
+            queries: {
+                blocks: {
+                    components:[Block],
+                    events: {
+                        added: {event:'EntityAdded'},
+                        removed: {event:'EntityRemoved'}
+                    }
+                },
+                floors: {
+                    components:[PhysicsFloor],
+                    events: {
+                        added: {event:'EntityAdded'},
+                        removed: {event:'EntityRemoved'}
+                    }
+                }
+            }
+        }
+    }
+    execute(delta) {
+        this.events.blocks.added.forEach(ent => {
+            const block = ent.getMutableComponent(Block)
+            block.rebuildPhysics()
+            this.cannonWorld.addBody(block.body)
+
+        })
+        this.cannonWorld.step(fixedTimeStep)//, delta, maxSubSteps)
+
+        this.queries.blocks.forEach(ent => {
+            const block = ent.getMutableComponent(Block)
+            // console.log(block.body.position.y)
+            block.syncBack()
+        })
+
+        this.events.floors.added.forEach(ent => {
+            const floor = ent.getMutableComponent(PhysicsFloor)
+            console.log("added floor")
+            floor.body = new CANNON.Body({
+                mass: 0 // mass == 0 makes the body static
+            });
+            floor.body.quaternion.setFromAxisAngle(new CANNON.Vec3(1,0,0),-Math.PI/2);
+            floor.body.addShape(new CANNON.Plane());
+            this.cannonWorld.addBody(floor.body);
+
+        })
+    }
     handleCollision(e) {
         // if(game.blockService.ignore_collisions) return
         //ignore tiny collisions

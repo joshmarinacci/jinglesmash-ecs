@@ -1,6 +1,6 @@
 import {System} from "./node_modules/ecsy/build/ecsy.module.js"
 import {Consts, toRad} from './common.js'
-import {Block} from './physics.js'
+import {Block, PhysicsFloor} from './physics.js'
 import {ThreeScene} from './three.js'
 import {Mesh, MeshLambertMaterial, PlaneGeometry} from "./node_modules/three/build/three.module.js"
 
@@ -75,7 +75,6 @@ export  class LevelLoaderSystem extends System {
             // const b2 = this.makeBlock()
             b2.frozen = true
             // const p = b.position
-            // b2.position.copy(p)
             b2.set('position',b.position)
             // b2.positionSet(p.x,p.y,p.z)
             b2.set('width',b.size.width)
@@ -138,6 +137,9 @@ export  class LevelLoaderSystem extends System {
         floorObj.rotation.x = toRad(-90)
         const sc = this.queries.three[0].getComponent(ThreeScene)
         sc.scene.add(floorObj)
+
+        const floor = this.world.createEntity()
+        floor.addComponent(PhysicsFloor)
 
         // floorBody.userData = {obj:floorObj}
         // floorBody.userData.skipRaycast = true
