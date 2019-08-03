@@ -37,8 +37,8 @@ export class BlockSystem extends System {
     execute(delta) {
         this.queries.blocks.forEach(ent => {
             const block = ent.getMutableComponent(Block)
-            block.obj.position.copy(block.position)
-            block.obj.rotation.copy(block.rotation)
+            // block.obj.position.copy(block.position)
+            // block.obj.rotation.copy(block.rotation)
         })
     }
 }
@@ -78,7 +78,7 @@ export class Block {
         }
         if(name === 'rotation') {
             this.rotation.copy(value)
-            this.obj.rotation.copy(value)
+            this.obj.rotation.setFromVector3(value,'XYZ')
             return
         }
         if(name === 'physicstype') return this.physicsType = value
