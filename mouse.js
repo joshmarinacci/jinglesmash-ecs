@@ -7,6 +7,7 @@ import {BoxGeometry,
     Vector2,
     DoubleSide,
     Vector3} from "./node_modules/three/build/three.module.js"
+import {PhysicsBall} from './physics.js'
 
 
 class MouseState {
@@ -81,6 +82,12 @@ export class MouseInputSystem extends System {
             })
             three.renderer.domElement.addEventListener('mouseup',(e)=>{
                 mouse.pressed = false
+                const ball = this.world.createEntity()
+                ball.addComponent(PhysicsBall, {
+                    initialPosition: mouse.mouseSphere.position.clone(),
+                    initialVelocity: new Vector3(0,3,-2),
+                    radius: 0.25,
+                })
             })
         })
 

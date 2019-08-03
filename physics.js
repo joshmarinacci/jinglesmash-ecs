@@ -1,11 +1,21 @@
-import {BoxGeometry, Mesh, MeshLambertMaterial, Vector3} from "./node_modules/three/build/three.module.js"
+import {BoxGeometry, Mesh, MeshLambertMaterial, Vector3, SphereGeometry, MeshPhongMaterial} from "./node_modules/three/build/three.module.js"
 import {System} from "./node_modules/ecsy/build/ecsy.module.js"
 import {Consts} from './common.js'
+import {ThreeScene} from './three'
 
 const wallMaterial = new CANNON.Material()
 
-export class Ball {
-
+export class PhysicsBall {
+    constructor() {
+        this.obj = null
+        this.body = null
+        this.initialVelocity = new Vector3()
+        this.initialPosition = new Vector3()
+    }
+    syncBack() {
+        this.obj.position.copy(this.body.position)
+        this.obj.quaternion.copy(this.body.quaternion)
+    }
 }
 
 export class PhysicsFloor {
@@ -108,6 +118,7 @@ export class PhysicsSystem extends System {
 
         return {
             queries: {
+                three: { components: [ThreeScene], },
                 blocks: {
                     components:[Block],
                     events: {
@@ -121,7 +132,14 @@ export class PhysicsSystem extends System {
                         added: {event:'EntityAdded'},
                         removed: {event:'EntityRemoved'}
                     }
-                }
+                },
+                balls: {
+                    components:[PhysicsBall],
+                    events: {
+                        added: {event:'EntityAdded'},
+                        removed: {event:'EntityRemoved'}
+                    }
+                },
             }
         }
     }
@@ -135,21 +153,49 @@ export class PhysicsSystem extends System {
         this.cannonWorld.step(fixedTimeStep)//, delta, maxSubSteps)
 
         this.queries.blocks.forEach(ent => {
-            const block = ent.getMutableComponent(Block)
-            // console.log(block.body.position.y)
-            block.syncBack()
+            ent.getMutableComponent(Block).syncBack()
         })
 
         this.events.floors.added.forEach(ent => {
             const floor = ent.getMutableComponent(PhysicsFloor)
-            console.log("added floor")
             floor.body = new CANNON.Body({
                 mass: 0 // mass == 0 makes the body static
             });
             floor.body.quaternion.setFromAxisAngle(new CANNON.Vec3(1,0,0),-Math.PI/2);
             floor.body.addShape(new CANNON.Plane());
             this.cannonWorld.addBody(floor.body);
+            this.makeBall()
+        })
 
+        this.events.balls.added.forEach(ent => {
+            const ball = ent.getMutableComponent(PhysicsBall)
+            ball.obj =new Mesh(
+                new SphereGeometry(ball.radius,16,16),
+                new MeshPhongMaterial({color: 'orange', flatShading: true})
+            )
+            // const pos = new Vector3(0,3,2)
+            ball.obj.castShadow = true
+            ball.obj.position.copy(ball.initialPosition)
+
+            const pos = ball.initialPosition
+            const dir = ball.initialVelocity
+
+            const sc = this.queries.three[0].getComponent(ThreeScene)
+            sc.scene.add(ball.obj)
+
+            ball.body = new CANNON.Body({
+                mass: 5,
+                shape: new CANNON.Sphere(ball.radius),
+                position: new CANNON.Vec3(pos.x, pos.y, pos.z),
+                velocity: new CANNON.Vec3(dir.x,dir.y,dir.z),
+                type: CANNON.Body.DYNAMIC,
+                material: this.ballMaterial,
+            })
+            this.cannonWorld.addBody(ball.body)
+        })
+
+        this.queries.balls.forEach(ent => {
+            ent.getMutableComponent(PhysicsBall).syncBack()
         })
     }
     handleCollision(e) {
@@ -178,4 +224,6 @@ export class PhysicsSystem extends System {
         // console.log(`collision: body ${e.body.jtype} target ${e.target.jtype}`)
     }
 
+    makeBall() {
+    }
 }
