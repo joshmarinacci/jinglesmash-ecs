@@ -1,28 +1,8 @@
-import {World, System} from "./node_modules/ecsy/build/ecsy.module.js"
-import {Consts, Globals, toRad} from './common'
-import {Block} from './physics'
-import {ThreeScene} from './three'
-import {
-    PlaneGeometry,
-    Object3D,
-    Vector2,
-    Vector3,
-    Quaternion,
-    BufferGeometry,
-    Raycaster,
-    Float32BufferAttribute,
-    LineBasicMaterial,
-    NormalBlending,
-    SphereBufferGeometry,
-    Line,
-    Mesh,
-    MeshLambertMaterial,
-    Scene,
-    PerspectiveCamera,
-    WebGLRenderer,
-    DefaultLoadingManager,
-    Group,
-} from "./node_modules/three/build/three.module.js"
+import {System} from "./node_modules/ecsy/build/ecsy.module.js"
+import {Consts, toRad} from './common.js'
+import {Block} from './physics.js'
+import {ThreeScene} from './three.js'
+import {Mesh, MeshLambertMaterial, PlaneGeometry} from "./node_modules/three/build/three.module.js"
 
 function pickOne(arr) {
     return arr[Math.floor(Math.random()*arr.length)]

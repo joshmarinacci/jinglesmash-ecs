@@ -1,32 +1,18 @@
 import {
-    Object3D,
-    Vector2,
-    Vector3,
-    Quaternion,
-    BufferGeometry,
-    Raycaster,
-    Float32BufferAttribute,
-    LineBasicMaterial,
-    NormalBlending,
-    SphereBufferGeometry,
-    Line,
-    Mesh,
-    MeshLambertMaterial,
-    Scene,
-    PerspectiveCamera,
-    WebGLRenderer,
-    SphereGeometry,
+    BackSide,
     DefaultLoadingManager,
     Group,
-    TextureLoader,
+    Mesh,
     MeshBasicMaterial,
-    BackSide,
+    PerspectiveCamera,
+    Scene,
+    SphereGeometry,
+    TextureLoader,
+    WebGLRenderer
 } from "./node_modules/three/build/three.module.js"
 
-import {World, System} from "./node_modules/ecsy/build/ecsy.module.js"
-import {$, Consts, Globals} from './common.js'
-
-
+import {System} from "./node_modules/ecsy/build/ecsy.module.js"
+import {$} from './common.js'
 
 
 export class ThreeGroup {

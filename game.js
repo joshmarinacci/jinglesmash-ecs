@@ -1,42 +1,23 @@
 import {
-    RepeatWrapping,
+    AmbientLight,
+    Clock,
     Color,
+    ConeGeometry,
     DirectionalLight,
-    Object3D,
-    Vector2,
-    Vector3,
-    Quaternion,
-    BufferGeometry,
-    Raycaster,
-    Float32BufferAttribute,
-    LineBasicMaterial,
-    NormalBlending,
-    SphereBufferGeometry,
-    Line,
+    Geometry,
     Mesh,
     MeshLambertMaterial,
-    Scene,
     PCFSoftShadowMap,
-    PerspectiveCamera,
-    WebGLRenderer,
-    DefaultLoadingManager,
-    Group,
-    ConeGeometry,
-    Geometry,
-    TextureLoader,
-    AmbientLight,
+    RepeatWrapping,
     SphereGeometry,
+    TextureLoader
 } from "./node_modules/three/build/three.module.js"
-import {World, System} from "./node_modules/ecsy/build/ecsy.module.js"
-import {Consts, Globals} from './common'
-import {AudioSystem} from './audio'
-import {ThreeScene, ThreeSystem, ThreeGroup, SkyBox} from './three'
-import {LevelInfo, LevelLoaderSystem} from './levels'
-import {BlockSystem, PhysicsSystem} from './physics'
-import {
-    Clock,
-
-} from "./node_modules/three/build/three.module.js"
+import {World} from "./node_modules/ecsy/build/ecsy.module.js"
+import {Globals} from './common.js'
+import {AudioSystem} from './audio.js'
+import {SkyBox, ThreeGroup, ThreeScene, ThreeSystem} from './three.js'
+import {LevelInfo, LevelLoaderSystem} from './levels.js'
+import {BlockSystem, PhysicsSystem} from './physics.js'
 
 
 const $$ = (sel) => document.querySelectorAll(sel)

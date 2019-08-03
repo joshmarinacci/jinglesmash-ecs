@@ -1,26 +1,6 @@
-import {
-    Object3D,
-    Vector2,
-    Vector3,
-    Quaternion,
-    BufferGeometry,
-    Raycaster,
-    Float32BufferAttribute,
-    LineBasicMaterial,
-    NormalBlending,
-    SphereBufferGeometry,
-    Line,
-    Mesh,
-    MeshLambertMaterial,
-    Scene,
-    PerspectiveCamera,
-    WebGLRenderer,
-    DefaultLoadingManager,
-    Group,
-    BoxGeometry
-} from "./node_modules/three/build/three.module.js"
-import {World, System} from "./node_modules/ecsy/build/ecsy.module.js"
-import {Consts} from './common'
+import {BoxGeometry, Mesh, MeshLambertMaterial, Vector3} from "./node_modules/three/build/three.module.js"
+import {System} from "./node_modules/ecsy/build/ecsy.module.js"
+import {Consts} from './common.js'
 
 export class Ball {
 
@@ -37,8 +17,8 @@ export class BlockSystem extends System {
     execute(delta) {
         this.queries.blocks.forEach(ent => {
             const block = ent.getMutableComponent(Block)
-            // block.obj.position.copy(block.position)
-            // block.obj.rotation.copy(block.rotation)
+            block.obj.position.copy(block.position)
+            block.obj.rotation.copy(block.rotation)
         })
     }
 }
