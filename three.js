@@ -63,7 +63,8 @@ export class ThreeSystem extends System {
         document.body.appendChild( container );
         app.scene = new Scene();
         app.camera = new PerspectiveCamera( 70, window.innerWidth / window.innerHeight, 0.1, 100 );
-        app.camera.position.z = 10
+        app.camera.position.z = 5
+        app.camera.position.y = 1.5
         app.renderer = new WebGLRenderer( { antialias: true } );
         app.renderer.setPixelRatio( window.devicePixelRatio );
         app.renderer.setSize( window.innerWidth, window.innerHeight );

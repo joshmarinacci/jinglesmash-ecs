@@ -32,7 +32,7 @@ import {Consts, Globals} from './common'
 import {AudioSystem} from './audio'
 import {ThreeScene, ThreeSystem, ThreeGroup} from './three'
 import {LevelInfo, LevelLoaderSystem} from './levels'
-import {PhysicsSystem} from './physics'
+import {BlockSystem, PhysicsSystem} from './physics'
 import {
     Clock,
 
@@ -103,7 +103,6 @@ function setupBackground() {
     const background = world.createEntity()
     background.addComponent(ThreeGroup)
 
-
     const candyCones = new Geometry()
     candyCones.merge(new ConeGeometry(1,10,16,8).translate(-22,5,0))
     candyCones.merge(new ConeGeometry(1,10,16,8).translate(22,5,0))
@@ -120,7 +119,6 @@ function setupBackground() {
     greenCones.merge(new ConeGeometry(1,5,16,8).translate(14,0,-3))
     const mesh2 = new Mesh(greenCones,new MeshLambertMaterial({color:'green', map:tex}))
     background.getMutableComponent(ThreeGroup).group.add(mesh2)
-
 
     const dome_geo = new Geometry()
     //left
@@ -143,10 +141,6 @@ function setupBackground() {
     const mesh3 = new Mesh(dome_geo,new MeshLambertMaterial({color:'white'}))
     background.getMutableComponent(ThreeGroup).group.add(mesh3)
 
-    // background.position.set(0,0,0)
-    // background.userData.skipRaycast = true
-
-    // scene.add(background)
     core.scene.add(background.getMutableComponent(ThreeGroup).group)
 }
 
@@ -203,6 +197,7 @@ function setupGame() {
     world.registerSystem(AudioSystem)
     world.registerSystem(LevelLoaderSystem)
     world.registerSystem(PhysicsSystem)
+    world.registerSystem(BlockSystem)
 
     world.registerComponent(ThreeScene)
 

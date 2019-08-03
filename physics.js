@@ -26,6 +26,22 @@ export class Ball {
 
 }
 
+export class BlockSystem extends System {
+    init() {
+        return {
+            queries: {
+                blocks: { components:[Block]}
+            }
+        }
+    }
+    execute(delta) {
+        this.queries.blocks.forEach(ent => {
+            const block = ent.getMutableComponent(Block)
+            block.obj.position.copy(block.position)
+        })
+    }
+}
+
 export class Block {
     constructor() {
         this.position = new Vector3(0,0,0)
@@ -48,8 +64,42 @@ export class Block {
         // this.rebuildMaterial()
     }
 
+    set(name, value) {
+        // if(POSITION_NAMES.indexOf(name) >= 0) {
+        //     this.position[name] = value
+        //     this.obj.position[name] = value
+        //     this.body.position[name] = value
+        //     return
+        // }
+        // if(ROTATION_NAMES.indexOf(name) >= 0) {
+        //     name = name.substring(3)
+        //     this.rotation[name] = value
+        //     this.obj.rotation[name] = value
+        //     this.body.quaternion.setFromEuler(this.rotation.x,this.rotation.y,this.rotation.z,'XYZ')
+        //     return
+        // }
+        if(name === 'width' || name === 'height' || name === 'depth') {
+            this[name] = value
+            this.rebuildGeometry()
+            return
+        }
+        if(name === 'position') {
+            this.position.copy(value)
+            this.obj.position.copy(value)
+            return
+        }
+        if(name === 'rotation') {
+            this.rotation.copy(value)
+            this.obj.rotation.copy(value)
+            return;
+        }
+        if(name === 'physicstype') return this.physicsType = value
+        throw new Error("unknown property to set",name)
+    }
+
+
     rebuildGeometry() {
-        // this.obj.geometry = new BoxGeometry(this.width,this.height,this.depth)
+        this.obj.geometry = new BoxGeometry(this.width,this.height,this.depth)
         // if(this.geometryModifier !== null && this.physicsType === BLOCK_TYPES.BLOCK) this.geometryModifier(this.obj.geometry)
         // if(this.body) {
         //     this.body.userData.block = null
@@ -72,7 +122,6 @@ export class Block {
         this.body.userData = {}
         this.body.userData.block = this
         pworld.addBody(this.body)
-
          */
     }
 }
@@ -103,6 +152,5 @@ export class PhysicsSystem extends System {
         }
         // console.log(`collision: body ${e.body.jtype} target ${e.target.jtype}`)
     }
-
 
 }

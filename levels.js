@@ -75,16 +75,15 @@ export  class LevelLoaderSystem extends System {
             sc.scene.add(b2.obj)
             // const b2 = this.makeBlock()
             b2.frozen = true
-            const p = b.position
-            b2.position.copy(p)
+            // const p = b.position
+            // b2.position.copy(p)
+            b2.set('position',b.position)
             // b2.positionSet(p.x,p.y,p.z)
-            // b2.setWidth(b.size.width)
-            // b2.setHeight(b.size.height)
-            // b2.setDepth(b.size.depth)
-            // b2.set('rotx',b.rotation.x)
-            // b2.set('roty',b.rotation.y)
-            // b2.set('rotz',b.rotation.z)
-            // b2.set('physicstype',b.physicstype)
+            b2.set('width',b.size.width)
+            b2.set('height',b.size.height)
+            b2.set('depth',b.size.depth)
+            b2.set('rotation',b.rotation)
+            b2.set('physicstype',b.physicstype)
             // b2.frozen = false
             // b2.rebuildGeometry()
             return block
