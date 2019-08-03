@@ -58,7 +58,6 @@ export class ThreeSystem extends System {
         })
     }
     initScene(ent) {
-        console.log("initting the scene")
         const app = ent.getMutableComponent(ThreeScene)
         //init the scene
         //create DIV for the canvas
@@ -79,18 +78,17 @@ export class ThreeSystem extends System {
         // initContent(scene,camera,renderer)
 
         window.addEventListener( 'resize', ()=>{
-            console.log("rexizing")
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize( window.innerWidth, window.innerHeight );
+            app.camera.aspect = window.innerWidth / window.innerHeight;
+            app.camera.updateProjectionMatrix();
+            app.renderer.setSize( window.innerWidth, window.innerHeight );
         }, false );
 
         DefaultLoadingManager.onStart = (url, loaded, total) => {
             console.log(`loading ${url}.  loaded ${loaded} of ${total}`)
         }
         DefaultLoadingManager.onLoad = () => {
-            console.log(`loading complete`)
-            console.log("really setting it up now")
+            // console.log(`loading complete`)
+            // console.log("really setting it up now")
             $('#loading-indicator').style.display = 'none'
         }
         DefaultLoadingManager.onProgress = (url, loaded, total) => {

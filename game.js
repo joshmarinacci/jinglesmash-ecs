@@ -18,6 +18,7 @@ import {AudioSystem} from './audio.js'
 import {SkyBox, ThreeGroup, ThreeScene, ThreeSystem} from './three.js'
 import {LevelInfo, LevelLoaderSystem} from './levels.js'
 import {BlockSystem, PhysicsSystem} from './physics.js'
+import {MouseInputSystem} from "./mouse.js"
 
 
 const $$ = (sel) => document.querySelectorAll(sel)
@@ -163,6 +164,7 @@ function setupGame() {
     world.registerSystem(LevelLoaderSystem)
     world.registerSystem(PhysicsSystem)
     world.registerSystem(BlockSystem)
+    world.registerSystem(MouseInputSystem)
 
     world.registerComponent(ThreeScene)
 

@@ -42,11 +42,9 @@ export  class LevelLoaderSystem extends System {
     }
     execute(delta) {
         this.events.levels.added.forEach(ent => {
-            console.log("added a level",ent)
             const info = ent.getMutableComponent(LevelInfo)
-            console.log("info is",info)
             this.loadStructure(info).then(()=>{
-                console.log("fully loaded")
+                // console.log("fully loaded")
             })
         })
     }
@@ -114,7 +112,6 @@ export  class LevelLoaderSystem extends System {
             level.roomType = doc.data.roomType
         }
         //
-        console.log('room type is',level.roomType)
 
         if(level.roomType === Consts.ROOM_TYPES.FLOOR) {
             this.startFloorRoom(level)
