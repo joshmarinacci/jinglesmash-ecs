@@ -43,21 +43,13 @@ export class MouseInputSystem extends System {
         }
     }
     execute(delta) {
-        /*
-        on load, add target indicator
-        on mouse move
-            move target indicator
-        on mouse down
-            increase tension by moving the ball back
-        on mouse release
-            fire the ball into the scene
-         */
-
+        //hook up the mouse state component
         this.events.three.added.forEach(ent => {
             const three = ent.getMutableComponent(ThreeScene)
             if (!three.scene) return
             ent.addComponent(MouseState)
         })
+        //hook up the mouse events
         this.events.mouse.added.forEach(ent => {
             const three = this.queries.three[0].getMutableComponent(ThreeScene)
             const mouse = ent.getMutableComponent(MouseState)
@@ -92,6 +84,7 @@ export class MouseInputSystem extends System {
             })
         })
 
+        //update the mouse indicator
         this.queries.mouse.forEach(ent => {
             const mouse = ent.getMutableComponent(MouseState)
             const mat = mouse.mouseSphere.material
