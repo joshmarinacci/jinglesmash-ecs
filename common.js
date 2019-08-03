@@ -38,3 +38,5 @@ export const Consts = {
     POSITION_NAMES : ['x','y','z'],
     ROTATION_NAMES : ['rotx','roty','rotz'],
 }
+
+export const $ = (sel) => document.querySelector(sel)

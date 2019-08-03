@@ -9,6 +9,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "ecsy": "^0.1.0"
+    "cannon": "^0.6.2",
+    "ecsy": "^0.1.0",
+    "three": "^0.107.0"
   }
 }

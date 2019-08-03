@@ -1,6 +1,34 @@
-import {World, System} from "./node_modules/ecsy/build/ecsy.module.js"
-import {Consts, Globals} from './common'
+import {
+    Object3D,
+    Vector2,
+    Vector3,
+    Quaternion,
+    BufferGeometry,
+    Raycaster,
+    Float32BufferAttribute,
+    LineBasicMaterial,
+    NormalBlending,
+    SphereBufferGeometry,
+    Line,
+    Mesh,
+    MeshLambertMaterial,
+    Scene,
+    PerspectiveCamera,
+    WebGLRenderer,
+    DefaultLoadingManager,
+    Group,
+} from "./node_modules/three/build/three.module.js"
 
+import {World, System} from "./node_modules/ecsy/build/ecsy.module.js"
+import {$, Consts, Globals} from './common.js'
+
+
+
+export class ThreeGroup {
+    constructor() {
+        this.group = new Group()
+    }
+}
 export class ThreeScene {
     constructor() {
         this.scene = null
@@ -12,7 +40,13 @@ export class ThreeSystem extends System {
     init() {
         return {
             queries: {
-                three: {components: [ThreeScene]}
+                three: {
+                    components: [ThreeScene],
+                    events: {
+                        added: {event:'EntityAdded'},
+                        removed: {event:'EntityRemoved'}
+                    }
+                }
             }
         }
     }
@@ -21,42 +55,45 @@ export class ThreeSystem extends System {
         this.events.three.added.forEach(this.initScene)
     }
     initScene(ent) {
-        const s3 = ent.getComponent(ThreeScene)
+        console.log("initting the scene")
+        const app = ent.getMutableComponent(ThreeScene)
         //init the scene
         //create DIV for the canvas
         const container = document.createElement( 'div' );
         document.body.appendChild( container );
-        scene = new THREE.Scene();
-        camera = new THREE.PerspectiveCamera( 70, window.innerWidth / window.innerHeight, 0.1, 100 );
-        renderer = new THREE.WebGLRenderer( { antialias: true } );
-        renderer.setPixelRatio( window.devicePixelRatio );
-        renderer.setSize( window.innerWidth, window.innerHeight );
-        renderer.gammaOutput = true
-        renderer.vr.enabled = true;
-        container.appendChild( renderer.domElement );
-        this.vrmanager = new VRManager(renderer)
+        app.scene = new Scene();
+        app.camera = new PerspectiveCamera( 70, window.innerWidth / window.innerHeight, 0.1, 100 );
+        app.camera.position.z = 10
+        app.renderer = new WebGLRenderer( { antialias: true } );
+        app.renderer.setPixelRatio( window.devicePixelRatio );
+        app.renderer.setSize( window.innerWidth, window.innerHeight );
+        app.renderer.gammaOutput = true
+        // app.renderer.vr.enabled = true;
+        container.appendChild( app.renderer.domElement );
+        // this.vrmanager = new VRManager(renderer)
 
         // initContent(scene,camera,renderer)
 
         window.addEventListener( 'resize', ()=>{
+            console.log("rexizing")
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
             renderer.setSize( window.innerWidth, window.innerHeight );
         }, false );
 
-        THREE.DefaultLoadingManager.onStart = (url, loaded, total) => {
+        DefaultLoadingManager.onStart = (url, loaded, total) => {
             console.log(`loading ${url}.  loaded ${loaded} of ${total}`)
         }
-        THREE.DefaultLoadingManager.onLoad = () => {
+        DefaultLoadingManager.onLoad = () => {
             console.log(`loading complete`)
             console.log("really setting it up now")
             $('#loading-indicator').style.display = 'none'
         }
-        THREE.DefaultLoadingManager.onProgress = (url, loaded, total) => {
+        DefaultLoadingManager.onProgress = (url, loaded, total) => {
             console.log(`prog ${url}.  loaded ${loaded} of ${total}`)
             $("#progress").setAttribute('value',100*(loaded/total))
         }
-        THREE.DefaultLoadingManager.onError = (url) => {
+        DefaultLoadingManager.onError = (url) => {
             console.log(`error loading ${url}`)
         }
     }
