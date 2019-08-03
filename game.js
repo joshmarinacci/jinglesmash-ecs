@@ -19,6 +19,7 @@ import {SkyBox, ThreeGroup, ThreeScene, ThreeSystem} from './three.js'
 import {LevelInfo, LevelLoaderSystem} from './levels.js'
 import {BlockSystem, PhysicsSystem} from './physics.js'
 import {MouseInputSystem} from "./mouse.js"
+import {SoundEffect} from './audio.js'
 
 
 const $$ = (sel) => document.querySelectorAll(sel)
@@ -110,7 +111,8 @@ function setupBackground() {
     core.scene.add(background.getMutableComponent(ThreeGroup).group)
 }
 
-function setupAudio() {
+function setupAudio(world) {
+
     // game.audioService = new AudioService({enabled:DEBUG.AUDIO})
     // game.audioService.load("click","./sounds/plink.wav")
     world.createEntity().addComponent(SoundEffect,{name:'click', src:'./sounds/plink.wav'})
@@ -187,7 +189,7 @@ function setupGame() {
     setupLights()
     setupBackground()
     // setupGame()
-    // setupAudio()
+    setupAudio(world)
     // setupGui()
 
     const level1 = world.createEntity()
