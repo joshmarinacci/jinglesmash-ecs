@@ -40,3 +40,4 @@ export const Consts = {
 }
 
 export const $ = (sel) => document.querySelector(sel)
+export const toRad = (deg) => deg * Math.PI/180

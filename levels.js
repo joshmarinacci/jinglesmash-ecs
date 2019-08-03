@@ -1,7 +1,28 @@
 import {World, System} from "./node_modules/ecsy/build/ecsy.module.js"
-import {Consts, Globals} from './common'
+import {Consts, Globals, toRad} from './common'
 import {Block} from './physics'
 import {ThreeScene} from './three'
+import {
+    PlaneGeometry,
+    Object3D,
+    Vector2,
+    Vector3,
+    Quaternion,
+    BufferGeometry,
+    Raycaster,
+    Float32BufferAttribute,
+    LineBasicMaterial,
+    NormalBlending,
+    SphereBufferGeometry,
+    Line,
+    Mesh,
+    MeshLambertMaterial,
+    Scene,
+    PerspectiveCamera,
+    WebGLRenderer,
+    DefaultLoadingManager,
+    Group,
+} from "./node_modules/three/build/three.module.js"
 
 function pickOne(arr) {
     return arr[Math.floor(Math.random()*arr.length)]
@@ -109,12 +130,41 @@ export  class LevelLoaderSystem extends System {
         // if(typeof doc.data.hasGravity !== 'undefined') {
         //     this.hasGravity = doc.data.hasGravity
         // }
-        // if(typeof doc.data.roomType !== 'undefined') {
-        //     this.roomType = doc.data.roomType
-        // }
+        if(typeof doc.data.roomType !== 'undefined') {
+            level.roomType = doc.data.roomType
+        }
         //
+        console.log('room type is',level.roomType)
+
+        if(level.roomType === Consts.ROOM_TYPES.FLOOR) {
+            this.startFloorRoom(level)
+        }
         return newBlocks
 
+    }
+    startFloorRoom() {
+        /*
+        //add floor
+        const floorBody = new CANNON.Body({
+            mass: 0 // mass == 0 makes the body static
+        });
+        floorBody.quaternion.setFromAxisAngle(new CANNON.Vec3(1,0,0),-Math.PI/2);
+        floorBody.addShape(new CANNON.Plane());
+        this.getWorld().addBody(floorBody);
+        floorBody.jtype = BLOCK_TYPES.FLOOR
+         */
+        const floorObj = new Mesh(
+            new PlaneGeometry(100,100,32,32),
+            new MeshLambertMaterial({color:Consts.FLOOR_COLOR})
+        )
+        floorObj.receiveShadow = true
+        floorObj.rotation.x = toRad(-90)
+        const sc = this.queries.three[0].getComponent(ThreeScene)
+        sc.scene.add(floorObj)
+
+        // floorBody.userData = {obj:floorObj}
+        // floorBody.userData.skipRaycast = true
+        // this.floors.push(floorBody)
     }
 }
 
