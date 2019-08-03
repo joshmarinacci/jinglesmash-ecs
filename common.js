@@ -1,11 +1,11 @@
 export class Globals {
     constructor() {
-        this.BASE_URL =  "https://vr.josh.earth/360/doc/"
-        this.docid = "tumble_level5"
     }
 }
 
 export const Consts = {
+    BASE_URL :  "https://vr.josh.earth/360/doc/",
+    docid : "tumble_level5",
     BLOCK_TYPES : {
         FLOOR:'FLOOR',
         WALL:'WALL',
