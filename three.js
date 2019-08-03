@@ -15,12 +15,17 @@ import {
     Scene,
     PerspectiveCamera,
     WebGLRenderer,
+    SphereGeometry,
     DefaultLoadingManager,
     Group,
+    TextureLoader,
+    MeshBasicMaterial,
+    BackSide,
 } from "./node_modules/three/build/three.module.js"
 
 import {World, System} from "./node_modules/ecsy/build/ecsy.module.js"
 import {$, Consts, Globals} from './common.js'
+
 
 
 
@@ -46,6 +51,13 @@ export class ThreeSystem extends System {
                         added: {event:'EntityAdded'},
                         removed: {event:'EntityRemoved'}
                     }
+                },
+                skyboxes: {
+                    components: [SkyBox],
+                    events: {
+                        added: {event:'EntityAdded'},
+                        removed: {event:'EntityRemoved'}
+                    }
                 }
             }
         }
@@ -53,6 +65,11 @@ export class ThreeSystem extends System {
 
     execute(delta) {
         this.events.three.added.forEach(this.initScene)
+
+        const sc = this.queries.three[0].getMutableComponent(ThreeScene)
+        this.events.skyboxes.added.forEach(ent => {
+            sc.scene.add(ent.getComponent(SkyBox).obj)
+        })
     }
     initScene(ent) {
         console.log("initting the scene")
@@ -99,4 +116,18 @@ export class ThreeSystem extends System {
         }
     }
 
+}
+
+export class SkyBox {
+    copy(src) {
+        if(!src.src) return
+        this.obj = new Mesh(
+            new SphereGeometry(50),
+            new MeshBasicMaterial({
+                color:'white',
+                map:new TextureLoader().load(src.src),
+                side: BackSide
+            })
+        )
+    }
 }

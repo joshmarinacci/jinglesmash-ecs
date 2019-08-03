@@ -30,7 +30,7 @@ import {
 import {World, System} from "./node_modules/ecsy/build/ecsy.module.js"
 import {Consts, Globals} from './common'
 import {AudioSystem} from './audio'
-import {ThreeScene, ThreeSystem, ThreeGroup} from './three'
+import {ThreeScene, ThreeSystem, ThreeGroup, SkyBox} from './three'
 import {LevelInfo, LevelLoaderSystem} from './levels'
 import {BlockSystem, PhysicsSystem} from './physics'
 import {
@@ -74,24 +74,8 @@ function setupLights() {
 
 function setupBackground() {
     const core = game.getMutableComponent(ThreeScene)
-    const sky = world.createEntity()
-    // sky.addComponent(SkyBox,'./textures/sky2.jpg')
+    game.addComponent(SkyBox,{src:'./textures/sky2.jpg'})
 
-    /*
-    //background image
-    if(DEBUG.SKYBOX) {
-        const sky = new THREE.Mesh(
-            new THREE.SphereGeometry(50),
-            new THREE.MeshBasicMaterial({
-                color:'white',
-                map:game.texture_loader.load('./textures/sky2.jpg'),
-                side: THREE.BackSide
-            })
-        )
-        sky.userData.skipRaycast = true
-        scene.add(sky)
-    }
-     */
 
 
     const tex = new TextureLoader().load('./textures/candycane.png')
