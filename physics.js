@@ -38,6 +38,7 @@ export class BlockSystem extends System {
         this.queries.blocks.forEach(ent => {
             const block = ent.getMutableComponent(Block)
             block.obj.position.copy(block.position)
+            block.obj.rotation.copy(block.rotation)
         })
     }
 }
@@ -65,19 +66,6 @@ export class Block {
     }
 
     set(name, value) {
-        // if(POSITION_NAMES.indexOf(name) >= 0) {
-        //     this.position[name] = value
-        //     this.obj.position[name] = value
-        //     this.body.position[name] = value
-        //     return
-        // }
-        // if(ROTATION_NAMES.indexOf(name) >= 0) {
-        //     name = name.substring(3)
-        //     this.rotation[name] = value
-        //     this.obj.rotation[name] = value
-        //     this.body.quaternion.setFromEuler(this.rotation.x,this.rotation.y,this.rotation.z,'XYZ')
-        //     return
-        // }
         if(name === 'width' || name === 'height' || name === 'depth') {
             this[name] = value
             this.rebuildGeometry()
@@ -91,10 +79,10 @@ export class Block {
         if(name === 'rotation') {
             this.rotation.copy(value)
             this.obj.rotation.copy(value)
-            return;
+            return
         }
         if(name === 'physicstype') return this.physicsType = value
-        throw new Error("unknown property to set",name)
+        throw new Error(`unknown property to set ${name}`)
     }
 
 
