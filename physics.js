@@ -44,6 +44,7 @@ export class Block {
         this.obj.userData.block = this
         this.physicsType = Consts.BLOCK_TYPES.BLOCK
         this.body = null
+        this.toBeRemoved = false
     }
     copy(src) {
         this.rebuildGeometry()
@@ -120,8 +121,8 @@ export class PhysicsSystem extends System {
                 blocks: {
                     components:[Block],
                     events: {
-                        added: {event:'EntityAdded'},
-                        removed: {event:'EntityRemoved'}
+                        added: { event: 'EntityAdded'},
+                        removed: { event: 'EntityRemoved'}
                     }
                 },
                 floors: {
@@ -154,20 +155,31 @@ export class PhysicsSystem extends System {
                     (e.body === block.body && block.physicsType === Consts.BLOCK_TYPES.CRYSTAL)) {
                     if(Math.abs(e.contact.getImpactVelocityAlongNormal() >= 2.0)) {
                         console.log("crystal collsion", e.body)
-                        ent.removeComponent(Block)
-                        sc.scene.remove(block.obj)
+                        if(ent.hasComponent(Block)) {
+                            ent.getMutableComponent(Block).toBeRemoved = true
+                        }
                     }
                 }
             })
         })
-        this.events.blocks.removed.forEach(ent => {
-            console.log("========= removing a block")
-        })
         this.cannonWorld.step(fixedTimeStep)//, delta, maxSubSteps)
 
         this.queries.blocks.forEach(ent => {
-            ent.getMutableComponent(Block).syncBack()
+            const block = ent.getMutableComponent(Block)
+            block.syncBack()
+            if(block.toBeRemoved) {
+                sc.scene.remove(block.obj)
+                this.cannonWorld.removeBody(block.body)
+                ent.removeComponent(Block)
+            }
         })
+
+        //remove events seem useless because the component is already removed so I can't
+        //do anything with it.
+        // console.log(this.events.blocks.removed.length)
+        // this.events.blocks.removed.forEach(ent => {
+        //     const block = ent.getMutableComponent(Block)
+        // })
 
         this.events.floors.added.forEach(ent => {
             const floor = ent.getMutableComponent(PhysicsFloor)
