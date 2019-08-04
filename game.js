@@ -10,7 +10,8 @@ import {
     PCFSoftShadowMap,
     RepeatWrapping,
     SphereGeometry,
-    TextureLoader
+    TextureLoader,
+    Vector3,
 } from "./node_modules/three/build/three.module.js"
 import {World} from "./node_modules/ecsy/build/ecsy.module.js"
 import {Globals} from './common.js'
@@ -20,6 +21,7 @@ import {LevelInfo, LevelLoaderSystem} from './levels.js'
 import {BlockSystem, PhysicsSystem} from './physics.js'
 import {MouseInputSystem} from "./mouse.js"
 import {SoundEffect} from './audio.js'
+import {ParticlesSystem, ParticlesGroup} from './particles.js'
 
 
 const $$ = (sel) => document.querySelectorAll(sel)
@@ -157,6 +159,7 @@ function setupGame() {
     world.registerSystem(PhysicsSystem)
     world.registerSystem(BlockSystem)
     world.registerSystem(MouseInputSystem)
+    world.registerSystem(ParticlesSystem)
 
     world.registerComponent(ThreeScene)
 
@@ -184,6 +187,10 @@ function setupGame() {
 
     const level1 = world.createEntity()
     level1.addComponent(LevelInfo, {name:'tumble_level1'})
+
+
+    const parts = world.createEntity()
+    parts.addComponent(ParticlesGroup,{position: new Vector3(0,1,-2)})
 }
 
 setupGame()

@@ -41,3 +41,7 @@ export const Consts = {
 
 export const $ = (sel) => document.querySelector(sel)
 export const toRad = (deg) => deg * Math.PI/180
+export const remap =  (val, smin, smax, emin, emax) => {
+    const t =  (val-smin)/(smax-smin)
+    return (emax-emin)*t + emin
+}
