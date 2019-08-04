@@ -18,7 +18,7 @@ import {Globals} from './common.js'
 import {AudioSystem, SoundEffect} from './audio.js'
 import {SkyBox, ThreeGroup, ThreeScene, ThreeSystem} from './three.js'
 import {LevelInfo, LevelLoaderSystem} from './levels.js'
-import {BlockSystem, PhysicsSystem} from './physics.js'
+import {PhysicsSystem} from './physics.js'
 import {MouseInputSystem} from "./mouse.js"
 import {ParticlesGroup, ParticlesSystem} from './particles.js'
 
@@ -156,7 +156,6 @@ function setupGame() {
     world.registerSystem(AudioSystem)
     world.registerSystem(LevelLoaderSystem)
     world.registerSystem(PhysicsSystem)
-    world.registerSystem(BlockSystem)
     world.registerSystem(MouseInputSystem)
     world.registerSystem(ParticlesSystem)
 

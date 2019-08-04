@@ -64,13 +64,13 @@ export  class LevelLoaderSystem extends System {
             const block = this.world.createEntity()
             block.addComponent(Block)
             const b2 = block.getMutableComponent(Block)
-            sc.scene.add(b2.obj)
             b2.set('position',b.position)
             b2.set('width',b.size.width)
             b2.set('height',b.size.height)
             b2.set('depth',b.size.depth)
             b2.set('rotation',b.rotation)
             b2.set('physicstype',b.physicstype)
+            b2.rebuildMaterial()
             return block
         })
 

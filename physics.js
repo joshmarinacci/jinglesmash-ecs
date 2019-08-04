@@ -1,7 +1,15 @@
-import {BoxGeometry, Mesh, MeshLambertMaterial, Vector3, SphereGeometry, MeshPhongMaterial} from "./node_modules/three/build/three.module.js"
+import {
+    BoxGeometry,
+    Mesh,
+    MeshLambertMaterial,
+    MeshPhongMaterial,
+    SphereGeometry,
+    Vector3
+} from "./node_modules/three/build/three.module.js"
 import {System} from "./node_modules/ecsy/build/ecsy.module.js"
 import {Consts} from './common.js'
 import {ThreeScene} from './three'
+import {ParticlesGroup} from './particles.js'
 
 const wallMaterial = new CANNON.Material()
 
@@ -21,23 +29,6 @@ export class PhysicsBall {
 export class PhysicsFloor {
 }
 
-export class BlockSystem extends System {
-    init() {
-        return {
-            queries: {
-                blocks: { components:[Block]}
-            }
-        }
-    }
-    execute(delta) {
-        this.queries.blocks.forEach(ent => {
-            const block = ent.getMutableComponent(Block)
-            // block.obj.position.copy(block.position)
-            // block.obj.rotation.copy(block.rotation)
-        })
-    }
-}
-
 export class Block {
     constructor() {
         this.position = new Vector3(0,0,0)
@@ -50,7 +41,6 @@ export class Block {
             new MeshLambertMaterial({color:'green'})
         )
         this.obj.castShadow = true
-        // this.obj.userData.clickable = true
         this.obj.userData.block = this
         this.physicsType = Consts.BLOCK_TYPES.BLOCK
         this.body = null
@@ -102,6 +92,14 @@ export class Block {
         })
 
     }
+
+    rebuildMaterial() {
+        let color = 'green'
+        if(this.physicsType === Consts.BLOCK_TYPES.CRYSTAL) {
+            color = 'aqua'
+        }
+        this.obj.material = new MeshLambertMaterial({color:color})
+    }
 }
 
 const fixedTimeStep = 1.0 / 60.0; // seconds
@@ -144,11 +142,26 @@ export class PhysicsSystem extends System {
         }
     }
     execute(delta) {
+        const sc = this.queries.three[0].getMutableComponent(ThreeScene)
         this.events.blocks.added.forEach(ent => {
             const block = ent.getMutableComponent(Block)
             block.rebuildPhysics()
+            sc.scene.add(block.obj)
             this.cannonWorld.addBody(block.body)
-
+            block.body.addEventListener('collide',(e)=>{
+                if(Math.abs(e.contact.getImpactVelocityAlongNormal() < 1.0)) return
+                if((e.target === block.body && block.physicsType === Consts.BLOCK_TYPES.CRYSTAL) ||
+                    (e.body === block.body && block.physicsType === Consts.BLOCK_TYPES.CRYSTAL)) {
+                    if(Math.abs(e.contact.getImpactVelocityAlongNormal() >= 2.0)) {
+                        console.log("crystal collsion", e.body)
+                        ent.removeComponent(Block)
+                        sc.scene.remove(block.obj)
+                    }
+                }
+            })
+        })
+        this.events.blocks.removed.forEach(ent => {
+            console.log("========= removing a block")
         })
         this.cannonWorld.step(fixedTimeStep)//, delta, maxSubSteps)
 
@@ -169,7 +182,7 @@ export class PhysicsSystem extends System {
 
         this.events.balls.added.forEach(ent => {
             const ball = ent.getMutableComponent(PhysicsBall)
-            ball.obj =new Mesh(
+            ball.obj = new Mesh(
                 new SphereGeometry(ball.radius,16,16),
                 new MeshPhongMaterial({color: 'orange', flatShading: true})
             )
@@ -190,6 +203,13 @@ export class PhysicsSystem extends System {
                 velocity: new CANNON.Vec3(dir.x,dir.y,dir.z),
                 type: CANNON.Body.DYNAMIC,
                 material: this.ballMaterial,
+            })
+            ball.body.addEventListener('collide',(e)=>{
+                // console.log("ball collsion",e.body.position)
+                if(e.body.position.y !== 0) {
+                    const parts = this.world.createEntity()
+                    parts.addComponent(ParticlesGroup, {position: e.body.position.clone()})
+                }
             })
             this.cannonWorld.addBody(ball.body)
         })
