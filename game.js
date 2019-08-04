@@ -11,17 +11,16 @@ import {
     RepeatWrapping,
     SphereGeometry,
     TextureLoader,
-    Vector3,
+    Vector3
 } from "./node_modules/three/build/three.module.js"
 import {World} from "./node_modules/ecsy/build/ecsy.module.js"
 import {Globals} from './common.js'
-import {AudioSystem} from './audio.js'
+import {AudioSystem, SoundEffect} from './audio.js'
 import {SkyBox, ThreeGroup, ThreeScene, ThreeSystem} from './three.js'
 import {LevelInfo, LevelLoaderSystem} from './levels.js'
 import {BlockSystem, PhysicsSystem} from './physics.js'
 import {MouseInputSystem} from "./mouse.js"
-import {SoundEffect} from './audio.js'
-import {ParticlesSystem, ParticlesGroup} from './particles.js'
+import {ParticlesGroup, ParticlesSystem} from './particles.js'
 
 
 const $$ = (sel) => document.querySelectorAll(sel)

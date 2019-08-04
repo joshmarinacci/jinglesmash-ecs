@@ -1,14 +1,6 @@
-import {World, System} from "./node_modules/ecsy/build/ecsy.module.js"
+import {System} from "./node_modules/ecsy/build/ecsy.module.js"
 import {GPUParticleSystem} from './gpu_particles.js'
-import {Mesh, MeshLambertMaterial,
-    SphereGeometry,
-    Raycaster,
-    Vector2,
-    DoubleSide,
-    AdditiveBlending,
-    Color,
-    TextureLoader,
-    Vector3} from "./node_modules/three/build/three.module.js"
+import {AdditiveBlending, Color, TextureLoader, Vector3} from "./node_modules/three/build/three.module.js"
 import {remap} from './common.js'
 import {ThreeScene} from './three'
 
@@ -43,7 +35,6 @@ export class ParticlesSystem extends System {
             blending: AdditiveBlending,
             onTick:(system,time) => {
                 this.pendingParticles.forEach(v => {
-                    console.log("adding",v)
                     options.position.copy(v)
                     for (let i = 0; i < 100; i++) {
                         const v = 3.0

@@ -1,19 +1,14 @@
-import {Mesh, MeshLambertMaterial,
+import {
+    BufferAttribute,
+    BufferGeometry,
     Color,
-    SphereGeometry,
-    Raycaster,
-    Vector2,
-    DoubleSide,
-    AdditiveBlending,
-    TextureLoader,
     NormalBlending,
     Object3D,
+    Points,
     RepeatWrapping,
     ShaderMaterial,
-    BufferGeometry,
-    BufferAttribute,
-    Points,
-    Vector3} from "./node_modules/three/build/three.module.js"
+    Vector3
+} from "./node_modules/three/build/three.module.js"
 
 /*
 * modified from the version from the ThreeJS examples repo

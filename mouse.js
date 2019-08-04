@@ -1,11 +1,14 @@
 import {System} from "./node_modules/ecsy/build/ecsy.module.js"
 import {ThreeScene} from './three.js'
-import {Mesh, MeshLambertMaterial,
-    SphereGeometry,
-    Raycaster,
-    Vector2,
+import {
     DoubleSide,
-    Vector3} from "./node_modules/three/build/three.module.js"
+    Mesh,
+    MeshLambertMaterial,
+    Raycaster,
+    SphereGeometry,
+    Vector2,
+    Vector3
+} from "./node_modules/three/build/three.module.js"
 import {PhysicsBall} from './physics.js'
 import {Globals} from './common.js'
 import {PlaySoundEffect} from './audio.js'
