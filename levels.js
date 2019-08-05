@@ -3,14 +3,8 @@ import {Consts, toRad} from './common.js'
 import {Block, PhysicsFloor} from './physics.js'
 import {ThreeScene} from './three.js'
 import {Mesh, MeshLambertMaterial, PlaneGeometry, Vector3} from "./node_modules/three/build/three.module.js"
+import {pickOneValue} from './common.js'
 
-function pickOne(arr) {
-    return arr[Math.floor(Math.random()*arr.length)]
-}
-
-function pickOneValue(obj) {
-    return obj[pickOne(Object.keys(obj))]
-}
 
 export class LevelInfo {
     constructor() {

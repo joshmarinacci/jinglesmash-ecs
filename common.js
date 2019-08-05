@@ -45,3 +45,14 @@ export const remap =  (val, smin, smax, emin, emax) => {
     const t =  (val-smin)/(smax-smin)
     return (emax-emin)*t + emin
 }
+
+export function pickOne(arr) {
+    return arr[Math.floor(Math.random()*arr.length)]
+}
+
+export function pickOneValue(obj) {
+    return obj[pickOne(Object.keys(obj))]
+}
+export function pickOneKey(obj) {
+    return pickOne(Object.keys(obj))
+}
