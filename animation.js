@@ -1,5 +1,5 @@
 import {System} from "./node_modules/ecsy/build/ecsy.module.js"
-import {TransitionSphere} from './three'
+import {SimpleText, TransitionSphere} from './three.js'
 
 function lerp(from, to, t) {
     return from + (to-from)*t
@@ -45,11 +45,18 @@ export class AnimationSystem extends System {
                 console.log("done")
                 ent.removeComponent(Anim)
             } else {
-                const trans = ent.getMutableComponent(TransitionSphere)
                 const t = soFar/anim.duration
-                trans.obj.material.opacity = lerp(anim.from,anim.to,t)
+                const nv = lerp(anim.from,anim.to,t)
+                const obj = this.getComponentObject(ent)
+                obj.material.opacity = nv
             }
 
         })
+    }
+
+    getComponentObject(ent) {
+        if(ent.hasComponent(TransitionSphere)) return ent.getMutableComponent(TransitionSphere).obj
+        if(ent.hasComponent(SimpleText)) return ent.getMutableComponent(SimpleText).obj
+        throw new Error("unknown three object component")
     }
 }

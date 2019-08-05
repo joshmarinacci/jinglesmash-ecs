@@ -1,21 +1,22 @@
 import {
     BoxGeometry,
     CanvasTexture,
-    RepeatWrapping,
+    CylinderGeometry,
+    Geometry,
+    LatheBufferGeometry,
     Mesh,
     MeshLambertMaterial,
     MeshPhongMaterial,
     MeshStandardMaterial,
+    RepeatWrapping,
     SphereGeometry,
-    Vector3,
-    CylinderGeometry, Geometry, LatheBufferGeometry, Vector2
+    Vector2,
+    Vector3
 } from "./node_modules/three/build/three.module.js"
 import {System} from "./node_modules/ecsy/build/ecsy.module.js"
-import {Consts} from './common.js'
+import {Consts, pickOneValue} from './common.js'
 import {ThreeScene} from './three'
 import {ParticlesGroup} from './particles.js'
-import {pickOneValue} from './common.js'
-import {pickOneKey} from './common.js'
 
 
 const wallMaterial = new CANNON.Material()

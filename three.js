@@ -1,21 +1,20 @@
 import {
     BackSide,
+    CanvasTexture,
     DefaultLoadingManager,
     Group,
     Mesh,
     MeshBasicMaterial,
+    MeshLambertMaterial,
     PerspectiveCamera,
+    PlaneGeometry,
     Scene,
     SphereGeometry,
     TextureLoader,
-    WebGLRenderer,
-    MeshLambertMaterial
+    WebGLRenderer
 } from "./node_modules/three/build/three.module.js"
-
 import {System} from "./node_modules/ecsy/build/ecsy.module.js"
 import {$} from './common.js'
-
-
 
 export class ThreeGroup {
     constructor() {
@@ -53,6 +52,13 @@ export class ThreeSystem extends System {
                         added: {event:'EntityAdded'},
                         removed: {event:'EntityRemoved'}
                     }
+                },
+                texts: {
+                    components: [SimpleText],
+                    events: {
+                        added: {event:'EntityAdded'},
+                        removed: {event:'EntityRemoved'}
+                    }
                 }
             }
         }
@@ -70,7 +76,13 @@ export class ThreeSystem extends System {
             const sp = ent.getMutableComponent(TransitionSphere)
             this.setupTransitionSphere(sp,sc)
         })
+
+        this.events.texts.added.forEach(ent => {
+            const st = ent.getMutableComponent(SimpleText)
+            sc.scene.add(st.obj)
+        })
     }
+
     initScene(ent) {
         const app = ent.getMutableComponent(ThreeScene)
         //init the scene
@@ -140,5 +152,56 @@ export class SkyBox {
 }
 
 export class TransitionSphere {
+
+}
+
+export class SimpleText {
+    constructor() {
+
+    }
+    copy({
+             width = 1,
+             height = 1,
+             density = 128,
+             color = 'black',
+             backgroundColor = 'gray',
+             text = "foo",
+             fontHeight
+         }) {
+        this.density = density
+        this.htmlCanvas = document.createElement('canvas')
+        this.htmlCanvas.width = this.density*width
+        this.htmlCanvas.height = this.density*height
+        this.canvas_texture = new CanvasTexture(this.htmlCanvas)
+        this.obj = new Mesh(
+            new PlaneGeometry(width,height),
+            new MeshLambertMaterial({map:this.canvas_texture})
+        )
+        this.fontHeight = this.density/3.5
+        if(fontHeight) this.fontHeight = fontHeight
+        this.color = color
+        this.backgroundColor = backgroundColor
+        this.text = text
+        this.font = `${this.fontHeight}px sans-serif`
+        this.setText(this.text)
+    }
+
+    setText(str) {
+        const ctx = this.htmlCanvas.getContext('2d')
+        ctx.fillStyle = this.backgroundColor
+        ctx.fillRect(0,0,this.htmlCanvas.width, this.htmlCanvas.height)
+        ctx.font = this.font
+        ctx.fillStyle = this.color
+        const lines = str.split("\n")
+        const top = (this.fontHeight*lines.length)/2+this.htmlCanvas.height/2 - lines.length*this.fontHeight/2
+        lines.forEach((line,i) => {
+            const metrics = ctx.measureText(line)
+            ctx.fillText(line,
+                this.htmlCanvas.width/2-metrics.width/2,
+                top+i*this.fontHeight
+            )
+            this.canvas_texture.needsUpdate = true
+        })
+    }
 
 }

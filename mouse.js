@@ -44,6 +44,9 @@ export class MouseInputSystem extends System {
                         removed: {event:'EntityRemoved'}
                     }
                 },
+                waits: {
+                    components: [WaitForClick]
+                },
                 globals: {
                     components: [Globals]
                 }
@@ -89,15 +92,24 @@ export class MouseInputSystem extends System {
             })
             three.renderer.domElement.addEventListener('mouseup',(e)=>{
                 mouse.pressed = false
-                const ball = this.world.createEntity()
-                ball.addComponent(PhysicsBall, {
-                    initialPosition: mouse.mouseSphere.position.clone(),
-                    initialVelocity: new Vector3(0,3,-4),
-                    radius: 0.25,
-                })
+                if(this.queries.waits.length>0) {
+                    //see if we should block right now
+                    this.queries.waits.forEach(ent => {
+                        const waiter = ent.getMutableComponent(WaitForClick)
+                        if (waiter.callback) waiter.callback()
+                        ent.removeComponent(WaitForClick)
+                    })
+                } else {
+                    const ball = this.world.createEntity()
+                    ball.addComponent(PhysicsBall, {
+                        initialPosition: mouse.mouseSphere.position.clone(),
+                        initialVelocity: new Vector3(0, 3, -4),
+                        radius: 0.25,
+                    })
 
-                const globals = this.queries.globals[0].getMutableComponent(Globals)
-                globals.click.addComponent(PlaySoundEffect)
+                    const globals = this.queries.globals[0].getMutableComponent(Globals)
+                    globals.click.addComponent(PlaySoundEffect)
+                }
             })
         })
 
@@ -111,5 +123,11 @@ export class MouseInputSystem extends System {
                 mat.opacity = Math.min(mat.opacity + 0.10,1.0)
             }
         })
+    }
+}
+
+export class WaitForClick {
+    constructor() {
+        this.callback = null //function to be called when the click happens
     }
 }

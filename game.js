@@ -16,12 +16,12 @@ import {
 import {World} from "./node_modules/ecsy/build/ecsy.module.js"
 import {Globals} from './common.js'
 import {AudioSystem, SoundEffect} from './audio.js'
-import {SkyBox, ThreeGroup, ThreeScene, ThreeSystem, TransitionSphere} from './three.js'
+import {SimpleText, SkyBox, ThreeGroup, ThreeScene, ThreeSystem, TransitionSphere} from './three.js'
 import {LevelInfo, LevelLoaderSystem} from './levels.js'
 import {PhysicsSystem} from './physics.js'
-import {MouseInputSystem} from "./mouse.js"
+import {MouseInputSystem, WaitForClick} from "./mouse.js"
 import {ParticlesGroup, ParticlesSystem} from './particles.js'
-import {Anim, AnimationSystem} from './animation.js'
+import {AnimationSystem, Anim} from './animation.js'
 
 
 const $$ = (sel) => document.querySelectorAll(sel)
@@ -195,9 +195,27 @@ function setupGame() {
 
     const transition1 = world.createEntity()
     transition1.addComponent(TransitionSphere,{color:'red'})
-    setTimeout(()=>{
-        transition1.addComponent(Anim,{prop:'opacity',from:1.0,to:0.0,duration:0.5})
-    },1000)
+
+    const instructions = world.createEntity()
+    instructions.addComponent(SimpleText,{
+        width:2,
+        height:1,
+        density: 256,
+        text:"Jingle Smash\ndestroy blue blocks\nclick to play",
+        backgroundColor:'white',
+        fontHeight:50,
+    })
+    const ins = instructions.getMutableComponent(SimpleText)
+    ins.obj.position.z = 4.0
+    ins.obj.position.y = 1.5
+
+    const click1 = world.createEntity()
+    click1.addComponent(WaitForClick,{callback:()=>{
+            transition1.addComponent(Anim,{prop:'opacity',from:1.0,to:0.0,duration:0.5})
+            instructions.getMutableComponent(SimpleText).obj.visible = false
+            // instructions.addComponent(Anim,{prop:'opacity',from:1.0,to:0.0,duration:0.5})
+        }})
+
 }
 
 setupGame()
