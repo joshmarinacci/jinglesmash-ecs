@@ -65,13 +65,11 @@ export class Block {
         if(name === 'position') {
             this.position.copy(value)
             this.obj.position.copy(value)
-            if(this.body) this.body.position.copy(value)
             return
         }
         if(name === 'rotation') {
             this.rotation.copy(value)
-            this.obj.rotation.setFromVector3(value,'XYZ')
-            if(this.body) this.body.quaternion.setFromEuler(this.rotation.x,this.rotation.y,this.rotation.z,'XYZ')
+            this.obj.rotation.setFromVector3(value)
             return
         }
         if(name === 'physicstype') return this.physicsType = value
@@ -84,21 +82,22 @@ export class Block {
     }
 
     rebuildPhysics() {
+        let type = CANNON.Body.DYNAMIC
+        if(this.physicsType === Consts.BLOCK_TYPES.WALL) type = CANNON.Body.KINEMATIC
         this.body = new CANNON.Body({
             mass: 1,//kg
-            type: CANNON.Body.DYNAMIC,
+            type: type,
             position: new CANNON.Vec3(this.position.x,this.position.y,this.position.z),
             shape: new CANNON.Box(new CANNON.Vec3(this.width/2,this.height/2,this.depth/2)),
             material: wallMaterial,
         })
-
+        this.body.quaternion.setFromEuler(this.rotation.x,this.rotation.y,this.rotation.z,'XYZ')
     }
 
     rebuildMaterial() {
-        let color = 'green'
-        if(this.physicsType === Consts.BLOCK_TYPES.CRYSTAL) {
-            color = 'aqua'
-        }
+        let color = 'red'
+        if(this.physicsType === Consts.BLOCK_TYPES.CRYSTAL) color = 'aqua'
+        if(this.physicsType === Consts.BLOCK_TYPES.WALL) color = 'blue'
         this.obj.material = new MeshLambertMaterial({color:color})
     }
 }
@@ -153,8 +152,8 @@ export class PhysicsSystem extends System {
                 if(Math.abs(e.contact.getImpactVelocityAlongNormal() < 1.0)) return
                 if((e.target === block.body && block.physicsType === Consts.BLOCK_TYPES.CRYSTAL) ||
                     (e.body === block.body && block.physicsType === Consts.BLOCK_TYPES.CRYSTAL)) {
-                    if(Math.abs(e.contact.getImpactVelocityAlongNormal() >= 2.0)) {
-                        console.log("crystal collsion", e.body)
+                    console.log(e.contact.getImpactVelocityAlongNormal())
+                    if(Math.abs(e.contact.getImpactVelocityAlongNormal() >= 1.5)) {
                         if(ent.hasComponent(Block)) {
                             ent.getMutableComponent(Block).toBeRemoved = true
                         }
