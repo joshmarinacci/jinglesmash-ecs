@@ -30,7 +30,6 @@ export class AnimationSystem extends System {
 
     execute(delta) {
         this.events.anims.added.forEach(ent => {
-            console.log('adding anim')
             const anim = ent.getMutableComponent(Anim)
             anim.startTime = performance.now()/1000
             anim.started = true
@@ -41,7 +40,6 @@ export class AnimationSystem extends System {
 
 
             if(soFar > anim.duration) {
-                console.log("done")
                 ent.removeComponent(Anim)
             } else {
                 const t = soFar/anim.duration

@@ -152,6 +152,10 @@ export class PhysicsSystem extends System {
         }
     }
     execute(delta) {
+        this.events.balls.removed.forEach(ent => {
+            console.log("ball was removed",ent.getMutableComponent(PhysicsBall))
+        })
+
         const sc = this.queries.three[0].getMutableComponent(ThreeScene)
         this.events.blocks.added.forEach(ent => {
             const block = ent.getMutableComponent(Block)

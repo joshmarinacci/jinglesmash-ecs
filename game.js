@@ -23,6 +23,7 @@ import {MouseInputSystem, WaitForClick} from "./mouse.js"
 import {ParticlesGroup, ParticlesSystem} from './particles.js'
 import {AnimationSystem, Anim} from './animation.js'
 import {GameLogic} from './logic.js'
+import {PhysicsBall} from './physics.js'
 
 
 const $$ = (sel) => document.querySelectorAll(sel)
