@@ -8,11 +8,13 @@ import {
     Scene,
     SphereGeometry,
     TextureLoader,
-    WebGLRenderer
+    WebGLRenderer,
+    MeshLambertMaterial
 } from "./node_modules/three/build/three.module.js"
 
 import {System} from "./node_modules/ecsy/build/ecsy.module.js"
 import {$} from './common.js'
+
 
 
 export class ThreeGroup {
@@ -44,6 +46,13 @@ export class ThreeSystem extends System {
                         added: {event:'EntityAdded'},
                         removed: {event:'EntityRemoved'}
                     }
+                },
+                transitions: {
+                    components: [TransitionSphere],
+                    events: {
+                        added: {event:'EntityAdded'},
+                        removed: {event:'EntityRemoved'}
+                    }
                 }
             }
         }
@@ -55,6 +64,11 @@ export class ThreeSystem extends System {
         const sc = this.queries.three[0].getMutableComponent(ThreeScene)
         this.events.skyboxes.added.forEach(ent => {
             sc.scene.add(ent.getComponent(SkyBox).obj)
+        })
+
+        this.events.transitions.added.forEach(ent => {
+            const sp = ent.getMutableComponent(TransitionSphere)
+            this.setupTransitionSphere(sp,sc)
         })
     }
     initScene(ent) {
@@ -100,6 +114,15 @@ export class ThreeSystem extends System {
         }
     }
 
+    setupTransitionSphere(sp, sc) {
+        sp.obj = new Mesh(
+            new SphereGeometry(2),
+            new MeshLambertMaterial({color:'red', side: BackSide, transparent:true, opacity:1.0})
+        )
+        sp.obj.position.z = 5
+        sp.obj.position.y = 1.5
+        sc.scene.add(sp.obj)
+    }
 }
 
 export class SkyBox {
@@ -114,4 +137,8 @@ export class SkyBox {
             })
         )
     }
+}
+
+export class TransitionSphere {
+
 }
