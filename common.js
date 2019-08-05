@@ -1,5 +1,7 @@
 export class Globals {
     constructor() {
+        this.playing = false
+        this.balls = -1
     }
 }
 

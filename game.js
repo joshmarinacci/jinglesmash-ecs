@@ -22,6 +22,7 @@ import {PhysicsSystem} from './physics.js'
 import {MouseInputSystem, WaitForClick} from "./mouse.js"
 import {ParticlesGroup, ParticlesSystem} from './particles.js'
 import {AnimationSystem, Anim} from './animation.js'
+import {GameLogic} from './logic.js'
 
 
 const $$ = (sel) => document.querySelectorAll(sel)
@@ -160,6 +161,7 @@ function setupGame() {
     world.registerSystem(MouseInputSystem)
     world.registerSystem(ParticlesSystem)
     world.registerSystem(AnimationSystem)
+    world.registerSystem(GameLogic)
 
     world.registerComponent(ThreeScene)
 
@@ -185,6 +187,8 @@ function setupGame() {
     setupAudio(world)
     // setupGui()
 
+    const globals = game.getMutableComponent(Globals)
+
     const level1 = world.createEntity()
     level1.addComponent(LevelInfo, {name:'tumble_level1'})
 
@@ -193,11 +197,11 @@ function setupGame() {
     parts.addComponent(ParticlesGroup,{position: new Vector3(0,1,-2)})
 
 
-    const transition1 = world.createEntity()
-    transition1.addComponent(TransitionSphere,{color:'red'})
+    globals.transition = world.createEntity()
+    globals.transition.addComponent(TransitionSphere,{color:'red'})
 
-    const instructions = world.createEntity()
-    instructions.addComponent(SimpleText,{
+    globals.instructions = world.createEntity()
+    globals.instructions.addComponent(SimpleText,{
         width:2,
         height:1,
         density: 256,
@@ -205,16 +209,18 @@ function setupGame() {
         backgroundColor:'white',
         fontHeight:50,
     })
-    const ins = instructions.getMutableComponent(SimpleText)
+    const ins = globals.instructions.getMutableComponent(SimpleText)
     ins.obj.position.z = 4.0
     ins.obj.position.y = 1.5
 
     const click1 = world.createEntity()
     click1.addComponent(WaitForClick,{callback:()=>{
-            transition1.addComponent(Anim,{prop:'opacity',from:1.0,to:0.0,duration:0.5})
-            instructions.getMutableComponent(SimpleText).obj.visible = false
-            // instructions.addComponent(Anim,{prop:'opacity',from:1.0,to:0.0,duration:0.5})
-        }})
+        game.getMutableComponent(Globals).balls = 3
+        game.getMutableComponent(Globals).playing = true
+        globals.transition.addComponent(Anim,{prop:'opacity',from:1.0,to:0.0,duration:0.5})
+        globals.instructions.getMutableComponent(SimpleText).obj.visible = false
+    }})
+
 
 }
 

@@ -100,6 +100,8 @@ export class MouseInputSystem extends System {
                         ent.removeComponent(WaitForClick)
                     })
                 } else {
+                    const globals = this.queries.globals[0].getMutableComponent(Globals)
+                    globals.balls += -1
                     const ball = this.world.createEntity()
                     ball.addComponent(PhysicsBall, {
                         initialPosition: mouse.mouseSphere.position.clone(),
@@ -107,7 +109,6 @@ export class MouseInputSystem extends System {
                         radius: 0.25,
                     })
 
-                    const globals = this.queries.globals[0].getMutableComponent(Globals)
                     globals.click.addComponent(PlaySoundEffect)
                 }
             })

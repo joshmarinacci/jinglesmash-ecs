@@ -34,7 +34,6 @@ export class AnimationSystem extends System {
             const anim = ent.getMutableComponent(Anim)
             anim.startTime = performance.now()/1000
             anim.started = true
-            console.log(anim)
         })
         this.queries.anims.forEach(ent => {
             const anim = ent.getMutableComponent(Anim)
