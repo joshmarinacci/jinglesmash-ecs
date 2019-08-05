@@ -1,8 +1,11 @@
 import {
     BoxGeometry,
+    CanvasTexture,
+    RepeatWrapping,
     Mesh,
     MeshLambertMaterial,
     MeshPhongMaterial,
+    MeshStandardMaterial,
     SphereGeometry,
     Vector3
 } from "./node_modules/three/build/three.module.js"
@@ -113,6 +116,8 @@ export class PhysicsSystem extends System {
         this.wallMaterial = new CANNON.Material()
         this.ballMaterial = new CANNON.Material()
 
+        this.materials = generateBlockTextures()
+        this.textures = generateBallTextures()
 
         return {
             queries: {
@@ -146,6 +151,7 @@ export class PhysicsSystem extends System {
         this.events.blocks.added.forEach(ent => {
             const block = ent.getMutableComponent(Block)
             block.rebuildPhysics()
+            block.obj.material = this.materials[block.physicsType]
             sc.scene.add(block.obj)
             this.cannonWorld.addBody(block.body)
             block.body.addEventListener('collide',(e)=>{
@@ -161,7 +167,7 @@ export class PhysicsSystem extends System {
                 }
             })
         })
-        this.cannonWorld.step(fixedTimeStep)//, delta, maxSubSteps)
+        this.cannonWorld.step(fixedTimeStep, delta, maxSubSteps)
 
         this.queries.blocks.forEach(ent => {
             const block = ent.getMutableComponent(Block)
@@ -188,7 +194,6 @@ export class PhysicsSystem extends System {
             floor.body.quaternion.setFromAxisAngle(new CANNON.Vec3(1,0,0),-Math.PI/2);
             floor.body.addShape(new CANNON.Plane());
             this.cannonWorld.addBody(floor.body);
-            this.makeBall()
         })
 
         this.events.balls.added.forEach(ent => {
@@ -229,32 +234,160 @@ export class PhysicsSystem extends System {
             ent.getMutableComponent(PhysicsBall).syncBack()
         })
     }
-    handleCollision(e) {
-        // if(game.blockService.ignore_collisions) return
-        //ignore tiny collisions
-        if(Math.abs(e.contact.getImpactVelocityAlongNormal() < 1.0)) return
+}
 
-        //when ball hits moving block,
-        if(e.body.jtype === Consts.BLOCK_TYPES.BALL) {
-            if( e.target.jtype === Consts.BLOCK_TYPES.WALL) {
-                const sound = this.world.createEntity()
-                sound.addComponent(PlaySound,{name:'click'})
-            }
-            if (e.target.jtype === Consts.BLOCK_TYPES.BLOCK) {
-                //hit a block, just make the thunk sound
-                sound.addComponent(PlaySound,{name:'click'})
+
+function generateBallTextures() {
+    const textures = {}
+    {
+        const canvas = document.createElement('canvas')
+        canvas.width = 64
+        canvas.height = 16
+        const c = canvas.getContext('2d')
+
+
+        c.fillStyle = 'black'
+        c.fillRect(0, 0, canvas.width, canvas.height)
+        c.fillStyle = 'red'
+        c.fillRect(0, 0, 30, canvas.height)
+        c.fillStyle = 'white'
+        c.fillRect(30, 0, 4, canvas.height)
+        c.fillStyle = 'green'
+        c.fillRect(34, 0, 30, canvas.height)
+
+        textures.ornament1 = new CanvasTexture(canvas)
+        textures.ornament1.wrapS = RepeatWrapping
+        textures.ornament1.repeat.set(8, 1)
+    }
+
+
+    {
+        const canvas = document.createElement('canvas')
+        canvas.width = 128
+        canvas.height = 128
+        const c = canvas.getContext('2d')
+        c.fillStyle = 'black'
+        c.fillRect(0,0,canvas.width, canvas.height)
+
+        c.fillStyle = 'red'
+        c.fillRect(0, 0, canvas.width, canvas.height/2)
+        c.fillStyle = 'white'
+        c.fillRect(0, canvas.height/2, canvas.width, canvas.height/2)
+
+        const tex = new CanvasTexture(canvas)
+        tex.wrapS = RepeatWrapping
+        tex.wrapT = RepeatWrapping
+        tex.repeat.set(6,6)
+        textures.ornament2 = tex
+    }
+
+    return textures
+
+}
+function generateBlockTextures() {
+    const materials = {}
+    const textures = {}
+    {
+        const canvas = document.createElement('canvas')
+        canvas.width = 128
+        canvas.height = 128
+        const c = canvas.getContext('2d')
+
+        //white background
+        c.fillStyle = 'white'
+        c.fillRect(0,0,canvas.width, canvas.height)
+
+
+        //lower left for the sides
+        c.save()
+        c.translate(0,canvas.height/2)
+        c.fillStyle = 'red'
+        c.fillRect(canvas.width/8*1.5, 0, canvas.width/8, canvas.height/2)
+        c.restore()
+
+        //upper left for the bottom and top
+        c.save()
+        c.translate(0,0)
+        c.fillStyle = 'red'
+        c.fillRect(canvas.width/8*1.5, 0, canvas.width/8, canvas.height/2)
+        c.fillStyle = 'red'
+        c.fillRect(0,canvas.height/8*1.5, canvas.width/2, canvas.height/8)
+        c.restore()
+
+        c.fillStyle = 'black'
+        // c.fillRect(0,canvas.height/2,canvas.width,1)
+        // c.fillRect(canvas.width/2,0,1,canvas.height)
+
+        const tex = new CanvasTexture(canvas)
+        textures.present1 = tex
+
+        materials[Consts.BLOCK_TYPES.BLOCK] = new MeshStandardMaterial({
+            color: 'white',
+            metalness: 0.0,
+            roughness: 1.0,
+            // wireframe: true,
+            map:textures.present1,
+        })
+    }
+
+    {
+        const canvas = document.createElement('canvas')
+        canvas.width = 128
+        canvas.height = 128
+        const c = canvas.getContext('2d')
+
+        //white background
+        c.fillStyle = 'white'
+        c.fillRect(0,0,canvas.width, canvas.height)
+        for(let x=0; x<canvas.width; x++) {
+            for(let y =0; y<canvas.height; y++) {
+                let p = Math.random()*255
+                p = Math.max(p,200)
+                // if(p < 128) p = 128
+                c.fillStyle = `rgb(${0.5},${p},${p})`
+                c.fillRect(x,y,1,1)
             }
         }
 
-        //if crystal hits anything and the impact was strong enought
-        if(e.body.jtype === Consts.BLOCK_TYPES.CRYSTAL || e.target.jtype === Consts.BLOCK_TYPES.CRYSTAL) {
-            if(Math.abs(e.contact.getImpactVelocityAlongNormal() >= 2.0)) {
-                return destroyCrystal(e.target)
-            }
-        }
-        // console.log(`collision: body ${e.body.jtype} target ${e.target.jtype}`)
+        const tex = new CanvasTexture(canvas)
+        materials[Consts.BLOCK_TYPES.WALL] = new MeshLambertMaterial({
+            color:'white',
+            map:tex
+        })
     }
 
-    makeBall() {
+    {
+        const canvas = document.createElement('canvas')
+        canvas.width = 128
+        canvas.height = 128
+        const c = canvas.getContext('2d')
+
+        //white background
+        c.fillStyle = '#55aaff'
+        c.fillRect(0,0,canvas.width, canvas.height)
+        c.fillStyle = 'white'
+        const w = 128
+        const h = 128
+        c.fillRect(0,0,3,h)
+        c.fillRect(w-4,0,3,h)
+        c.fillRect(0,0,w,3)
+        c.fillRect(0,h-3,w,3)
+        c.fillRect(w/2-1,0,3,h)
+        c.fillRect(0, h/2-1,w,3)
+
+        const tex = new CanvasTexture(canvas)
+        materials[Consts.BLOCK_TYPES.CRYSTAL] = new MeshStandardMaterial({
+            color: 'white',
+            metalness: 0.0,
+            roughness: 1.0,
+            // wireframe: true,
+            map:tex,
+        })
     }
+
+
+    // this.materials[BLOCK_TYPES.CRYSTAL] = new MeshLambertMaterial({color:'aqua'})
+    materials[Consts.BLOCK_TYPES.FLOOR] = new MeshLambertMaterial({color:'gray'})
+    // this.materials[BLOCK_TYPES.WALL] = new MeshLambertMaterial({color:'red'})
+    return materials
 }
