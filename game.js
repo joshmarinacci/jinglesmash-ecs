@@ -172,6 +172,10 @@ function setupGame() {
     game.addComponent(Globals)
     game.addComponent(ThreeScene)
 
+    const globals = game.getMutableComponent(Globals)
+    globals.transition = world.createEntity()
+    globals.transition.addComponent(TransitionSphere,{color:'red'})
+
     //execute one tick to properly init everything
     world.execute(0.1,0)
 
@@ -189,7 +193,6 @@ function setupGame() {
     setupAudio(world)
     // setupGui()
 
-    const globals = game.getMutableComponent(Globals)
 
     const level1 = world.createEntity()
     level1.addComponent(LevelInfo, {name:Consts.LEVEL_NAMES[globals.levelIndex]})
@@ -199,8 +202,6 @@ function setupGame() {
     parts.addComponent(ParticlesGroup,{position: new Vector3(0,1,-2)})
 
 
-    globals.transition = world.createEntity()
-    globals.transition.addComponent(TransitionSphere,{color:'red'})
 
     globals.instructions = world.createEntity()
     globals.instructions.addComponent(SimpleText,{

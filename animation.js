@@ -1,5 +1,6 @@
 import {System} from "./node_modules/ecsy/build/ecsy.module.js"
 import {SimpleText, TransitionSphere} from './three.js'
+import {Block} from './physics.js'
 
 function lerp(from, to, t) {
     return from + (to-from)*t
@@ -56,7 +57,7 @@ export class AnimationSystem extends System {
                 const t = soFar/anim.duration
                 const nv = lerp(anim.from,anim.to,t)
                 const obj = this.getComponentObject(ent)
-                obj.material.opacity = nv
+                this.setObjectProperty(anim,obj,nv)
             }
 
         })
@@ -81,6 +82,21 @@ export class AnimationSystem extends System {
     getComponentObject(ent) {
         if(ent.hasComponent(TransitionSphere)) return ent.getMutableComponent(TransitionSphere).obj
         if(ent.hasComponent(SimpleText)) return ent.getMutableComponent(SimpleText).obj
+        if(ent.hasComponent(Block)) return ent.getMutableComponent(Block).obj
+        console.error(ent)
         throw new Error("unknown three object component")
+    }
+
+    setObjectProperty(anim, obj, nv) {
+        if(anim.prop === 'opacity') {
+            obj.material.opacity = nv
+            return
+        }
+        if(anim.prop === 'scale') {
+            obj.scale.set(nv,nv,nv)
+            return
+        }
+        throw new Error(`don't know how to set the property ${anim.prop}`)
+
     }
 }

@@ -15,10 +15,11 @@ import {
 } from "./node_modules/three/build/three.module.js"
 import {System} from "./node_modules/ecsy/build/ecsy.module.js"
 import {Consts, pickOneValue} from './common.js'
-import {ThreeScene} from './three'
+import {ThreeScene} from './three.js'
 import {ParticlesGroup} from './particles.js'
 import {Globals} from './common.js'
 import {LevelInfo} from './levels'
+import {Anim} from './animation.js'
 
 
 const wallMaterial = new CANNON.Material()
@@ -185,12 +186,14 @@ export class PhysicsSystem extends System {
         }
 
         const sc = this.queries.three[0].getMutableComponent(ThreeScene)
-        this.events.blocks.added.forEach(ent => {
+        this.events.blocks.added.forEach((ent,i) => {
             const block = ent.getMutableComponent(Block)
             block.rebuildPhysics()
             block.obj.material = this.materials[block.physicsType]
             sc.scene.add(block.obj)
             this.cannonWorld.addBody(block.body)
+            //ent.addComponent(Anim,{prop:'scale',from:0.1,to:1.0,duration:0.3, lerp:'elastic', delay:0.1*i})
+
             block.body.addEventListener('collide',(e)=>{
                 const globals = this.queries.globals[0].getMutableComponent(Globals)
                 if(!globals.collisionsActive) return
