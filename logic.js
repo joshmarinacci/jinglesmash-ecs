@@ -89,7 +89,7 @@ export class GameLogic extends System {
                     console.log("doing physics")
                     globals.physicsActive = true
                 })
-                this.doWait(1.8,()=>{
+                this.doWait(2.0,()=>{
                     console.log("doing collisions")
                     globals.collisionsActive = true
                 })
@@ -102,6 +102,7 @@ export class GameLogic extends System {
         console.log("you lost. must restart the level")
         const globals = this.queries.globals[0].getMutableComponent(Globals)
         globals.physicsActive = false
+        globals.collisionsActive = false
         globals.playing = false
         globals.balls = 3
         globals.transition.addComponent(Anim, {prop: 'opacity', from: 0.0, to: 1.0, duration: 0.5})
