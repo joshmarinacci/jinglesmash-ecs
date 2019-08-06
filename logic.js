@@ -57,25 +57,7 @@ export class GameLogic extends System {
         if (globals.restart) {
             // globals.physicsActive = true
             globals.restart = false
-            globals.balls = 3
-            globals.playing = true
-            globals.transition.addComponent(Anim, {prop: 'opacity', from: 1.0, to: 0.0, duration: 0.5})
-            globals.instructions.getMutableComponent(SimpleText).obj.visible = false
-            globals.removeBalls = true
-            globals.removeBlocks = true
-            this.doWait(0.5,()=>{
-                console.log('adding level')
-                const l2 = this.world.createEntity()
-                l2.addComponent(LevelInfo, {name: Consts.LEVEL_NAMES[globals.levelIndex]})
-            })
-            this.doWait(1.5,()=>{
-                console.log("doing physics")
-                globals.physicsActive = true
-            })
-            this.doWait(2.0,()=>{
-                console.log("doing collisions")
-                globals.collisionsActive = true
-            })
+            this.resetLevelSettings(globals)
         }
         if (globals.nextLevel) {
             globals.nextLevel = false
@@ -83,30 +65,11 @@ export class GameLogic extends System {
             if (globals.levelIndex >= Consts.LEVEL_NAMES.length) {
                 this.wonGame()
             } else {
-                this.queries.levels.forEach(ent => {
+                this.queries.levels.slice().forEach(ent => {
                     const level = ent.getMutableComponent(LevelInfo)
                     ent.removeComponent(LevelInfo)
                 })
-                globals.transition.addComponent(Anim, {prop: 'opacity', from: 1.0, to: 0.0, duration: 0.5})
-                globals.instructions.getMutableComponent(SimpleText).obj.visible = false
-                globals.balls = 3
-                globals.playing = true
-                globals.removeBalls = true
-                globals.removeBlocks = true
-                this.doWait(0.5,()=>{
-                    console.log('adding level')
-                    const l2 = this.world.createEntity()
-                    l2.addComponent(LevelInfo, {name: Consts.LEVEL_NAMES[globals.levelIndex]})
-                })
-                this.doWait(1.5,()=>{
-                    console.log("doing physics")
-                    globals.physicsActive = true
-                })
-                this.doWait(2.0,()=>{
-                    console.log("doing collisions")
-                    globals.collisionsActive = true
-                })
-
+                this.resetLevelSettings(globals)
             }
         }
     }
@@ -117,15 +80,11 @@ export class GameLogic extends System {
         globals.physicsActive = false
         globals.collisionsActive = false
         globals.playing = false
-        globals.balls = 3
         globals.transition.addComponent(Anim, {prop: 'opacity', from: 0.0, to: 1.0, duration: 0.5})
         globals.instructions.getMutableComponent(SimpleText).obj.visible = true
         globals.instructions.getMutableComponent(SimpleText).setText("try again")
-        const click2 = this.world.createEntity()
-        click2.addComponent(WaitForClick, {
-            callback: () => {
-                this.queries.globals[0].getMutableComponent(Globals).restart = true
-            }
+        this.waitForClick(()=>{
+            this.queries.globals[0].getMutableComponent(Globals).restart = true
         })
     }
 
@@ -166,5 +125,32 @@ export class GameLogic extends System {
     doWait(number, f) {
         const wait = this.world.createEntity()
         wait.addComponent(WaitForTime, { duration:number,callback: f})
+    }
+
+    resetLevelSettings(globals) {
+        globals.balls = 3
+        globals.playing = true
+        globals.removeBalls = true
+        globals.removeBlocks = true
+        globals.transition.addComponent(Anim, {prop: 'opacity', from: 1.0, to: 0.0, duration: 0.5})
+        globals.instructions.getMutableComponent(SimpleText).obj.visible = false
+        this.doWait(0.5,()=>{
+            console.log('adding level')
+            const l2 = this.world.createEntity()
+            l2.addComponent(LevelInfo, {name: Consts.LEVEL_NAMES[globals.levelIndex]})
+        })
+        this.doWait(1.5,()=>{
+            console.log("doing physics")
+            globals.physicsActive = true
+        })
+        this.doWait(1.8,()=>{
+            console.log("doing collisions")
+            globals.collisionsActive = true
+        })
+    }
+
+    waitForClick(f) {
+        const click2 = this.world.createEntity()
+        click2.addComponent(WaitForClick, {callback: f})
     }
 }
