@@ -19,19 +19,34 @@ function easeLinear(from,to,t) {
 
 export class Anim {
     constructor() {
-        this.started = false
+        COUNTER++
         this.startTime = null
         this.lerp = "linear"
         this.delay = 0.0
         this.duration = 1.0
+        this.prop = 'foo'
+    }
+    copy({
+         prop='foo',
+         lerp='linear',
+         from=0,
+         to=1.0,
+         duration=1.0,
+         delay=0.0
+      }) {
+        this.prop = prop
+        this.lerp = lerp
+        this.from = from
+        this.to = to
+        this.duration = duration
+        this.delay = delay
     }
 }
 
 function lerp(anim,from,to,t) {
     if(anim.lerp === LERP_TYPES.LINEAR)  return easeLinear(from,to,t)
     if(anim.lerp === LERP_TYPES.ELASTIC) return easeLinear(from,to,easeOutElastic(t))
-    console.log("invalid LERP_TYPE",anim.lerp)
-    return from
+    return easeLinear(from,to,t)
 }
 
 export class WaitForTime {
@@ -66,20 +81,19 @@ export class AnimationSystem extends System {
         this.events.anims.added.forEach(ent => {
             const anim = ent.getMutableComponent(Anim)
             anim.startTime = performance.now()/1000
-            anim.started = true
         })
         this.queries.anims.forEach(ent => {
             const anim = ent.getMutableComponent(Anim)
             const soFar = performance.now()/1000 - anim.startTime - anim.delay
             if(soFar < 0) return
 
-            if(soFar > anim.duration) {
+            const t = soFar/anim.duration
+            if(t > 1.0) {
                 ent.removeComponent(Anim)
             } else {
-                const t = soFar/anim.duration
-                const nv = lerp(anim,anim.from,anim.to,t)
+                const nv = lerp(anim, anim.from, anim.to, t)
                 const obj = this.getComponentObject(ent)
-                this.setObjectProperty(anim,obj,nv)
+                this.setObjectProperty(anim, obj, nv)
             }
 
         })
@@ -87,7 +101,6 @@ export class AnimationSystem extends System {
         this.events.waits.added.forEach(ent => {
             const wait = ent.getMutableComponent(WaitForTime)
             wait.startTime = performance.now()/1000
-            wait.started = true
         })
 
         this.queries.waits.forEach(ent => {
