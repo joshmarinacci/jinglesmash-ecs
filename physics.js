@@ -3,6 +3,7 @@ import {
     CanvasTexture,
     CylinderGeometry,
     Geometry,
+    DoubleSide,
     LatheBufferGeometry,
     Mesh,
     MeshLambertMaterial,
@@ -10,6 +11,7 @@ import {
     MeshStandardMaterial,
     RepeatWrapping,
     SphereGeometry,
+    PlaneGeometry,
     Vector2,
     Vector3
 } from "./node_modules/three/build/three.module.js"
@@ -20,6 +22,7 @@ import {ParticlesGroup} from './particles.js'
 import {Globals} from './common.js'
 import {LevelInfo} from './levels'
 import {Anim} from './animation.js'
+import {toRad} from './common'
 
 
 const wallMaterial = new CANNON.Material()
@@ -39,6 +42,9 @@ export class PhysicsBall {
 }
 
 export class PhysicsFloor {
+}
+export class PhysicsCubeRoom {
+
 }
 
 export class Block {
@@ -146,6 +152,13 @@ export class PhysicsSystem extends System {
                         removed: {event:'EntityRemoved'}
                     }
                 },
+                cuberooms: {
+                    components:[PhysicsCubeRoom],
+                    events: {
+                        added: {event:'EntityAdded'},
+                        removed: {event:'EntityRemoved'}
+                    }
+                },
                 balls: {
                     components:[PhysicsBall],
                     events: {
@@ -231,12 +244,55 @@ export class PhysicsSystem extends System {
 
         this.events.floors.added.forEach(ent => {
             const floor = ent.getMutableComponent(PhysicsFloor)
+            const floorObj = new Mesh(
+                new PlaneGeometry(100,100,32,32),
+                new MeshLambertMaterial({color:Consts.FLOOR_COLOR})
+            )
+            floorObj.receiveShadow = true
+            floorObj.rotation.x = toRad(-90)
+            const sc = this.queries.three[0].getComponent(ThreeScene)
+            sc.scene.add(floorObj)
+            floor.obj = floorObj
             floor.body = new CANNON.Body({
                 mass: 0 // mass == 0 makes the body static
             });
             floor.body.quaternion.setFromAxisAngle(new CANNON.Vec3(1,0,0),-Math.PI/2);
             floor.body.addShape(new CANNON.Plane());
             this.cannonWorld.addBody(floor.body);
+        })
+
+        this.events.cuberooms.added.forEach(ent => {
+            const room = ent.getMutableComponent(PhysicsCubeRoom)
+
+            const makeFloor = (axis, angle, pos, color) => {
+                const floorBody = new CANNON.Body({ mass:0 })
+                floorBody.quaternion.setFromAxisAngle(new CANNON.Vec3(axis[0],axis[1],axis[2]),angle);
+                floorBody.addShape(new CANNON.Plane())
+                floorBody.position.set(pos[0],pos[1],pos[2])
+                this.cannonWorld.addBody(floorBody);
+
+                const floorObj = new Mesh(
+                    new PlaneGeometry(10,10),
+                    new MeshLambertMaterial({color:color, side: DoubleSide})
+                )
+                floorObj.quaternion.setFromAxisAngle(new Vector3(axis[0],axis[1],axis[2]),angle);
+                floorObj.position.set(pos[0],pos[1],pos[2])
+                const sc = this.queries.three[0].getComponent(ThreeScene)
+                sc.scene.add(floorObj)
+                return floorBody
+            }
+
+            const size = 5.5
+            const floors = []
+            floors.push(makeFloor([0,1,0],toRad(90), [-size,0,0], 'teal'))
+            floors.push(makeFloor([0,1,0],toRad(-90),[+size,0,0], 'teal'))
+
+            floors.push(makeFloor([1,0,0],toRad(-90), [-0,-size,0], 'teal'))
+            floors.push(makeFloor([1,0,0],toRad(90), [+0,+size,0], 'teal'))
+
+            floors.push(makeFloor([1,0,0],toRad(0), [+0,0,-size], 'teal'))
+            floors.push(makeFloor([1,0,0],toRad(180), [+0,0,size], 'teal'))
+
         })
 
         this.events.balls.added.forEach(ent => {

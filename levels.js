@@ -5,6 +5,7 @@ import {ThreeScene} from './three.js'
 import {Mesh, MeshLambertMaterial, PlaneGeometry, Vector3} from "./node_modules/three/build/three.module.js"
 import {pickOneValue} from './common.js'
 import {Globals} from './common.js'
+import {PhysicsCubeRoom} from './physics.js'
 
 
 export class LevelInfo {
@@ -99,20 +100,18 @@ export  class LevelLoaderSystem extends System {
         if(level.roomType === Consts.ROOM_TYPES.FLOOR) {
             this.startFloorRoom(level)
         }
+        if(level.roomType === Consts.ROOM_TYPES.CUBE) {
+            this.startCubeRoom(level)
+        }
         return newBlocks
 
     }
     startFloorRoom() {
-        const floorObj = new Mesh(
-            new PlaneGeometry(100,100,32,32),
-            new MeshLambertMaterial({color:Consts.FLOOR_COLOR})
-        )
-        floorObj.receiveShadow = true
-        floorObj.rotation.x = toRad(-90)
-        const sc = this.queries.three[0].getComponent(ThreeScene)
-        sc.scene.add(floorObj)
         const floor = this.world.createEntity()
         floor.addComponent(PhysicsFloor)
+    }
+    startCubeRoom() {
+        this.world.createEntity().addComponent(PhysicsCubeRoom)
     }
 }
 
