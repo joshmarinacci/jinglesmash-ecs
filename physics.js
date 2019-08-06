@@ -20,7 +20,7 @@ import {Consts, pickOneValue} from './common.js'
 import {ThreeScene} from './three.js'
 import {ParticlesGroup} from './particles.js'
 import {Globals} from './common.js'
-import {LevelInfo} from './levels'
+import {LevelInfo} from './levels.js'
 import {Anim} from './animation.js'
 import {toRad} from './common'
 

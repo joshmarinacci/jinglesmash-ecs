@@ -24,6 +24,7 @@ import {WaitForClick} from './mouse.js'
 import {PhysicsBall} from './physics.js'
 import {LevelInfo} from './levels.js'
 import {WaitForTime} from './animation.js'
+import {loadStructure} from './levels.js'
 
 
 export class GameLogic extends System {
@@ -40,7 +41,7 @@ export class GameLogic extends System {
 
     execute(delta) {
         const globals = this.queries.globals[0].getMutableComponent(Globals)
-        if (globals.playing && !globals.levelLoading && globals.physicsActive && globals.collisionsActive) {
+        if (globals.playing && globals.physicsActive && globals.collisionsActive) {
             const crystals = this.queries.blocks.filter(ent => {
                 return ent.getComponent(Block).physicsType === Consts.BLOCK_TYPES.CRYSTAL
             })
@@ -65,10 +66,8 @@ export class GameLogic extends System {
             if (globals.levelIndex >= Consts.LEVEL_NAMES.length) {
                 this.wonGame()
             } else {
-                this.queries.levels.slice().forEach(ent => {
-                    const level = ent.getMutableComponent(LevelInfo)
-                    ent.removeComponent(LevelInfo)
-                })
+                //remove the old level
+                this.queries.levels.slice().forEach(ent => ent.removeComponent(LevelInfo))
                 this.resetLevelSettings(globals)
             }
         }
@@ -93,7 +92,6 @@ export class GameLogic extends System {
         globals.physicsActive = false
         globals.collisionsActive = false
         globals.playing = false
-        globals.levelLoading = true
         globals.balls = 3
         globals.transition.addComponent(Anim, {prop: 'opacity', from: 0.0, to: 1.0, duration: 0.5})
         globals.instructions.getMutableComponent(SimpleText).obj.visible = true
@@ -138,14 +136,16 @@ export class GameLogic extends System {
             // console.log('adding level')
             const l2 = this.world.createEntity()
             l2.addComponent(LevelInfo, {name: Consts.LEVEL_NAMES[globals.levelIndex]})
-        })
-        this.doWait(1.5,()=>{
-            // console.log("doing physics")
-            globals.physicsActive = true
-        })
-        this.doWait(1.8,()=>{
-            // console.log("doing collisions")
-            globals.collisionsActive = true
+            const info = l2.getMutableComponent(LevelInfo)
+            loadStructure(info,this.world).then(()=>{
+                console.log("got the next level")
+                //turn on physics
+                globals.physicsActive = true
+                this.doWait(1.8,()=>{
+                    console.log("doing collisions")
+                    globals.collisionsActive = true
+                })
+            })
         })
     }
 

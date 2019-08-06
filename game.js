@@ -17,7 +17,7 @@ import {World} from "./node_modules/ecsy/build/ecsy.module.js"
 import {Globals} from './common.js'
 import {AudioSystem, SoundEffect} from './audio.js'
 import {SimpleText, SkyBox, ThreeGroup, ThreeScene, ThreeSystem, TransitionSphere} from './three.js'
-import {LevelInfo, LevelLoaderSystem} from './levels.js'
+import {LevelInfo} from './levels.js'
 import {PhysicsSystem} from './physics.js'
 import {MouseInputSystem, WaitForClick} from "./mouse.js"
 import {ParticlesGroup, ParticlesSystem} from './particles.js'
@@ -27,6 +27,7 @@ import {PhysicsBall} from './physics.js'
 import {Consts} from './common.js'
 import {WaitForTime} from './animation.js'
 import {$} from './common.js'
+import {loadStructure} from './levels.js'
 
 
 const $$ = (sel) => document.querySelectorAll(sel)
@@ -160,7 +161,6 @@ function setupGame() {
 
     world.registerSystem(ThreeSystem)
     world.registerSystem(AudioSystem)
-    world.registerSystem(LevelLoaderSystem)
     world.registerSystem(PhysicsSystem)
     world.registerSystem(MouseInputSystem)
     world.registerSystem(ParticlesSystem)
@@ -197,6 +197,10 @@ function setupGame() {
 
     const level1 = world.createEntity()
     level1.addComponent(LevelInfo, {name:Consts.LEVEL_NAMES[globals.levelIndex]})
+    const info = level1.getMutableComponent(LevelInfo)
+    loadStructure(info,world).then(()=>{
+        console.log("got the level")
+    })
 
 
     const parts = world.createEntity()

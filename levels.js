@@ -10,6 +10,7 @@ import {PhysicsCubeRoom} from './physics.js'
 
 export class LevelInfo {
     constructor() {
+        this.name = 'foo'
         this.ballRadius = 0.25
         this.ballMass = 5
         this.ballType = pickOneValue(Consts.BALL_TYPES)
@@ -21,98 +22,62 @@ export class LevelInfo {
     }
 }
 
-export  class LevelLoaderSystem extends System {
-    init() {
-        return {
-            queries: {
-                globals: {components: [Globals]},
-                three: { components: [ThreeScene], },
-                levels: {
-                    components: [LevelInfo],
-                    events: {
-                        added: {event:'EntityAdded'},
-                        removed: {event:'EntityRemoved'}
-                    }
-                }
-            }
-        }
-    }
-    execute(delta) {
-        this.events.levels.added.forEach(ent => {
-            const info = ent.getMutableComponent(LevelInfo)
-            this.loadStructure(info).then(()=>{
-                console.log("LevelLoader: fully loaded", info.name)
-                const globals = this.queries.globals[0].getMutableComponent(Globals)
-                globals.levelLoading = false
-            })
+export function loadStructure(info,world) {
+    console.log("fetching",info)
+    return fetch(`${Consts.BASE_URL}${info.name}?cachebust=${Math.random()}`)
+        .then(res => res.json())
+        .then(res => {
+            return loadFromJSON(res,info,world)
         })
-    }
-    loadStructure(info) {
-        console.log("fetching",info)
-        return fetch(`${Consts.BASE_URL}${info.name}?cachebust=${Math.random()}`)
-            .then(res => res.json())
-            .then(res => {
-                return this.loadFromJSON(res,info)
-            })
+}
+
+function  loadFromJSON(doc,level,world) {
+    level.blocks = []
+    const newBlocks = doc.data.blocks.map(b => {
+        const block = world.createEntity()
+        block.addComponent(Block)
+        const b2 = block.getMutableComponent(Block)
+        b2.set('position',b.position)
+        b2.set('width',b.size.width)
+        b2.set('height',b.size.height)
+        b2.set('depth',b.size.depth)
+        b2.set('rotation',b.rotation)
+        if(b.physicstype === "fixed") b.physicstype = Consts.BLOCK_TYPES.BLOCK
+        if(b.physicstype === "dynamic") b.physicstype = Consts.BLOCK_TYPES.BLOCK
+        b2.set('physicstype',b.physicstype)
+        b2.rebuildMaterial()
+        return block
+    })
+
+    if(!doc.data.ballRadius) level.ballRadius = 0.25
+    if(!doc.data.ballMass) level.ballMass = 5
+    if(typeof doc.data.wallFriction !== 'undefined') {
+        // console.log("wall friction",doc.data.wallFriction)
+        // console.log("wall restitution",doc.data.wallRestitution)
+        level.wallFriction = doc.data.wallFriction
+        level.wallRestitution = doc.data.wallRestitution
+    //     this.rebuildWallMaterial()
     }
 
-    loadFromJSON(doc,level) {
-        const sc = this.queries.three[0].getComponent(ThreeScene)
-        level.blocks = []
-        const newBlocks = doc.data.blocks.map(b => {
-            const block = this.world.createEntity()
-            block.addComponent(Block)
-            const b2 = block.getMutableComponent(Block)
-            b2.set('position',b.position)
-            b2.set('width',b.size.width)
-            b2.set('height',b.size.height)
-            b2.set('depth',b.size.depth)
-            b2.set('rotation',b.rotation)
-            if(b.physicstype === "fixed") b.physicstype = Consts.BLOCK_TYPES.BLOCK
-            if(b.physicstype === "dynamic") b.physicstype = Consts.BLOCK_TYPES.BLOCK
-            b2.set('physicstype',b.physicstype)
-            b2.rebuildMaterial()
-            return block
-        })
-
-        if(!doc.data.ballRadius) level.ballRadius = 0.25
-        if(!doc.data.ballMass) level.ballMass = 5
-        if(typeof doc.data.wallFriction !== 'undefined') {
-            // console.log("wall friction",doc.data.wallFriction)
-            // console.log("wall restitution",doc.data.wallRestitution)
-            level.wallFriction = doc.data.wallFriction
-            level.wallRestitution = doc.data.wallRestitution
-        //     this.rebuildWallMaterial()
-        }
-
-        if(typeof doc.data.gravity !== 'undefined') {
-            const g = doc.data.gravity
-            console.log("desired gravity",g)
-            level.gravity.copy(g)
-        }
-        if(typeof doc.data.hasGravity !== 'undefined') {
-            level.hasGravity = doc.data.hasGravity
-        }
-        if(typeof doc.data.roomType !== 'undefined') {
-            level.roomType = doc.data.roomType
-        }
-
-        if(level.roomType === Consts.ROOM_TYPES.FLOOR) {
-            this.startFloorRoom(level)
-        }
-        if(level.roomType === Consts.ROOM_TYPES.CUBE) {
-            this.startCubeRoom(level)
-        }
-        return newBlocks
-
+    if(typeof doc.data.gravity !== 'undefined') {
+        const g = doc.data.gravity
+        console.log("desired gravity",g)
+        level.gravity.copy(g)
     }
-    startFloorRoom() {
-        const floor = this.world.createEntity()
-        floor.addComponent(PhysicsFloor)
+    if(typeof doc.data.hasGravity !== 'undefined') {
+        level.hasGravity = doc.data.hasGravity
     }
-    startCubeRoom() {
-        this.world.createEntity().addComponent(PhysicsCubeRoom)
+    if(typeof doc.data.roomType !== 'undefined') {
+        level.roomType = doc.data.roomType
     }
+
+    if(level.roomType === Consts.ROOM_TYPES.FLOOR) {
+        world.createEntity().addComponent(PhysicsFloor)
+    }
+    if(level.roomType === Consts.ROOM_TYPES.CUBE) {
+        world.createEntity().addComponent(PhysicsCubeRoom)
+    }
+    return newBlocks
 }
 
 
