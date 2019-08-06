@@ -83,7 +83,10 @@ export class AnimationSystem extends System {
         if(ent.hasComponent(TransitionSphere)) return ent.getMutableComponent(TransitionSphere).obj
         if(ent.hasComponent(SimpleText)) return ent.getMutableComponent(SimpleText).obj
         if(ent.hasComponent(Block)) return ent.getMutableComponent(Block).obj
+        console.error(`id ${ent.id} has`)
+        Object.keys(ent._components).forEach(c => console.log('comp:',c))
         console.error(ent)
+
         throw new Error("unknown three object component")
     }
 

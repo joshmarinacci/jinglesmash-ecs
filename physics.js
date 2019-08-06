@@ -61,6 +61,7 @@ export class Block {
     copy(src) {
         this.rebuildGeometry()
         // this.rebuildMaterial()
+        this.toBeRemoved = false
     }
 
     syncBack() {
@@ -192,7 +193,7 @@ export class PhysicsSystem extends System {
             block.obj.material = this.materials[block.physicsType]
             sc.scene.add(block.obj)
             this.cannonWorld.addBody(block.body)
-            //ent.addComponent(Anim,{prop:'scale',from:0.1,to:1.0,duration:0.3, lerp:'elastic', delay:0.1*i})
+            ent.addComponent(Anim,{prop:'scale',from:0.1,to:1.0,duration:0.3, lerp:'elastic', delay:0.1*i})
 
             block.body.addEventListener('collide',(e)=>{
                 const globals = this.queries.globals[0].getMutableComponent(Globals)
