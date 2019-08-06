@@ -1,9 +1,19 @@
 import {System} from "./node_modules/ecsy/build/ecsy.module.js"
 import {SimpleText, TransitionSphere} from './three.js'
 import {Block} from './physics.js'
+import {Consts} from './common'
 
-function lerp(from, to, t) {
-    return from + (to-from)*t
+export const LERP_TYPES = {
+    LINEAR:'linear',
+    ELASTIC:'elastic'
+}
+
+function easeOutElastic(t) {
+    const p = 0.3
+    return Math.pow(2,-10*t) * Math.sin((t-p/4)*(2*Math.PI)/p) + 1;
+}
+function easeLinear(from,to,t) {
+    return (to - from) * t + from
 }
 
 
@@ -11,8 +21,17 @@ export class Anim {
     constructor() {
         this.started = false
         this.startTime = null
+        this.lerp = "linear"
     }
 }
+
+function lerp(anim,from,to,t) {
+    if(anim.lerp === LERP_TYPES.LINEAR)  return easeLinear(from,to,t)
+    if(anim.lerp === LERP_TYPES.ELASTIC) return easeLinear(from,to,easeOutElastic(t))
+    console.log("invalid LERP_TYPE",anim.lerp)
+    return from
+}
+
 export class WaitForTime {
     constructor() {
         this.startTime = null
@@ -55,7 +74,7 @@ export class AnimationSystem extends System {
                 ent.removeComponent(Anim)
             } else {
                 const t = soFar/anim.duration
-                const nv = lerp(anim.from,anim.to,t)
+                const nv = lerp(anim,anim.from,anim.to,t)
                 const obj = this.getComponentObject(ent)
                 this.setObjectProperty(anim,obj,nv)
             }
