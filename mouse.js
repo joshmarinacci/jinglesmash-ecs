@@ -110,7 +110,6 @@ export class MouseInputSystem extends System {
                     ball.addComponent(PhysicsBall, {
                         initialPosition: mouse.mouseSphere.position.clone(),
                         initialVelocity: delta,
-                        radius: 0.25,
                     })
 
                     globals.click.addComponent(PlaySoundEffect)

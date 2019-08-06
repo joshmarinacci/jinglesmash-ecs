@@ -233,9 +233,12 @@ export class PhysicsSystem extends System {
         })
 
         this.events.balls.added.forEach(ent => {
+            const level = this.queries.levels[0].getComponent(LevelInfo)
+
             const ball = ent.getMutableComponent(PhysicsBall)
             ball.tex = pickOneValue(this.textures)
             ball.type = pickOneValue(Consts.BALL_TYPES)
+            ball.radius = level.ballRadius
             generateBallMesh(ball)
 
             ball.obj.castShadow = true
@@ -247,13 +250,11 @@ export class PhysicsSystem extends System {
             const sc = this.queries.three[0].getComponent(ThreeScene)
             sc.scene.add(ball.obj)
 
-            const level = this.queries.levels[0].getComponent(LevelInfo)
             ball.body = new CANNON.Body({
                 mass: level.ballMass,
                 shape: new CANNON.Sphere(ball.radius),
                 position: new CANNON.Vec3(pos.x, pos.y, pos.z),
                 velocity: new CANNON.Vec3(dir.x,dir.y,dir.z),
-                type: CANNON.Body.DYNAMIC,
                 material: ballMaterial,
             })
             ball.body.addEventListener('collide',(e)=>{
