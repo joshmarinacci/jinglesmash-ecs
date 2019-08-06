@@ -12,8 +12,8 @@ export class LevelInfo {
         this.ballRadius = 0.25
         this.ballMass = 5
         this.ballType = pickOneValue(Consts.BALL_TYPES)
-        this.wallFriction = null
-        this.wallRestitution = null
+        this.wallFriction = 0.0
+        this.wallRestitution = 0.0
         this.gravity = new Vector3()
         this.hasGravity = true
         this.roomType = 'roomType'
@@ -75,8 +75,8 @@ export  class LevelLoaderSystem extends System {
         if(!doc.data.ballRadius) level.ballRadius = 0.25
         if(!doc.data.ballMass) level.ballMass = 5
         if(typeof doc.data.wallFriction !== 'undefined') {
-            console.log("wall friction",doc.data.wallFriction)
-            console.log("wall restitution",doc.data.wallRestitution)
+            // console.log("wall friction",doc.data.wallFriction)
+            // console.log("wall restitution",doc.data.wallRestitution)
             level.wallFriction = doc.data.wallFriction
             level.wallRestitution = doc.data.wallRestitution
         //     this.rebuildWallMaterial()

@@ -18,9 +18,11 @@ import {Consts, pickOneValue} from './common.js'
 import {ThreeScene} from './three'
 import {ParticlesGroup} from './particles.js'
 import {Globals} from './common.js'
+import {LevelInfo} from './levels'
 
 
 const wallMaterial = new CANNON.Material()
+const ballMaterial = new CANNON.Material()
 
 export class PhysicsBall {
     constructor() {
@@ -119,8 +121,7 @@ export class PhysicsSystem extends System {
         this.cannonWorld = new CANNON.World();
         this.cannonWorld.gravity.set(0, -9.82, 0);
 
-        this.wallMaterial = new CANNON.Material()
-        this.ballMaterial = new CANNON.Material()
+
 
         this.materials = generateBlockTextures()
         this.textures = generateBallTextures()
@@ -150,6 +151,13 @@ export class PhysicsSystem extends System {
                         removed: {event:'EntityRemoved'}
                     }
                 },
+                levels:{
+                    components:[LevelInfo],
+                    events: {
+                        added: {event:'EntityAdded'},
+                        removed: {event:'EntityRemoved'}
+                    }
+                }
             }
         }
     }
@@ -239,13 +247,14 @@ export class PhysicsSystem extends System {
             const sc = this.queries.three[0].getComponent(ThreeScene)
             sc.scene.add(ball.obj)
 
+            const level = this.queries.levels[0].getComponent(LevelInfo)
             ball.body = new CANNON.Body({
-                mass: 5,
+                mass: level.ballMass,
                 shape: new CANNON.Sphere(ball.radius),
                 position: new CANNON.Vec3(pos.x, pos.y, pos.z),
                 velocity: new CANNON.Vec3(dir.x,dir.y,dir.z),
                 type: CANNON.Body.DYNAMIC,
-                material: this.ballMaterial,
+                material: ballMaterial,
             })
             ball.body.addEventListener('collide',(e)=>{
                 // console.log("ball collsion",e.body.position)
@@ -260,6 +269,16 @@ export class PhysicsSystem extends System {
         this.queries.balls.forEach(ent => {
             ent.getMutableComponent(PhysicsBall).syncBack()
         })
+
+        this.events.levels.added.forEach(ent => {
+            const info = ent.getMutableComponent(LevelInfo)
+            this.rebuildWallMaterial(info)
+        })
+    }
+    rebuildWallMaterial(info) {
+        // console.log("rebuilding the wall material",info.wallFriction, info.wallRestitution)
+        this.cannonWorld.addContactMaterial(new CANNON.ContactMaterial(wallMaterial,ballMaterial,
+            {friction:info.wallFriction, restitution: info.wallRestitution}))
     }
 }
 
