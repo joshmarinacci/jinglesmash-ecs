@@ -5,6 +5,8 @@ export class Globals {
         this.removeBalls = false
         this.nextLevel = false
         this.levelIndex = 0
+        this.physicsActive = false
+        this.collisionsActive = false
     }
 }
 

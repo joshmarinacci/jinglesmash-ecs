@@ -23,6 +23,7 @@ import {Anim} from './animation.js'
 import {WaitForClick} from './mouse.js'
 import {PhysicsBall} from './physics.js'
 import {LevelInfo} from './levels.js'
+import {WaitForTime} from './animation.js'
 
 
 export class GameLogic extends System {
@@ -48,12 +49,13 @@ export class GameLogic extends System {
             } else {
                 // console.log('still playing')
             }
-            if (globals.balls <= 0) {
+            if (globals.balls < 0) {
                 return this.loseLevel()
             }
         }
 
         if (globals.restart) {
+            // globals.physicsActive = true
             globals.restart = false
             globals.balls = 3
             globals.playing = true
@@ -72,14 +74,26 @@ export class GameLogic extends System {
                     const level = ent.getMutableComponent(LevelInfo)
                     ent.removeComponent(LevelInfo)
                 })
-                const l2 = this.world.createEntity()
-                l2.addComponent(LevelInfo, {name: Consts.LEVEL_NAMES[globals.levelIndex]})
                 globals.transition.addComponent(Anim, {prop: 'opacity', from: 1.0, to: 0.0, duration: 0.5})
                 globals.instructions.getMutableComponent(SimpleText).obj.visible = false
                 globals.balls = 3
                 globals.playing = true
                 globals.removeBalls = true
                 globals.removeBlocks = true
+                this.doWait(0.5,()=>{
+                    console.log('adding level')
+                    const l2 = this.world.createEntity()
+                    l2.addComponent(LevelInfo, {name: Consts.LEVEL_NAMES[globals.levelIndex]})
+                })
+                this.doWait(1.5,()=>{
+                    console.log("doing physics")
+                    globals.physicsActive = true
+                })
+                this.doWait(1.8,()=>{
+                    console.log("doing collisions")
+                    globals.collisionsActive = true
+                })
+
             }
         }
     }
@@ -87,6 +101,7 @@ export class GameLogic extends System {
     loseLevel() {
         console.log("you lost. must restart the level")
         const globals = this.queries.globals[0].getMutableComponent(Globals)
+        globals.physicsActive = false
         globals.playing = false
         globals.balls = 3
         globals.transition.addComponent(Anim, {prop: 'opacity', from: 0.0, to: 1.0, duration: 0.5})
@@ -102,6 +117,8 @@ export class GameLogic extends System {
 
     winLevel() {
         const globals = this.queries.globals[0].getMutableComponent(Globals)
+        globals.physicsActive = false
+        globals.collisionsActive = false
         globals.playing = false
         globals.levelLoading = true
         globals.balls = 3
@@ -130,5 +147,10 @@ export class GameLogic extends System {
                 this.queries.globals[0].getMutableComponent(Globals).nextLevel = true
             }
         })
+    }
+
+    doWait(number, f) {
+        const wait = this.world.createEntity()
+        wait.addComponent(WaitForTime, { duration:number,callback: f})
     }
 }

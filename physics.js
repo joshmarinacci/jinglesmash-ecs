@@ -192,6 +192,8 @@ export class PhysicsSystem extends System {
             sc.scene.add(block.obj)
             this.cannonWorld.addBody(block.body)
             block.body.addEventListener('collide',(e)=>{
+                const globals = this.queries.globals[0].getMutableComponent(Globals)
+                if(!globals.collisionsActive) return
                 if(Math.abs(e.contact.getImpactVelocityAlongNormal() < 1.0)) return
                 if((e.target === block.body && block.physicsType === Consts.BLOCK_TYPES.CRYSTAL) ||
                     (e.body === block.body && block.physicsType === Consts.BLOCK_TYPES.CRYSTAL)) {
@@ -203,7 +205,8 @@ export class PhysicsSystem extends System {
                 }
             })
         })
-        this.cannonWorld.step(fixedTimeStep, delta, maxSubSteps)
+
+        if(globals.physicsActive) this.cannonWorld.step(fixedTimeStep, delta, maxSubSteps)
 
         this.queries.blocks.forEach(ent => {
             const block = ent.getMutableComponent(Block)
@@ -258,7 +261,6 @@ export class PhysicsSystem extends System {
                 material: ballMaterial,
             })
             ball.body.addEventListener('collide',(e)=>{
-                // console.log("ball collsion",e.body.position)
                 if(e.body.position.y !== 0) {
                     const parts = this.world.createEntity()
                     parts.addComponent(ParticlesGroup, {position: e.body.position.clone()})

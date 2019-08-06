@@ -25,6 +25,7 @@ import {AnimationSystem, Anim} from './animation.js'
 import {GameLogic} from './logic.js'
 import {PhysicsBall} from './physics.js'
 import {Consts} from './common.js'
+import {WaitForTime} from './animation.js'
 
 
 const $$ = (sel) => document.querySelectorAll(sel)
@@ -215,11 +216,23 @@ function setupGame() {
     ins.obj.position.y = 1.5
 
     const click1 = world.createEntity()
-    click1.addComponent(WaitForClick,{callback:()=>{
-        game.getMutableComponent(Globals).balls = 3
-        game.getMutableComponent(Globals).playing = true
-        globals.transition.addComponent(Anim,{prop:'opacity',from:1.0,to:0.0,duration:0.5})
-        globals.instructions.getMutableComponent(SimpleText).obj.visible = false
+    click1.addComponent(WaitForClick,{
+        callback:()=>{
+            const globals = game.getMutableComponent(Globals)
+            globals.balls = 3
+            globals.playing = true
+            globals.transition.addComponent(Anim,{prop:'opacity',from:1.0,to:0.0,duration:0.5})
+            globals.instructions.getMutableComponent(SimpleText).obj.visible = false
+            const wait = world.createEntity()
+            wait.addComponent(WaitForTime,{duration:0.1, callback:()=>{
+                    console.log("doing physics")
+                    globals.physicsActive = true
+                }})
+            const wait2 = world.createEntity()
+            wait2.addComponent(WaitForTime,{duration:1.1, callback:()=>{
+                    console.log("doing collisions")
+                    globals.collisionsActive = true
+                }})
     }})
 
 
