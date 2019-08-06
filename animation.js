@@ -22,6 +22,8 @@ export class Anim {
         this.started = false
         this.startTime = null
         this.lerp = "linear"
+        this.delay = 0.0
+        this.duration = 1.0
     }
 }
 
@@ -68,7 +70,8 @@ export class AnimationSystem extends System {
         })
         this.queries.anims.forEach(ent => {
             const anim = ent.getMutableComponent(Anim)
-            const soFar = performance.now()/1000 - anim.startTime
+            const soFar = performance.now()/1000 - anim.startTime - anim.delay
+            if(soFar < 0) return
 
             if(soFar > anim.duration) {
                 ent.removeComponent(Anim)

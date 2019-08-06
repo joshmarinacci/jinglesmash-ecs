@@ -224,15 +224,13 @@ function setupGame() {
             const globals = game.getMutableComponent(Globals)
             globals.balls = 3
             globals.playing = true
-            globals.transition.addComponent(Anim,{prop:'opacity',from:1.0,to:0.0,duration:0.5})
+            globals.transition.addComponent(Anim,{prop:'opacity',from:1.0,to:0.0,duration:1.5, delay:0.0})
             globals.instructions.getMutableComponent(SimpleText).obj.visible = false
-            const wait = world.createEntity()
-            wait.addComponent(WaitForTime,{duration:0.1, callback:()=>{
+            world.createEntity().addComponent(WaitForTime,{duration:0.1, callback:()=>{
                     console.log("doing physics")
                     globals.physicsActive = true
                 }})
-            const wait2 = world.createEntity()
-            wait2.addComponent(WaitForTime,{duration:1.1, callback:()=>{
+            world.createEntity().addComponent(WaitForTime,{duration:1.1, callback:()=>{
                     console.log("doing collisions")
                     globals.collisionsActive = true
                 }})
