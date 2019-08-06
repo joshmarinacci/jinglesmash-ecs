@@ -40,7 +40,7 @@ export class GameLogic extends System {
 
     execute(delta) {
         const globals = this.queries.globals[0].getMutableComponent(Globals)
-        if (globals.playing && !globals.levelLoading) {
+        if (globals.playing && !globals.levelLoading && globals.physicsActive && globals.collisionsActive) {
             const crystals = this.queries.blocks.filter(ent => {
                 return ent.getComponent(Block).physicsType === Consts.BLOCK_TYPES.CRYSTAL
             })
@@ -63,6 +63,19 @@ export class GameLogic extends System {
             globals.instructions.getMutableComponent(SimpleText).obj.visible = false
             globals.removeBalls = true
             globals.removeBlocks = true
+            this.doWait(0.5,()=>{
+                console.log('adding level')
+                const l2 = this.world.createEntity()
+                l2.addComponent(LevelInfo, {name: Consts.LEVEL_NAMES[globals.levelIndex]})
+            })
+            this.doWait(1.5,()=>{
+                console.log("doing physics")
+                globals.physicsActive = true
+            })
+            this.doWait(2.0,()=>{
+                console.log("doing collisions")
+                globals.collisionsActive = true
+            })
         }
         if (globals.nextLevel) {
             globals.nextLevel = false
