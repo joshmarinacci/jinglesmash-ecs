@@ -12,13 +12,25 @@ export class Anim {
         this.startTime = null
     }
 }
-
+export class WaitForTime {
+    constructor() {
+        this.startTime = null
+        this.callback = null
+    }
+}
 export class AnimationSystem extends System {
     init() {
         return {
             queries: {
                 anims: {
                     components: [Anim],
+                    events: {
+                        added: {event:'EntityAdded'},
+                        removed: {event:'EntityRemoved'}
+                    }
+                },
+                waits: {
+                    components: [WaitForTime],
                     events: {
                         added: {event:'EntityAdded'},
                         removed: {event:'EntityRemoved'}
@@ -38,7 +50,6 @@ export class AnimationSystem extends System {
             const anim = ent.getMutableComponent(Anim)
             const soFar = performance.now()/1000 - anim.startTime
 
-
             if(soFar > anim.duration) {
                 ent.removeComponent(Anim)
             } else {
@@ -46,6 +57,22 @@ export class AnimationSystem extends System {
                 const nv = lerp(anim.from,anim.to,t)
                 const obj = this.getComponentObject(ent)
                 obj.material.opacity = nv
+            }
+
+        })
+
+        this.events.waits.added.forEach(ent => {
+            const wait = ent.getMutableComponent(WaitForTime)
+            wait.startTime = performance.now()/1000
+            wait.started = true
+        })
+
+        this.queries.waits.forEach(ent => {
+            const wait = ent.getMutableComponent(WaitForTime)
+            const soFar = performance.now()/1000 - wait.startTime
+            if(soFar > wait.duration) {
+                if(wait.callback) wait.callback()
+                ent.removeComponent(WaitForTime)
             }
 
         })
