@@ -67,6 +67,8 @@ export  class LevelLoaderSystem extends System {
             b2.set('height',b.size.height)
             b2.set('depth',b.size.depth)
             b2.set('rotation',b.rotation)
+            if(b.physicstype === "fixed") b.physicstype = Consts.BLOCK_TYPES.BLOCK
+            if(b.physicstype === "dynamic") b.physicstype = Consts.BLOCK_TYPES.BLOCK
             b2.set('physicstype',b.physicstype)
             b2.rebuildMaterial()
             return block

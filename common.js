@@ -44,8 +44,8 @@ export const Consts = {
     ROTATION_NAMES : ['rotx','roty','rotz'],
     LEVEL_NAMES: [
     "tumble_level1",
-    // "tumble_level2",
-    // "tumble_level5",
+    "tumble_level2",
+    "tumble_level5",
     "tumble_level6",
     "tumble_level7",
     "tumble_level8",
