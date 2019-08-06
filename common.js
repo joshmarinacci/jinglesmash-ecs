@@ -2,6 +2,9 @@ export class Globals {
     constructor() {
         this.playing = false
         this.balls = -1
+        this.removeBalls = false
+        this.nextLevel = false
+        this.levelIndex = 0
     }
 }
 
@@ -39,6 +42,21 @@ export const Consts = {
 
     POSITION_NAMES : ['x','y','z'],
     ROTATION_NAMES : ['rotx','roty','rotz'],
+    LEVEL_NAMES: [
+    "tumble_level1",
+    // "tumble_level2",
+    "tumble_level5",
+    "tumble_level6",
+    "tumble_level7",
+    "tumble_level8",
+    "tumble_level10",
+    "tumble_level11",
+    "tumble_level12",
+    "tumble_level13",
+    "tumble_level14",
+    "tumble_level9",
+    "tumble_level15",
+    ]
 }
 
 export const $ = (sel) => document.querySelector(sel)

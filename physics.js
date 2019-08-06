@@ -17,6 +17,7 @@ import {System} from "./node_modules/ecsy/build/ecsy.module.js"
 import {Consts, pickOneValue} from './common.js'
 import {ThreeScene} from './three'
 import {ParticlesGroup} from './particles.js'
+import {Globals} from './common.js'
 
 
 const wallMaterial = new CANNON.Material()
@@ -127,6 +128,7 @@ export class PhysicsSystem extends System {
         return {
             queries: {
                 three: { components: [ThreeScene], },
+                globals: {components:[Globals]},
                 blocks: {
                     components:[Block],
                     events: {
@@ -152,9 +154,27 @@ export class PhysicsSystem extends System {
         }
     }
     execute(delta) {
-        this.events.balls.removed.forEach(ent => {
-            console.log("ball was removed",ent.getMutableComponent(PhysicsBall))
-        })
+        const globals = this.queries.globals[0].getMutableComponent(Globals)
+        if(globals.removeBalls) {
+            globals.removeBalls = false
+            this.queries.balls.slice().forEach(ent => {
+                const ball = ent.getMutableComponent(PhysicsBall)
+                const sc = this.queries.three[0].getComponent(ThreeScene)
+                sc.scene.remove(ball.obj)
+                this.cannonWorld.removeBody(ball.body)
+                ent.removeComponent(PhysicsBall)
+            })
+        }
+        if(globals.removeBlocks) {
+            globals.removeBlocks = false
+            this.queries.blocks.slice().forEach(ent => {
+                const block = ent.getMutableComponent(Block)
+                const sc = this.queries.three[0].getComponent(ThreeScene)
+                sc.scene.remove(block.obj)
+                this.cannonWorld.removeBody(block.body)
+                ent.removeComponent(Block)
+            })
+        }
 
         const sc = this.queries.three[0].getMutableComponent(ThreeScene)
         this.events.blocks.added.forEach(ent => {
@@ -167,7 +187,6 @@ export class PhysicsSystem extends System {
                 if(Math.abs(e.contact.getImpactVelocityAlongNormal() < 1.0)) return
                 if((e.target === block.body && block.physicsType === Consts.BLOCK_TYPES.CRYSTAL) ||
                     (e.body === block.body && block.physicsType === Consts.BLOCK_TYPES.CRYSTAL)) {
-                    console.log(e.contact.getImpactVelocityAlongNormal())
                     if(Math.abs(e.contact.getImpactVelocityAlongNormal() >= 1.5)) {
                         if(ent.hasComponent(Block)) {
                             ent.getMutableComponent(Block).toBeRemoved = true

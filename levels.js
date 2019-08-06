@@ -38,7 +38,7 @@ export  class LevelLoaderSystem extends System {
         this.events.levels.added.forEach(ent => {
             const info = ent.getMutableComponent(LevelInfo)
             this.loadStructure(info).then(()=>{
-                // console.log("fully loaded")
+                console.log("LevelLoader: fully loaded", info.name)
             })
         })
     }

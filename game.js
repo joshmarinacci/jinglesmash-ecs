@@ -24,6 +24,7 @@ import {ParticlesGroup, ParticlesSystem} from './particles.js'
 import {AnimationSystem, Anim} from './animation.js'
 import {GameLogic} from './logic.js'
 import {PhysicsBall} from './physics.js'
+import {Consts} from './common.js'
 
 
 const $$ = (sel) => document.querySelectorAll(sel)
@@ -184,14 +185,13 @@ function setupGame() {
 
     setupLights()
     setupBackground()
-    // setupGame()
     setupAudio(world)
     // setupGui()
 
     const globals = game.getMutableComponent(Globals)
 
     const level1 = world.createEntity()
-    level1.addComponent(LevelInfo, {name:'tumble_level1'})
+    level1.addComponent(LevelInfo, {name:Consts.LEVEL_NAMES[globals.levelIndex]})
 
 
     const parts = world.createEntity()
