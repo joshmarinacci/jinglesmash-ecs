@@ -26,6 +26,7 @@ import {GameLogic} from './logic.js'
 import {PhysicsBall} from './physics.js'
 import {Consts} from './common.js'
 import {WaitForTime} from './animation.js'
+import {$} from './common.js'
 
 
 const $$ = (sel) => document.querySelectorAll(sel)
@@ -136,7 +137,7 @@ function setupGui() {
         //if vr,
         if(detected) {
             // pointer = new Pointer(scene,renderer,camera, pointer_opts)
-            vrmanager.enterVR()
+            // vrmanager.enterVR()
         } else {
             // pointer_opts.mouseSimulatesController = true
             // pointer = new Pointer(scene,renderer,camera, pointer_opts)
@@ -146,10 +147,10 @@ function setupGui() {
         // pointer.waitSceneClick(()=>startLevel())
     })
 
-    on(vrmanager,VR_DETECTED,()=>{
-        detected = true
-        $("#enter-button").innerText = "enter vr"
-    })
+    // on(vrmanager,VR_DETECTED,()=>{
+    //     detected = true
+    //     $("#enter-button").innerText = "enter vr"
+    // })
     $("#enter-button").disabled = false
 
 }
@@ -191,7 +192,7 @@ function setupGame() {
     setupLights()
     setupBackground()
     setupAudio(world)
-    // setupGui()
+    setupGui()
 
 
     const level1 = world.createEntity()

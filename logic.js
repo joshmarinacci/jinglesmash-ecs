@@ -135,16 +135,16 @@ export class GameLogic extends System {
         globals.transition.addComponent(Anim, {prop: 'opacity', from: 1.0, to: 0.0, duration: 0.5})
         globals.instructions.getMutableComponent(SimpleText).obj.visible = false
         this.doWait(0.5,()=>{
-            console.log('adding level')
+            // console.log('adding level')
             const l2 = this.world.createEntity()
             l2.addComponent(LevelInfo, {name: Consts.LEVEL_NAMES[globals.levelIndex]})
         })
         this.doWait(1.5,()=>{
-            console.log("doing physics")
+            // console.log("doing physics")
             globals.physicsActive = true
         })
         this.doWait(1.8,()=>{
-            console.log("doing collisions")
+            // console.log("doing collisions")
             globals.collisionsActive = true
         })
     }

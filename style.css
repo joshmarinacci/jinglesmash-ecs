@@ -1,3 +1,16 @@
 #overlay {
-    display: none;
+    /*display: none;*/
+    position: fixed;
+    top:0;
+    left:0;
+    width: 100vw;
+    height: 100vh;
+    background-color: #64c937;
+    text-align: center;
+}
+
+html, body {
+    margin:0;
+    padding:0;
+    overflow: hidden;
 }
