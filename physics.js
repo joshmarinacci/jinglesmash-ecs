@@ -336,6 +336,11 @@ export class PhysicsSystem extends System {
         this.events.levels.added.forEach(ent => {
             const info = ent.getMutableComponent(LevelInfo)
             this.rebuildWallMaterial(info)
+            if(info.hasGravity) {
+                this.cannonWorld.gravity.set(0,-9.82,0);
+            } else {
+                this.cannonWorld.gravity.set(0,0,0)
+            }
         })
     }
     rebuildWallMaterial(info) {

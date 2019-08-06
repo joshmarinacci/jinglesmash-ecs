@@ -133,11 +133,7 @@ export class GameLogic extends System {
         globals.transition.addComponent(Anim, {prop: 'opacity', from: 1.0, to: 0.0, duration: 0.5})
         globals.instructions.getMutableComponent(SimpleText).obj.visible = false
         this.doWait(0.5,()=>{
-            // console.log('adding level')
-            const l2 = this.world.createEntity()
-            l2.addComponent(LevelInfo, {name: Consts.LEVEL_NAMES[globals.levelIndex]})
-            const info = l2.getMutableComponent(LevelInfo)
-            loadStructure(info,this.world).then(()=>{
+            loadStructure(Consts.LEVEL_NAMES[globals.levelIndex],this.world).then(()=>{
                 console.log("got the next level")
                 //turn on physics
                 globals.physicsActive = true

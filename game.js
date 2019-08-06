@@ -195,11 +195,8 @@ function setupGame() {
     setupGui()
 
 
-    const level1 = world.createEntity()
-    level1.addComponent(LevelInfo, {name:Consts.LEVEL_NAMES[globals.levelIndex]})
-    const info = level1.getMutableComponent(LevelInfo)
-    loadStructure(info,world).then(()=>{
-        console.log("got the level")
+    loadStructure(Consts.LEVEL_NAMES[globals.levelIndex],world).then(()=>{
+        console.log("loaded the level")
     })
 
 

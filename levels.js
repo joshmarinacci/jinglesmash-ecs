@@ -22,16 +22,19 @@ export class LevelInfo {
     }
 }
 
-export function loadStructure(info,world) {
-    console.log("fetching",info)
-    return fetch(`${Consts.BASE_URL}${info.name}?cachebust=${Math.random()}`)
+export function loadStructure(name,world) {
+    console.log("fetching",name)
+    return fetch(`${Consts.BASE_URL}${name}?cachebust=${Math.random()}`)
         .then(res => res.json())
         .then(res => {
-            return loadFromJSON(res,info,world)
+            return loadFromJSON(res,world)
         })
 }
 
-function  loadFromJSON(doc,level,world) {
+function  loadFromJSON(doc,world) {
+    const l = world.createEntity()
+    l.addComponent(LevelInfo)
+    const level = l.getMutableComponent(LevelInfo)
     level.blocks = []
     const newBlocks = doc.data.blocks.map(b => {
         const block = world.createEntity()
@@ -61,7 +64,6 @@ function  loadFromJSON(doc,level,world) {
 
     if(typeof doc.data.gravity !== 'undefined') {
         const g = doc.data.gravity
-        console.log("desired gravity",g)
         level.gravity.copy(g)
     }
     if(typeof doc.data.hasGravity !== 'undefined') {
