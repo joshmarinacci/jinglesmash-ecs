@@ -39,8 +39,11 @@ export class GameLogic extends System {
 
     execute(delta) {
         const globals = this.queries.globals[0].getMutableComponent(Globals)
-        if (globals.playing) {
-            if (this.queries.blocks.length <= 0) {
+        if (globals.playing && !globals.levelLoading) {
+            const crystals = this.queries.blocks.filter(ent => {
+                return ent.getComponent(Block).physicsType === Consts.BLOCK_TYPES.CRYSTAL
+            })
+            if (crystals.length <= 0) {
                 return this.winLevel()
             } else {
                 // console.log('still playing')
@@ -100,6 +103,7 @@ export class GameLogic extends System {
     winLevel() {
         const globals = this.queries.globals[0].getMutableComponent(Globals)
         globals.playing = false
+        globals.levelLoading = true
         globals.balls = 3
         globals.transition.addComponent(Anim, {prop: 'opacity', from: 0.0, to: 1.0, duration: 0.5})
         globals.instructions.getMutableComponent(SimpleText).obj.visible = true

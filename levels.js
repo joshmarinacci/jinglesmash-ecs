@@ -4,6 +4,7 @@ import {Block, PhysicsFloor} from './physics.js'
 import {ThreeScene} from './three.js'
 import {Mesh, MeshLambertMaterial, PlaneGeometry, Vector3} from "./node_modules/three/build/three.module.js"
 import {pickOneValue} from './common.js'
+import {Globals} from './common.js'
 
 
 export class LevelInfo {
@@ -23,6 +24,7 @@ export  class LevelLoaderSystem extends System {
     init() {
         return {
             queries: {
+                globals: {components: [Globals]},
                 three: { components: [ThreeScene], },
                 levels: {
                     components: [LevelInfo],
@@ -39,6 +41,8 @@ export  class LevelLoaderSystem extends System {
             const info = ent.getMutableComponent(LevelInfo)
             this.loadStructure(info).then(()=>{
                 console.log("LevelLoader: fully loaded", info.name)
+                const globals = this.queries.globals[0].getMutableComponent(Globals)
+                globals.levelLoading = false
             })
         })
     }

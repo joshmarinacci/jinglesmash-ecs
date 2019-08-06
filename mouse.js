@@ -103,9 +103,13 @@ export class MouseInputSystem extends System {
                     const globals = this.queries.globals[0].getMutableComponent(Globals)
                     globals.balls += -1
                     const ball = this.world.createEntity()
+                    const delta = new Vector3()
+                    delta.copy(mouse.mouseSphere.position)
+                    delta.sub(three.camera.position)
+                    delta.multiplyScalar(6)
                     ball.addComponent(PhysicsBall, {
                         initialPosition: mouse.mouseSphere.position.clone(),
-                        initialVelocity: new Vector3(0, 3, -4),
+                        initialVelocity: delta,
                         radius: 0.25,
                     })
 
