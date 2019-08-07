@@ -74,7 +74,7 @@ export class ParticlesSystem extends System {
         this.events.three.added.forEach(ent => {
             const three = ent.getMutableComponent(ThreeScene)
             if (!three.scene) return
-            three.scene.add(this.psystem)
+            three.stage.add(this.psystem)
         })
 
         this.events.groups.added.forEach(ent => {

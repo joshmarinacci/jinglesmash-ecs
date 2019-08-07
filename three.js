@@ -26,6 +26,7 @@ export class ThreeScene {
         this.scene = null
         this.camera = null
         this.renderer = null
+        this.stage = null
     }
 }
 export class ThreeSystem extends System {
@@ -91,8 +92,6 @@ export class ThreeSystem extends System {
         document.body.appendChild( container );
         app.scene = new Scene();
         app.camera = new PerspectiveCamera( 70, window.innerWidth / window.innerHeight, 0.1, 100 );
-        app.camera.position.z = 5
-        app.camera.position.y = 1.5
         app.renderer = new WebGLRenderer( { antialias: true } );
         app.renderer.setPixelRatio( window.devicePixelRatio );
         app.renderer.setSize( window.innerWidth, window.innerHeight );
@@ -121,6 +120,10 @@ export class ThreeSystem extends System {
         DefaultLoadingManager.onError = (url) => {
             console.log(`error loading ${url}`)
         }
+
+        app.stage = new Group()
+        app.scene.add(app.stage)
+        app.stage.position.z = -4
     }
 
     setupTransitionSphere(sp, sc) {
@@ -128,8 +131,6 @@ export class ThreeSystem extends System {
             new SphereGeometry(2),
             new MeshLambertMaterial({color:'red', side: BackSide, transparent:true, opacity:1.0})
         )
-        sp.obj.position.z = 5
-        sp.obj.position.y = 1.5
         sc.scene.add(sp.obj)
     }
 }

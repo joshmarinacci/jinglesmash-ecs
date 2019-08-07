@@ -134,6 +134,7 @@ function setupGui(core) {
             core.vrmanager.enterVR()
         } else {
             console.log("starting without VR")
+            $("#overlay").style.visibility = 'hidden'
         }
     })
 

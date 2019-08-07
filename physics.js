@@ -183,7 +183,7 @@ export class PhysicsSystem extends System {
             this.queries.balls.slice().forEach(ent => {
                 const ball = ent.getMutableComponent(PhysicsBall)
                 const sc = this.queries.three[0].getComponent(ThreeScene)
-                sc.scene.remove(ball.obj)
+                sc.stage.remove(ball.obj)
                 this.cannonWorld.removeBody(ball.body)
                 ent.removeComponent(PhysicsBall)
             })
@@ -193,7 +193,7 @@ export class PhysicsSystem extends System {
             this.queries.blocks.slice().forEach(ent => {
                 const block = ent.getMutableComponent(Block)
                 const sc = this.queries.three[0].getComponent(ThreeScene)
-                sc.scene.remove(block.obj)
+                sc.stage.remove(block.obj)
                 this.cannonWorld.removeBody(block.body)
                 ent.removeComponent(Block)
             })
@@ -204,7 +204,7 @@ export class PhysicsSystem extends System {
             const block = ent.getMutableComponent(Block)
             block.rebuildPhysics()
             block.obj.material = this.materials[block.physicsType]
-            sc.scene.add(block.obj)
+            sc.stage.add(block.obj)
             this.cannonWorld.addBody(block.body)
             block.obj.scale.set(0.01,0.01,0.01)
             ent.addComponent(Anim,{prop:'scale',from:0.01,to:1.0,duration:0.5, lerp:'elastic', delay:0.2*i})
@@ -230,7 +230,7 @@ export class PhysicsSystem extends System {
             const block = ent.getMutableComponent(Block)
             block.syncBack()
             if(block.toBeRemoved) {
-                sc.scene.remove(block.obj)
+                sc.stage.remove(block.obj)
                 this.cannonWorld.removeBody(block.body)
                 ent.removeComponent(Block)
             }
@@ -252,7 +252,7 @@ export class PhysicsSystem extends System {
             floorObj.receiveShadow = true
             floorObj.rotation.x = toRad(-90)
             const sc = this.queries.three[0].getComponent(ThreeScene)
-            sc.scene.add(floorObj)
+            sc.stage.add(floorObj)
             floor.obj = floorObj
             floor.body = new CANNON.Body({
                 mass: 0 // mass == 0 makes the body static
@@ -279,7 +279,7 @@ export class PhysicsSystem extends System {
                 floorObj.quaternion.setFromAxisAngle(new Vector3(axis[0],axis[1],axis[2]),angle);
                 floorObj.position.set(pos[0],pos[1],pos[2])
                 const sc = this.queries.three[0].getComponent(ThreeScene)
-                sc.scene.add(floorObj)
+                sc.stage.add(floorObj)
                 return floorBody
             }
 
@@ -312,7 +312,7 @@ export class PhysicsSystem extends System {
             const dir = ball.initialVelocity
 
             const sc = this.queries.three[0].getComponent(ThreeScene)
-            sc.scene.add(ball.obj)
+            sc.stage.add(ball.obj)
 
             ball.body = new CANNON.Body({
                 mass: level.ballMass,

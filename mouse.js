@@ -71,7 +71,7 @@ export class MouseInputSystem extends System {
                 new SphereGeometry(2),
                 new MeshLambertMaterial({color:'blue', side:DoubleSide, transparent:true, opacity:0.0})
             )
-            inputSphere.position.set(0,1.5,5)
+            inputSphere.position.copy(three.camera.position)
             three.scene.add(inputSphere)
 
             three.renderer.domElement.addEventListener('mousemove',(e)=>{
@@ -104,11 +104,13 @@ export class MouseInputSystem extends System {
                     globals.balls += -1
                     const ball = this.world.createEntity()
                     const delta = new Vector3()
-                    delta.copy(mouse.mouseSphere.position)
-                    delta.sub(three.camera.position)
-                    delta.multiplyScalar(6)
+                    delta.copy(mouse.mouseSphere.getWorldPosition())
+                    delta.sub(three.camera.getWorldPosition())
+                    delta.multiplyScalar(10)
+                    const pos = mouse.mouseSphere.getWorldPosition()
+                    three.stage.worldToLocal(pos)
                     ball.addComponent(PhysicsBall, {
-                        initialPosition: mouse.mouseSphere.position.clone(),
+                        initialPosition: pos,
                         initialVelocity: delta,
                     })
 
