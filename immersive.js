@@ -8,9 +8,12 @@ import {
     LineBasicMaterial,
     Mesh,
     MeshLambertMaterial,
+    CylinderGeometry, MeshStandardMaterial, RepeatWrapping, TextureLoader,
     NormalBlending
 } from "./node_modules/three/build/three.module.js"
 import {WaitForClick} from './mouse.js'
+import {toRad} from './common'
+
 
 
 function printError(err) {
@@ -124,7 +127,13 @@ export class VRManager {
 }
 
 
-export class VRController {}
+export class VRController {
+    constructor() {
+        this.vrcontroller = null
+        this.slingshot = null
+    }
+
+}
 export class ImmersiveInputSystem extends System {
     init() {
         return {
@@ -166,6 +175,9 @@ export class ImmersiveInputSystem extends System {
             controller.vrcontroller.addEventListener('selectstart', this.controllerSelectStart.bind(this));
             controller.vrcontroller.addEventListener('selectend', this.controllerSelectEnd.bind(this));
             controller.vrcontroller.add(this.makeLaser())
+
+            controller.slingshot = this.makeSlingshot()
+            controller.vrcontroller.add(controller.slingshot)
             three.scene.add(controller.vrcontroller)
         })
     }
@@ -198,5 +210,26 @@ export class ImmersiveInputSystem extends System {
         })
 
         return new Line(geometry, material)
+    }
+
+    makeSlingshot() {
+        const geo = new CylinderGeometry(0.05,0.05,1.0,16)
+        geo.rotateX(toRad(90))
+        const tex = new TextureLoader().load('./textures/candycane.png')
+        tex.wrapS = RepeatWrapping
+        tex.wrapT = RepeatWrapping
+        tex.repeat.set(1,10)
+
+        const launcher = new Mesh(
+            geo,
+            new MeshStandardMaterial({
+                color:'white',
+                metalness:0.3,
+                roughness:0.3,
+                map:tex
+            })
+        )
+        launcher.position.z = -0.5
+        return launcher
     }
 }
