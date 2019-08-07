@@ -160,34 +160,14 @@ export class ImmersiveInputSystem extends System {
         })
 
         this.events.controllers.added.forEach(ent => {
-            console.log('setting up a controller')
             const three = this.queries.three[0].getComponent(ThreeScene)
             const controller = ent.getMutableComponent(VRController)
             controller.vrcontroller = three.renderer.vr.getController(controller.index)
             controller.vrcontroller.addEventListener('selectstart', this.controllerSelectStart.bind(this));
             controller.vrcontroller.addEventListener('selectend', this.controllerSelectEnd.bind(this));
             controller.vrcontroller.add(this.makeLaser())
-
-            controller.vrcontroller.add(new Mesh(
-                new BoxGeometry(0.5,0.5,0.5),
-                new MeshLambertMaterial({color:'green'})
-                ))
+            three.scene.add(controller.vrcontroller)
         })
-/*
-        this.queries.controllers.forEach(ent => {
-            const c = ent.getMutableComponent(VRController)
-            if(!c.vrcontroller.visible) {
-                console.log("hidden")
-                return
-            }
-            if(!controller.visible) return
-            const dir = new THREE.Vector3(0, 0, -1)
-            dir.applyQuaternion(c.quaternion)
-            this.raycaster.set(c.position, dir)
-            this._processMove()
-
-        })*/
-
     }
     controllerSelectEnd(evt) {
         console.log("selected")
