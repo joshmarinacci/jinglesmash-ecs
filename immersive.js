@@ -1,19 +1,21 @@
 import {System} from "./node_modules/ecsy/build/ecsy.module.js"
 import {ThreeScene} from './three.js'
 import {
-    BoxGeometry,
+    Vector3,
     BufferGeometry,
     Float32BufferAttribute,
     Line,
     LineBasicMaterial,
     Mesh,
-    MeshLambertMaterial,
-    CylinderGeometry, MeshStandardMaterial, RepeatWrapping, TextureLoader,
+    CylinderGeometry,
+    MeshStandardMaterial,
+    RepeatWrapping,
+    TextureLoader,
     NormalBlending
 } from "./node_modules/three/build/three.module.js"
 import {WaitForClick} from './mouse.js'
-import {toRad} from './common'
-
+import {Globals, toRad} from './common.js'
+import {PhysicsBall} from './physics.js'
 
 
 function printError(err) {
@@ -155,6 +157,9 @@ export class ImmersiveInputSystem extends System {
                 waits: {
                     components: [WaitForClick]
                 },
+                globals: {
+                    components: [Globals]
+                }
             }
         }
     }
@@ -173,7 +178,18 @@ export class ImmersiveInputSystem extends System {
             const controller = ent.getMutableComponent(VRController)
             controller.vrcontroller = three.renderer.vr.getController(controller.index)
             controller.vrcontroller.addEventListener('selectstart', this.controllerSelectStart.bind(this));
-            controller.vrcontroller.addEventListener('selectend', this.controllerSelectEnd.bind(this));
+            controller.vrcontroller.addEventListener('selectend', (evt)=>{
+                if(this.queries.waits.length>0) {
+                    //see if we should block right now
+                    this.queries.waits.forEach(ent => {
+                        const waiter = ent.getMutableComponent(WaitForClick)
+                        if (waiter.callback) waiter.callback()
+                        ent.removeComponent(WaitForClick)
+                    })
+                } else {
+                    this.controllerSelectEnd(ent)
+                }
+            });
             controller.vrcontroller.add(this.makeLaser())
 
             controller.slingshot = this.makeSlingshot()
@@ -181,16 +197,27 @@ export class ImmersiveInputSystem extends System {
             three.scene.add(controller.vrcontroller)
         })
     }
-    controllerSelectEnd(evt) {
-        console.log("selected")
-        if(this.queries.waits.length>0) {
-            //see if we should block right now
-            this.queries.waits.forEach(ent => {
-                const waiter = ent.getMutableComponent(WaitForClick)
-                if (waiter.callback) waiter.callback()
-                ent.removeComponent(WaitForClick)
-            })
-        }
+    controllerSelectEnd(ent) {
+        const three = this.queries.three[0].getComponent(ThreeScene)
+        const globals = this.queries.globals[0].getMutableComponent(Globals)
+        globals.balls += -1
+
+        const ball = this.world.createEntity()
+        const endPoint = new Vector3(0,0,-1)
+        const conn = ent.getComponent(VRController)
+        conn.vrcontroller.localToWorld(endPoint)
+        three.stage.worldToLocal(endPoint)
+        const dirPoint = new Vector3(0,0,-1)
+        dirPoint.applyQuaternion(conn.vrcontroller.quaternion)
+        dirPoint.normalize()
+        dirPoint.multiplyScalar(10)
+
+        ball.addComponent(PhysicsBall, {
+            initialPosition: endPoint,
+            initialVelocity: dirPoint,
+        })
+
+
     }
 
     controllerSelectStart(evt) {
