@@ -23,6 +23,7 @@ export class Anim {
         this.delay = 0.0
         this.duration = 1.0
         this.prop = 'foo'
+        this.onDone = null
     }
     copy({
          prop='foo',
@@ -30,7 +31,8 @@ export class Anim {
          from=0,
          to=1.0,
          duration=1.0,
-         delay=0.0
+         delay=0.0,
+         onDone=null
       }) {
         this.prop = prop
         this.lerp = lerp
@@ -38,6 +40,7 @@ export class Anim {
         this.to = to
         this.duration = duration
         this.delay = delay
+        this.onDone = onDone
     }
 }
 
@@ -87,6 +90,7 @@ export class AnimationSystem extends System {
 
             const t = soFar/anim.duration
             if(t > 1.0) {
+                if(anim.onDone) anim.onDone()
                 ent.removeComponent(Anim)
             } else {
                 const nv = lerp(anim, anim.from, anim.to, t)

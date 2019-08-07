@@ -5,6 +5,7 @@ import {Block, PhysicsBall} from './physics.js'
 import {Anim, WaitForTime} from './animation.js'
 import {WaitForClick} from './mouse.js'
 import {LevelInfo, loadStructure} from './levels.js'
+import {TransitionSphere} from './three'
 
 
 export class GameLogic extends System {
@@ -59,6 +60,7 @@ export class GameLogic extends System {
         globals.physicsActive = false
         globals.collisionsActive = false
         globals.playing = false
+        globals.transition.getComponent(TransitionSphere).obj.visible = true
         globals.transition.addComponent(Anim, {prop: 'opacity', from: 0.0, to: 1.0, duration: 0.5})
         globals.instructions.getMutableComponent(SimpleText).obj.visible = true
         globals.instructions.getMutableComponent(SimpleText).setText("try again")
@@ -73,6 +75,7 @@ export class GameLogic extends System {
         globals.collisionsActive = false
         globals.playing = false
         globals.balls = 3
+        globals.transition.getComponent(TransitionSphere).obj.visible = true
         globals.transition.addComponent(Anim, {prop: 'opacity', from: 0.0, to: 1.0, duration: 0.5})
         globals.instructions.getMutableComponent(SimpleText).obj.visible = true
         globals.instructions.getMutableComponent(SimpleText).setText("You won.\nNext Level")
@@ -89,6 +92,7 @@ export class GameLogic extends System {
         const globals = this.queries.globals[0].getMutableComponent(Globals)
         globals.playing = false
         globals.balls = 3
+        globals.transition.getComponent(TransitionSphere).obj.visible = true
         globals.transition.addComponent(Anim, {prop: 'opacity', from: 0.0, to: 1.0, duration: 0.5})
         globals.instructions.getMutableComponent(SimpleText).obj.visible = true
         globals.instructions.getMutableComponent(SimpleText).setText("You won the game")
@@ -110,7 +114,9 @@ export class GameLogic extends System {
         globals.playing = true
         globals.removeBalls = true
         globals.removeBlocks = true
-        globals.transition.addComponent(Anim, {prop: 'opacity', from: 1.0, to: 0.0, duration: 0.5})
+        globals.transition.addComponent(Anim, {prop: 'opacity', from: 1.0, to: 0.0, duration: 0.5, onDone:()=>{
+                globals.transition.getComponent(TransitionSphere).obj.visible = false
+            }})
         globals.instructions.getMutableComponent(SimpleText).obj.visible = false
         this.doWait(0.5,()=>{
             loadStructure(Consts.LEVEL_NAMES[globals.levelIndex],this.world).then(()=>{

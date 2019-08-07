@@ -207,7 +207,7 @@ export class PhysicsSystem extends System {
             sc.stage.add(block.obj)
             this.cannonWorld.addBody(block.body)
             block.obj.scale.set(0.01,0.01,0.01)
-            ent.addComponent(Anim,{prop:'scale',from:0.01,to:1.0,duration:0.5, lerp:'elastic', delay:0.2*i})
+            ent.addComponent(Anim,{prop:'scale',from:0.01,to:1.0,duration:0.6, lerp:'elastic', delay:0.05*i})
 
             block.body.addEventListener('collide',(e)=>{
                 const globals = this.queries.globals[0].getMutableComponent(Globals)

@@ -161,7 +161,7 @@ function setupGame() {
 
     world.registerSystem(ThreeSystem)
     world.registerSystem(ImmersiveInputSystem)
-    world.registerSystem(AudioSystem)
+    // world.registerSystem(AudioSystem)
     world.registerSystem(PhysicsSystem)
     world.registerSystem(MouseInputSystem)
     world.registerSystem(ParticlesSystem)
@@ -225,7 +225,9 @@ function setupGame() {
             const globals = game.getMutableComponent(Globals)
             globals.balls = 3
             globals.playing = true
-            globals.transition.addComponent(Anim,{prop:'opacity',from:1.0,to:0.0,duration:1.5, delay:0.0})
+            globals.transition.addComponent(Anim,{prop:'opacity',from:1.0,to:0.0,duration:1.5, delay:0.0, onDone:()=>{
+                globals.transition.getComponent(TransitionSphere).obj.visible = false
+                }})
             globals.instructions.getMutableComponent(SimpleText).obj.visible = false
             world.createEntity().addComponent(WaitForTime,{duration:0.1, callback:()=>{
                     console.log("doing physics")
