@@ -14,20 +14,17 @@ import {
     Vector3
 } from "./node_modules/three/build/three.module.js"
 import {World} from "./node_modules/ecsy/build/ecsy.module.js"
-import {Globals} from './common.js'
+import {$, Consts, Globals} from './common.js'
 import {AudioSystem, SoundEffect} from './audio.js'
 import {SimpleText, SkyBox, ThreeGroup, ThreeScene, ThreeSystem, TransitionSphere} from './three.js'
-import {LevelInfo} from './levels.js'
+import {loadStructure} from './levels.js'
 import {PhysicsSystem} from './physics.js'
 import {MouseInputSystem, WaitForClick} from "./mouse.js"
 import {ParticlesGroup, ParticlesSystem} from './particles.js'
-import {AnimationSystem, Anim} from './animation.js'
+import {Anim, AnimationSystem, WaitForTime} from './animation.js'
 import {GameLogic} from './logic.js'
-import {PhysicsBall} from './physics.js'
-import {Consts} from './common.js'
-import {WaitForTime} from './animation.js'
-import {$} from './common.js'
-import {loadStructure} from './levels.js'
+import {VR_DETECTED, VRManager} from './immersive.js'
+import {VR_PRESENTCHANGE} from './immersive'
 
 
 const $$ = (sel) => document.querySelectorAll(sel)
@@ -128,30 +125,30 @@ function setupAudio(world) {
 }
 
 
-function setupGui() {
+function setupGui(core) {
     let detected = false
     on($("#enter-button"),'click',(e)=> {
         e.preventDefault()
         e.stopPropagation()
-        //hide the overlay
-        $("#overlay").style.visibility = 'hidden'
-        //if vr,
         if(detected) {
-            // pointer = new Pointer(scene,renderer,camera, pointer_opts)
-            // vrmanager.enterVR()
+            core.vrmanager.enterVR()
         } else {
-            // pointer_opts.mouseSimulatesController = true
-            // pointer = new Pointer(scene,renderer,camera, pointer_opts)
+            console.log("starting without VR")
         }
-        // pointer.controller1.userData.skipRaycast = true
-        // initFireball()
-        // pointer.waitSceneClick(()=>startLevel())
     })
 
-    // on(vrmanager,VR_DETECTED,()=>{
-    //     detected = true
-    //     $("#enter-button").innerText = "enter vr"
-    // })
+    core.vrmanager = new VRManager(core.renderer)
+    on(core.vrmanager,VR_DETECTED,()=>{
+        detected = true
+        $("#enter-button").innerText = "enter vr"
+    })
+    on(core.vrmanager,VR_PRESENTCHANGE,(e)=>{
+        if(e.isPresenting) {
+            $("#overlay").style.visibility = 'hidden'
+        } else {
+            $("#overlay").style.visibility = 'visible'
+        }
+    })
     $("#enter-button").disabled = false
 
 }
@@ -160,7 +157,7 @@ function setupGame() {
     world = new World();
 
     world.registerSystem(ThreeSystem)
-    world.registerSystem(AudioSystem)
+    // world.registerSystem(AudioSystem)
     world.registerSystem(PhysicsSystem)
     world.registerSystem(MouseInputSystem)
     world.registerSystem(ParticlesSystem)
@@ -192,7 +189,7 @@ function setupGame() {
     setupLights()
     setupBackground()
     setupAudio(world)
-    setupGui()
+    setupGui(core)
 
 
     loadStructure(Consts.LEVEL_NAMES[globals.levelIndex],world).then(()=>{

@@ -1,7 +1,6 @@
 import {System} from "./node_modules/ecsy/build/ecsy.module.js"
 import {SimpleText, TransitionSphere} from './three.js'
 import {Block} from './physics.js'
-import {Consts} from './common'
 
 export const LERP_TYPES = {
     LINEAR:'linear',
@@ -19,7 +18,6 @@ function easeLinear(from,to,t) {
 
 export class Anim {
     constructor() {
-        COUNTER++
         this.startTime = null
         this.lerp = "linear"
         this.delay = 0.0

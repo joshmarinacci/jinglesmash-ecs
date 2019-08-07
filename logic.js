@@ -1,30 +1,10 @@
-import {
-    BoxGeometry,
-    CanvasTexture,
-    CylinderGeometry,
-    Geometry,
-    LatheBufferGeometry,
-    Mesh,
-    MeshLambertMaterial,
-    MeshPhongMaterial,
-    MeshStandardMaterial,
-    RepeatWrapping,
-    SphereGeometry,
-    Vector2,
-    Vector3
-} from "./node_modules/three/build/three.module.js"
 import {System} from "./node_modules/ecsy/build/ecsy.module.js"
-import {Consts, pickOneValue} from './common.js'
-import {SimpleText, ThreeScene} from './three.js'
-import {ParticlesGroup} from './particles.js'
-import {Globals} from './common.js'
-import {Block} from './physics.js'
-import {Anim} from './animation.js'
+import {Consts, Globals} from './common.js'
+import {SimpleText} from './three.js'
+import {Block, PhysicsBall} from './physics.js'
+import {Anim, WaitForTime} from './animation.js'
 import {WaitForClick} from './mouse.js'
-import {PhysicsBall} from './physics.js'
-import {LevelInfo} from './levels.js'
-import {WaitForTime} from './animation.js'
-import {loadStructure} from './levels.js'
+import {LevelInfo, loadStructure} from './levels.js'
 
 
 export class GameLogic extends System {

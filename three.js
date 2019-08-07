@@ -97,11 +97,8 @@ export class ThreeSystem extends System {
         app.renderer.setPixelRatio( window.devicePixelRatio );
         app.renderer.setSize( window.innerWidth, window.innerHeight );
         app.renderer.gammaOutput = true
-        // app.renderer.vr.enabled = true;
+        app.renderer.vr.enabled = true;
         container.appendChild( app.renderer.domElement );
-        // this.vrmanager = new VRManager(renderer)
-
-        // initContent(scene,camera,renderer)
 
         window.addEventListener( 'resize', ()=>{
             app.camera.aspect = window.innerWidth / window.innerHeight;
