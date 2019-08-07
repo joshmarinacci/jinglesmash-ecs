@@ -14,7 +14,7 @@ import {
     Vector3
 } from "./node_modules/three/build/three.module.js"
 import {World} from "./node_modules/ecsy/build/ecsy.module.js"
-import {$, Consts, Globals} from './common.js'
+import {$, Consts, Globals, on} from './common.js'
 import {AudioSystem, SoundEffect} from './audio.js'
 import {SimpleText, SkyBox, ThreeGroup, ThreeScene, ThreeSystem, TransitionSphere} from './three.js'
 import {loadStructure} from './levels.js'
@@ -25,10 +25,6 @@ import {Anim, AnimationSystem, WaitForTime} from './animation.js'
 import {GameLogic} from './logic.js'
 import {ImmersiveInputSystem, VR_DETECTED, VR_PRESENTCHANGE, VRController, VRManager} from './immersive.js'
 
-
-const $$ = (sel) => document.querySelectorAll(sel)
-const on = (elem, type, cb) => elem.addEventListener(type,cb)
-const rand = (min,max) => Math.random()*(max-min) + min
 
 let game
 let world
