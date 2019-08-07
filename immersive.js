@@ -202,7 +202,7 @@ export class ImmersiveInputSystem extends System {
         const dirPoint = new Vector3(0,0,-1)
         dirPoint.applyQuaternion(conn.vrcontroller.quaternion)
         dirPoint.normalize()
-        dirPoint.multiplyScalar(10)
+        dirPoint.multiplyScalar(20)
 
         ball.addComponent(PhysicsBall, {
             initialPosition: endPoint,

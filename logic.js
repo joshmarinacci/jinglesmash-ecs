@@ -114,6 +114,7 @@ export class GameLogic extends System {
         globals.playing = true
         globals.removeBalls = true
         globals.removeBlocks = true
+        globals.removeFloors = true
         globals.transition.addComponent(Anim, {prop: 'opacity', from: 1.0, to: 0.0, duration: 0.5, onDone:()=>{
                 globals.transition.getComponent(TransitionSphere).obj.visible = false
             }})

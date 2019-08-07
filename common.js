@@ -3,6 +3,7 @@ export class Globals {
         this.playing = false
         this.balls = -1
         this.removeBalls = false
+        this.removeFloors = false
         this.nextLevel = false
         this.levelIndex = 0
         this.physicsActive = false

@@ -177,6 +177,7 @@ export class PhysicsSystem extends System {
         }
     }
     execute(delta) {
+        // console.log(this.cannonWorld.bodies.length)
         const globals = this.queries.globals[0].getMutableComponent(Globals)
         if(globals.removeBalls) {
             globals.removeBalls = false
@@ -191,11 +192,21 @@ export class PhysicsSystem extends System {
         if(globals.removeBlocks) {
             globals.removeBlocks = false
             this.queries.blocks.slice().forEach(ent => {
-                const block = ent.getMutableComponent(Block)
+                const comp = ent.getMutableComponent(Block)
                 const sc = this.queries.three[0].getComponent(ThreeScene)
-                sc.stage.remove(block.obj)
-                this.cannonWorld.removeBody(block.body)
+                sc.stage.remove(comp.obj)
+                this.cannonWorld.removeBody(comp.body)
                 ent.removeComponent(Block)
+            })
+        }
+        if(globals.removeFloors) {
+            globals.removeFloors = false
+            this.queries.floors.slice().forEach(ent => {
+                const comp = ent.getMutableComponent(PhysicsFloor)
+                const sc = this.queries.three[0].getComponent(ThreeScene)
+                sc.stage.remove(comp.obj)
+                this.cannonWorld.removeBody(comp.body)
+                ent.removeComponent(PhysicsFloor)
             })
         }
 
