@@ -19,11 +19,11 @@ import {AudioSystem, SoundEffect} from './audio.js'
 import {SimpleText, SkyBox, ThreeGroup, ThreeScene, ThreeSystem, TransitionSphere} from './three.js'
 import {loadStructure} from './levels.js'
 import {PhysicsSystem} from './physics.js'
-import {MouseInputSystem, WaitForClick} from "./mouse.js"
+import {MouseInputSystem, MouseState, WaitForClick} from "./mouse.js"
 import {ParticlesGroup, ParticlesSystem} from './particles.js'
 import {Anim, AnimationSystem, WaitForTime} from './animation.js'
 import {GameLogic} from './logic.js'
-import {ImmersiveInputSystem, VR_DETECTED, VR_PRESENTCHANGE, VRManager} from './immersive.js'
+import {ImmersiveInputSystem, VR_DETECTED, VR_PRESENTCHANGE, VRController, VRManager} from './immersive.js'
 
 
 const $$ = (sel) => document.querySelectorAll(sel)
@@ -131,9 +131,14 @@ function setupGui(core) {
         e.stopPropagation()
         if(detected) {
             core.vrmanager.enterVR()
+            //hook up the VR controllers
+            world.createEntity().addComponent(VRController,{index:0})
+            world.createEntity().addComponent(VRController,{index:1})
         } else {
             console.log("starting without VR")
             $("#overlay").style.visibility = 'hidden'
+            //hook up the mouse state component
+            game.addComponent(MouseState)
         }
     })
 

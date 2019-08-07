@@ -14,7 +14,7 @@ import {Globals} from './common.js'
 import {PlaySoundEffect} from './audio.js'
 
 
-class MouseState {
+export class MouseState {
     constructor() {
         this.position = new Vector3()
         this.mouseSphere = new Mesh(
@@ -56,12 +56,6 @@ export class MouseInputSystem extends System {
     execute(delta) {
         if(this.queries.globals.length < 1) return
         const globals = this.queries.globals[0].getComponent(Globals)
-        //hook up the mouse state component
-        this.events.three.added.forEach(ent => {
-            const three = ent.getMutableComponent(ThreeScene)
-            if (!three.scene) return
-            ent.addComponent(MouseState)
-        })
         //hook up the mouse events
         this.events.mouse.added.forEach(ent => {
             const three = this.queries.three[0].getMutableComponent(ThreeScene)

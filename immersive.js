@@ -165,14 +165,6 @@ export class ImmersiveInputSystem extends System {
     }
 
     execute(delta) {
-        this.events.three.added.forEach(ent => {
-            console.log("connected to THREE")
-            const three = ent.getMutableComponent(ThreeScene)
-            console.log('three has controllers',three.renderer.vr)
-            this.world.createEntity().addComponent(VRController,{index:0})
-            this.world.createEntity().addComponent(VRController,{index:1})
-        })
-
         this.events.controllers.added.forEach(ent => {
             const three = this.queries.three[0].getComponent(ThreeScene)
             const controller = ent.getMutableComponent(VRController)
