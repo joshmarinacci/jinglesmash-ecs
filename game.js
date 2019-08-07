@@ -144,8 +144,10 @@ function setupGui(core) {
     })
     on(core.vrmanager,VR_PRESENTCHANGE,(e)=>{
         if(e.isPresenting) {
+            game.getMutableComponent(Globals).immersive = true
             $("#overlay").style.visibility = 'hidden'
         } else {
+            game.getMutableComponent(Globals).immersive = false
             $("#overlay").style.visibility = 'visible'
         }
     })

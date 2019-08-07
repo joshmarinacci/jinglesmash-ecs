@@ -54,6 +54,8 @@ export class MouseInputSystem extends System {
         }
     }
     execute(delta) {
+        if(this.queries.globals.length < 1) return
+        const globals = this.queries.globals[0].getComponent(Globals)
         //hook up the mouse state component
         this.events.three.added.forEach(ent => {
             const three = ent.getMutableComponent(ThreeScene)
@@ -122,6 +124,10 @@ export class MouseInputSystem extends System {
         //update the mouse indicator
         this.queries.mouse.forEach(ent => {
             const mouse = ent.getMutableComponent(MouseState)
+            if(globals.immersive === true) {
+                mouse.mouseSphere.visible = false
+            }
+
             const mat = mouse.mouseSphere.material
             if(mouse.pressed) {
                 mat.opacity = Math.max(mat.opacity - 0.01,0.0)

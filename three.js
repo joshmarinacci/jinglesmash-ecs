@@ -123,7 +123,7 @@ export class ThreeSystem extends System {
 
         app.stage = new Group()
         app.scene.add(app.stage)
-        app.stage.position.z = -4
+        app.stage.position.z = -5
     }
 
     setupTransitionSphere(sp, sc) {
