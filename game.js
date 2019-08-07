@@ -23,8 +23,7 @@ import {MouseInputSystem, WaitForClick} from "./mouse.js"
 import {ParticlesGroup, ParticlesSystem} from './particles.js'
 import {Anim, AnimationSystem, WaitForTime} from './animation.js'
 import {GameLogic} from './logic.js'
-import {VR_DETECTED, VRManager} from './immersive.js'
-import {VR_PRESENTCHANGE} from './immersive'
+import {ImmersiveInputSystem, VR_DETECTED, VR_PRESENTCHANGE, VRManager} from './immersive.js'
 
 
 const $$ = (sel) => document.querySelectorAll(sel)
@@ -158,7 +157,8 @@ function setupGame() {
     world = new World();
 
     world.registerSystem(ThreeSystem)
-    // world.registerSystem(AudioSystem)
+    world.registerSystem(ImmersiveInputSystem)
+    world.registerSystem(AudioSystem)
     world.registerSystem(PhysicsSystem)
     world.registerSystem(MouseInputSystem)
     world.registerSystem(ParticlesSystem)
@@ -213,7 +213,7 @@ function setupGame() {
         fontHeight:50,
     })
     const ins = globals.instructions.getMutableComponent(SimpleText)
-    ins.obj.position.z = 4.0
+    ins.obj.position.z = -1.5
     ins.obj.position.y = 1.5
 
     const click1 = world.createEntity()

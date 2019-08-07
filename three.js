@@ -128,7 +128,7 @@ export class ThreeSystem extends System {
 
     setupTransitionSphere(sp, sc) {
         sp.obj = new Mesh(
-            new SphereGeometry(2),
+            new SphereGeometry(4),
             new MeshLambertMaterial({color:'red', side: BackSide, transparent:true, opacity:1.0})
         )
         sc.scene.add(sp.obj)
