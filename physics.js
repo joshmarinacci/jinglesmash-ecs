@@ -309,6 +309,7 @@ export class PhysicsSystem extends System {
 
         this.events.balls.added.forEach(ent => {
             const level = this.queries.levels[0].getComponent(LevelInfo)
+            globals.timeOfLastShot = performance.now()
 
             const ball = ent.getMutableComponent(PhysicsBall)
             ball.tex = pickOneValue(this.textures)

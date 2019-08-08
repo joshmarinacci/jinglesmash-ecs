@@ -22,16 +22,19 @@ export class GameLogic extends System {
 
     execute(delta) {
         const globals = this.queries.globals[0].getMutableComponent(Globals)
+        const time = performance.now()
+        const waited5 = (time - globals.timeOfLastShot > 3000)
+
         if (globals.playing && globals.physicsActive && globals.collisionsActive) {
             const crystals = this.queries.blocks.filter(ent => {
                 return ent.getComponent(Block).physicsType === Consts.BLOCK_TYPES.CRYSTAL
             })
-            if (crystals.length <= 0) {
+            if (crystals.length <= 0 && waited5) {
                 return this.winLevel()
             } else {
                 // console.log('still playing')
             }
-            if (globals.balls < 0) {
+            if (globals.balls <= 0 && waited5) {
                 return this.loseLevel()
             }
         }

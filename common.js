@@ -9,6 +9,7 @@ export class Globals {
         this.physicsActive = false
         this.collisionsActive = false
         this.immersive = false
+        this.timeOfLastShot = 0
     }
 }
 
