@@ -5,7 +5,7 @@ import {Block, PhysicsBall} from './physics.js'
 import {Anim, WaitForTime} from './animation.js'
 import {WaitForClick} from './mouse.js'
 import {LevelInfo, loadStructure} from './levels.js'
-import {TransitionSphere} from './three'
+import {TransitionSphere} from './three.js'
 
 
 export class GameLogic extends System {

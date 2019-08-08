@@ -22,7 +22,7 @@ import {ParticlesGroup} from './particles.js'
 import {Globals} from './common.js'
 import {LevelInfo} from './levels.js'
 import {Anim} from './animation.js'
-import {toRad} from './common'
+import {toRad} from './common.js'
 
 
 const wallMaterial = new CANNON.Material()

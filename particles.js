@@ -2,7 +2,7 @@ import {System} from "./node_modules/ecsy/build/ecsy.module.js"
 import {GPUParticleSystem} from './gpu_particles.js'
 import {AdditiveBlending, Color, TextureLoader, Vector3, NormalBlending} from "./node_modules/three/build/three.module.js"
 import {remap} from './common.js'
-import {ThreeScene} from './three'
+import {ThreeScene} from './three.js'
 
 
 export class ParticlesGroup {
