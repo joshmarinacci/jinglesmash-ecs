@@ -24,6 +24,7 @@ import {ParticlesGroup, ParticlesSystem} from './particles.js'
 import {Anim, AnimationSystem, WaitForTime} from './animation.js'
 import {GameLogic} from './logic.js'
 import {ImmersiveInputSystem, VR_DETECTED, VR_PRESENTCHANGE, VRController, VRManager} from './immersive.js'
+import {VRStats} from './three.js'
 
 
 let game
@@ -173,6 +174,7 @@ function setupGame() {
     game = world.createEntity()
     game.addComponent(Globals)
     game.addComponent(ThreeScene)
+    game.addComponent(VRStats)
 
     const globals = game.getMutableComponent(Globals)
     globals.transition = world.createEntity()

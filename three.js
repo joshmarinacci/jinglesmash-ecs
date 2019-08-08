@@ -54,6 +54,13 @@ export class ThreeSystem extends System {
                         removed: {event:'EntityRemoved'}
                     }
                 },
+                stats: {
+                    components: [VRStats],
+                    events: {
+                        added: {event:'EntityAdded'},
+                        removed: {event:'EntityRemoved'}
+                    }
+                },
                 texts: {
                     components: [SimpleText],
                     events: {
@@ -82,6 +89,9 @@ export class ThreeSystem extends System {
             const st = ent.getMutableComponent(SimpleText)
             sc.scene.add(st.obj)
         })
+
+        this.events.stats.added.forEach(ent => this.setupVRStats(ent.getMutableComponent(VRStats),sc))
+        this.queries.stats.forEach(ent => this.redrawVRStats(ent.getMutableComponent(VRStats),sc))
     }
 
     initScene(ent) {
@@ -132,6 +142,51 @@ export class ThreeSystem extends System {
             new MeshLambertMaterial({color:'red', side: BackSide, transparent:true, opacity:1.0})
         )
         sc.scene.add(sp.obj)
+    }
+
+
+    setupVRStats(stats,sc) {
+        stats.canvas = document.createElement('canvas')
+        stats.width = 256
+        stats.height = 128
+        stats.canvas.width = stats.width
+        stats.canvas.height = stats.height
+        stats.lastDraw = 0
+        stats.ctex = new CanvasTexture(stats.canvas)
+        stats.obj = new Mesh(
+            new PlaneGeometry(1,0.5),
+            new MeshBasicMaterial({map:stats.ctex})
+        )
+        stats.obj.position.z = -2
+        stats.obj.position.y = 2
+        stats.obj.position.x = -2
+        stats.obj.material.depthTest = false
+        stats.obj.material.depthWrite = false
+        sc.scene.add(stats.obj)
+        stats.obj.renderOrder = 1000
+        stats.customProps = {}
+    }
+
+    redrawVRStats(stats,sc) {
+        const time = performance.now()
+        if(time - stats.lastDraw > 1000) {
+            const fps = ((sc.renderer.info.render.frame - stats.lastFrame)*1000)/(time-stats.lastDraw)
+            const c = stats.canvas.getContext('2d')
+            c.fillStyle = 'white'
+            c.fillRect(0, 0, stats.canvas.width, stats.canvas.height)
+            c.fillStyle = 'black'
+            c.font = '16pt sans-serif'
+            c.fillText(`calls: ${sc.renderer.info.render.calls}`, 3, 20)
+            c.fillText(`tris : ${sc.renderer.info.render.triangles}`, 3, 40)
+            c.fillText(`fps : ${fps.toFixed(2)}`,3,60)
+            Object.keys(stats.customProps).forEach((key,i) => {
+                const val = stats.customProps[key]
+                c.fillText(`${key} : ${val}`,3,80+i*20)
+            })
+            stats.obj.material.map.needsUpdate = true
+            stats.lastDraw = performance.now()
+            stats.lastFrame = sc.renderer.info.render.frame
+        }
     }
 }
 
@@ -202,4 +257,10 @@ export class SimpleText {
         })
     }
 
+}
+
+
+export class VRStats {
+    constructor() {
+    }
 }
