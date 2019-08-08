@@ -88,13 +88,16 @@ export class AnimationSystem extends System {
             const soFar = performance.now()/1000 - anim.startTime - anim.delay
             if(soFar < 0) return
 
+            const obj = this.getComponentObject(ent)
+
             const t = soFar/anim.duration
             if(t > 1.0) {
+                const nv = lerp(anim, anim.from, anim.to, 1.0)
+                this.setObjectProperty(anim, obj, nv)
                 if(anim.onDone) anim.onDone()
                 ent.removeComponent(Anim)
             } else {
                 const nv = lerp(anim, anim.from, anim.to, t)
-                const obj = this.getComponentObject(ent)
                 this.setObjectProperty(anim, obj, nv)
             }
 

@@ -190,9 +190,11 @@ export class ImmersiveInputSystem extends System {
         })
     }
     controllerSelectEnd(ent) {
-        const three = this.queries.three[0].getComponent(ThreeScene)
         const globals = this.queries.globals[0].getMutableComponent(Globals)
+        if(globals.balls <= 0) return
         globals.balls += -1
+
+        const three = this.queries.three[0].getComponent(ThreeScene)
 
         const ball = this.world.createEntity()
         const endPoint = new Vector3(0,0,-1)

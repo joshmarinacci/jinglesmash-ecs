@@ -97,6 +97,7 @@ export class MouseInputSystem extends System {
                     })
                 } else {
                     const globals = this.queries.globals[0].getMutableComponent(Globals)
+                    if(globals.balls <= 0) return
                     globals.balls += -1
                     const ball = this.world.createEntity()
                     const delta = new Vector3()
