@@ -1,3 +1,8 @@
+import {
+    Vector3,
+    Quaternion,
+} from "./node_modules/three/build/three.module.js"
+
 export class Globals {
     constructor() {
         this.playing = false
@@ -81,4 +86,20 @@ export function pickOneValue(obj) {
 }
 export function pickOneKey(obj) {
     return pickOne(Object.keys(obj))
+}
+
+export class BaseBall {
+    constructor() {
+
+    }
+    copy({
+             radius=0.25,
+             position=new Vector3(0,0,0),
+             velocity=new Vector3(0,0,0)}) {
+        this.radius = radius
+        this.position = position
+        this.velocity = velocity
+        this.quaternion = new Quaternion()
+        console.log("ball created with radius",this.radius)
+    }
 }

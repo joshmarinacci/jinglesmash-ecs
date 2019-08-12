@@ -1,28 +1,19 @@
 import {
     BoxGeometry,
     CanvasTexture,
-    CylinderGeometry,
-    Geometry,
     DoubleSide,
-    LatheBufferGeometry,
     Mesh,
     MeshLambertMaterial,
-    MeshPhongMaterial,
     MeshStandardMaterial,
-    RepeatWrapping,
-    SphereGeometry,
     PlaneGeometry,
-    Vector2,
     Vector3
 } from "./node_modules/three/build/three.module.js"
 import {System} from "./node_modules/ecsy/build/ecsy.module.js"
-import {Consts, pickOneValue} from './common.js'
+import {BaseBall, Consts, Globals, toRad} from './common.js'
 import {ThreeScene} from './three.js'
 import {ParticlesGroup} from './particles.js'
-import {Globals} from './common.js'
 import {LevelInfo} from './levels.js'
 import {Anim} from './animation.js'
-import {toRad} from './common.js'
 
 
 const wallMaterial = new CANNON.Material()
@@ -30,14 +21,7 @@ const ballMaterial = new CANNON.Material()
 
 export class PhysicsBall {
     constructor() {
-        this.obj = null
         this.body = null
-        this.initialVelocity = new Vector3()
-        this.initialPosition = new Vector3()
-    }
-    syncBack() {
-        this.obj.position.copy(this.body.position)
-        this.obj.quaternion.copy(this.body.quaternion)
     }
 }
 
@@ -132,7 +116,6 @@ export class PhysicsSystem extends System {
 
 
         this.materials = generateBlockTextures()
-        this.textures = generateBallTextures()
 
         return {
             queries: {
@@ -160,7 +143,7 @@ export class PhysicsSystem extends System {
                     }
                 },
                 balls: {
-                    components:[PhysicsBall],
+                    components:[BaseBall,PhysicsBall],
                     events: {
                         added: {event:'EntityAdded'},
                         removed: {event:'EntityRemoved'}
@@ -312,23 +295,15 @@ export class PhysicsSystem extends System {
             globals.timeOfLastShot = performance.now()
 
             const ball = ent.getMutableComponent(PhysicsBall)
-            ball.tex = pickOneValue(this.textures)
-            ball.type = pickOneValue(Consts.BALL_TYPES)
-            ball.radius = level.ballRadius
-            generateBallMesh(ball)
+            const base = ent.getComponent(BaseBall)
 
-            ball.obj.castShadow = true
-            ball.obj.position.copy(ball.initialPosition)
+            const pos = base.position
+            const dir = base.velocity
 
-            const pos = ball.initialPosition
-            const dir = ball.initialVelocity
-
-            const sc = this.queries.three[0].getComponent(ThreeScene)
-            sc.stage.add(ball.obj)
 
             ball.body = new CANNON.Body({
                 mass: level.ballMass,
-                shape: new CANNON.Sphere(ball.radius),
+                shape: new CANNON.Sphere(base.radius),
                 position: new CANNON.Vec3(pos.x, pos.y, pos.z),
                 velocity: new CANNON.Vec3(dir.x,dir.y,dir.z),
                 material: ballMaterial,
@@ -343,7 +318,10 @@ export class PhysicsSystem extends System {
         })
 
         this.queries.balls.forEach(ent => {
-            ent.getMutableComponent(PhysicsBall).syncBack()
+            const phys = ent.getMutableComponent(PhysicsBall)
+            const base = ent.getMutableComponent(BaseBall)
+            base.position.copy(phys.body.position)
+            base.quaternion.copy(phys.body.quaternion)
         })
 
         this.events.levels.added.forEach(ent => {
@@ -364,97 +342,7 @@ export class PhysicsSystem extends System {
 }
 
 
-function generateBallTextures() {
-    const textures = {}
-    {
-        const canvas = document.createElement('canvas')
-        canvas.width = 64
-        canvas.height = 16
-        const c = canvas.getContext('2d')
 
-
-        c.fillStyle = 'black'
-        c.fillRect(0, 0, canvas.width, canvas.height)
-        c.fillStyle = 'red'
-        c.fillRect(0, 0, 30, canvas.height)
-        c.fillStyle = 'white'
-        c.fillRect(30, 0, 4, canvas.height)
-        c.fillStyle = 'green'
-        c.fillRect(34, 0, 30, canvas.height)
-
-        textures.ornament1 = new CanvasTexture(canvas)
-        textures.ornament1.wrapS = RepeatWrapping
-        textures.ornament1.repeat.set(8, 1)
-    }
-
-
-    {
-        const canvas = document.createElement('canvas')
-        canvas.width = 128
-        canvas.height = 128
-        const c = canvas.getContext('2d')
-        c.fillStyle = 'black'
-        c.fillRect(0,0,canvas.width, canvas.height)
-
-        c.fillStyle = 'red'
-        c.fillRect(0, 0, canvas.width, canvas.height/2)
-        c.fillStyle = 'white'
-        c.fillRect(0, canvas.height/2, canvas.width, canvas.height/2)
-
-        const tex = new CanvasTexture(canvas)
-        tex.wrapS = RepeatWrapping
-        tex.wrapT = RepeatWrapping
-        tex.repeat.set(6,6)
-        textures.ornament2 = tex
-    }
-
-    return textures
-
-}
-
-function generateBallMesh(ball) {
-    const rad = ball.radius
-    if(ball.type === Consts.BALL_TYPES.PLAIN) {
-        ball.obj = new Mesh(
-            new SphereGeometry(ball.radius,6,5),
-            new MeshPhongMaterial({color: Consts.BLOCK_COLORS.BALL, flatShading: true})
-        )
-        return
-    }
-
-    if(ball.type === Consts.BALL_TYPES.ORNAMENT1) {
-        let points = [];
-        for (let i = 0; i <= 16; i++) {
-            points.push(new Vector2(Math.sin(i * 0.195) * rad, i * rad / 7));
-        }
-        var geometry = new LatheBufferGeometry(points);
-        geometry.center()
-        ball.obj = new Mesh(geometry, new MeshStandardMaterial({
-            color: 'white',
-            metalness: 0.3,
-            roughness: 0.3,
-            map: ball.tex
-        }))
-        return
-    }
-
-    if(ball.type === Consts.BALL_TYPES.ORNAMENT2) {
-        const geo = new Geometry()
-        geo.merge(new SphereGeometry(rad,32))
-        const stem = new CylinderGeometry(rad/4,rad/4,0.5,8)
-        stem.translate(0,rad/4,0)
-        geo.merge(stem)
-        ball.obj = new Mesh(geo, new MeshStandardMaterial({
-            color: 'white',
-            metalness: 0.3,
-            roughness: 0.3,
-            map: ball.tex,
-        }))
-        return
-    }
-
-    throw new Error("unknown ball type",ball.type)
-}
 function generateBlockTextures() {
     const materials = {}
     const textures = {}

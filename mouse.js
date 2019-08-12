@@ -1,5 +1,5 @@
 import {System} from "./node_modules/ecsy/build/ecsy.module.js"
-import {ThreeScene} from './three.js'
+import {ThreeBall, ThreeScene} from './three.js'
 import {
     DoubleSide,
     Mesh,
@@ -9,9 +9,10 @@ import {
     Vector2,
     Vector3
 } from "./node_modules/three/build/three.module.js"
-import {PhysicsBall} from './physics.js'
-import {Globals} from './common.js'
+import {BaseBall, Globals} from './common.js'
 import {PlaySoundEffect} from './audio.js'
+import {PhysicsBall} from './physics.js'
+import {LevelInfo} from './levels.js'
 
 
 export class MouseState {
@@ -49,6 +50,9 @@ export class MouseInputSystem extends System {
                 },
                 globals: {
                     components: [Globals]
+                },
+                levels:{
+                    components:[LevelInfo],
                 }
             }
         }
@@ -106,11 +110,15 @@ export class MouseInputSystem extends System {
                     delta.multiplyScalar(10)
                     const pos = mouse.mouseSphere.getWorldPosition()
                     three.stage.worldToLocal(pos)
-                    ball.addComponent(PhysicsBall, {
-                        initialPosition: pos,
-                        initialVelocity: delta,
-                    })
+                    const level = this.queries.levels[0].getComponent(LevelInfo)
 
+                    ball.addComponent(BaseBall, {
+                        position: pos,
+                        velocity: delta,
+                        radius:level.ballRadius
+                    })
+                    ball.addComponent(ThreeBall)
+                    ball.addComponent(PhysicsBall)
                     globals.click.addComponent(PlaySoundEffect)
                 }
             })

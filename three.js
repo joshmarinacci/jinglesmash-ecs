@@ -1,20 +1,27 @@
 import {
     BackSide,
     CanvasTexture,
+    CylinderGeometry,
     DefaultLoadingManager,
+    Geometry,
     Group,
+    LatheBufferGeometry,
     Mesh,
     MeshBasicMaterial,
     MeshLambertMaterial,
+    MeshPhongMaterial,
+    MeshStandardMaterial,
     PerspectiveCamera,
     PlaneGeometry,
+    RepeatWrapping,
     Scene,
     SphereGeometry,
     TextureLoader,
+    Vector2,
     WebGLRenderer
 } from "./node_modules/three/build/three.module.js"
 import {System} from "./node_modules/ecsy/build/ecsy.module.js"
-import {$} from './common.js'
+import {$, BaseBall, Consts, pickOneValue} from './common.js'
 
 export class ThreeGroup {
     constructor() {
@@ -31,6 +38,8 @@ export class ThreeScene {
 }
 export class ThreeSystem extends System {
     init() {
+        this.textures = generateBallTextures()
+
         return {
             queries: {
                 three: {
@@ -67,6 +76,13 @@ export class ThreeSystem extends System {
                         added: {event:'EntityAdded'},
                         removed: {event:'EntityRemoved'}
                     }
+                },
+                balls: {
+                    components: [BaseBall, ThreeBall],
+                    events: {
+                        added: {event:'EntityAdded'},
+                        removed: {event:'EntityRemoved'}
+                    }
                 }
             }
         }
@@ -92,6 +108,9 @@ export class ThreeSystem extends System {
 
         this.events.stats.added.forEach(ent => this.setupVRStats(ent.getMutableComponent(VRStats),sc))
         this.queries.stats.forEach(ent => this.redrawVRStats(ent.getMutableComponent(VRStats),sc))
+
+        this.events.balls.added.forEach(ent => this.setupBall(ent))
+        this.queries.balls.forEach(ent => this.syncBall(ent))
     }
 
     initScene(ent) {
@@ -188,6 +207,25 @@ export class ThreeSystem extends System {
             stats.lastFrame = sc.renderer.info.render.frame
         }
     }
+
+    setupBall(ent) {
+        const base = ent.getComponent(BaseBall)
+        const thr = ent.getMutableComponent(ThreeBall)
+        thr.tex = pickOneValue(this.textures)
+        thr.type = pickOneValue(Consts.BALL_TYPES)
+        generateBallMesh(base,thr)
+        thr.obj.castShadow = true
+        thr.obj.position.copy(base.position)
+        const sc = this.queries.three[0].getComponent(ThreeScene)
+        sc.stage.add(thr.obj)
+    }
+
+    syncBall(ent) {
+        const thr = ent.getMutableComponent(ThreeBall)
+        const base = ent.getMutableComponent(BaseBall)
+        thr.obj.position.copy(base.position)
+        thr.obj.quaternion.copy(base.quaternion)
+    }
 }
 
 export class SkyBox {
@@ -263,4 +301,104 @@ export class SimpleText {
 export class VRStats {
     constructor() {
     }
+}
+
+export class ThreeBall {
+    constructor() {
+        this.obj = null
+        this.tex = null
+        this.type = null
+    }
+}
+
+function generateBallTextures() {
+    const textures = {}
+    {
+        const canvas = document.createElement('canvas')
+        canvas.width = 64
+        canvas.height = 16
+        const c = canvas.getContext('2d')
+
+
+        c.fillStyle = 'black'
+        c.fillRect(0, 0, canvas.width, canvas.height)
+        c.fillStyle = 'red'
+        c.fillRect(0, 0, 30, canvas.height)
+        c.fillStyle = 'white'
+        c.fillRect(30, 0, 4, canvas.height)
+        c.fillStyle = 'green'
+        c.fillRect(34, 0, 30, canvas.height)
+
+        textures.ornament1 = new CanvasTexture(canvas)
+        textures.ornament1.wrapS = RepeatWrapping
+        textures.ornament1.repeat.set(8, 1)
+    }
+
+
+    {
+        const canvas = document.createElement('canvas')
+        canvas.width = 128
+        canvas.height = 128
+        const c = canvas.getContext('2d')
+        c.fillStyle = 'black'
+        c.fillRect(0,0,canvas.width, canvas.height)
+
+        c.fillStyle = 'red'
+        c.fillRect(0, 0, canvas.width, canvas.height/2)
+        c.fillStyle = 'white'
+        c.fillRect(0, canvas.height/2, canvas.width, canvas.height/2)
+
+        const tex = new CanvasTexture(canvas)
+        tex.wrapS = RepeatWrapping
+        tex.wrapT = RepeatWrapping
+        tex.repeat.set(6,6)
+        textures.ornament2 = tex
+    }
+
+    return textures
+
+}
+function generateBallMesh(base,ball) {
+    const rad = base.radius
+
+    if(ball.type === Consts.BALL_TYPES.PLAIN) {
+        ball.obj = new Mesh(
+            new SphereGeometry(rad,6,5),
+            new MeshPhongMaterial({color: Consts.BLOCK_COLORS.BALL, flatShading: true})
+        )
+        return
+    }
+
+    if(ball.type === Consts.BALL_TYPES.ORNAMENT1) {
+        let points = [];
+        for (let i = 0; i <= 16; i++) {
+            points.push(new Vector2(Math.sin(i * 0.195) * rad, i * rad / 7));
+        }
+        var geometry = new LatheBufferGeometry(points);
+        geometry.center()
+        ball.obj = new Mesh(geometry, new MeshStandardMaterial({
+            color: 'white',
+            metalness: 0.3,
+            roughness: 0.3,
+            map: ball.tex
+        }))
+        return
+    }
+
+    if(ball.type === Consts.BALL_TYPES.ORNAMENT2) {
+        const geo = new Geometry()
+        geo.merge(new SphereGeometry(rad,32))
+        const stem = new CylinderGeometry(rad/4,rad/4,0.5,8)
+        stem.translate(0,rad/4,0)
+        geo.merge(stem)
+        ball.obj = new Mesh(geo, new MeshStandardMaterial({
+            color: 'white',
+            metalness: 0.3,
+            roughness: 0.3,
+            map: ball.tex,
+        }))
+        return
+    }
+
+    throw new Error("unknown ball type",ball.type)
 }
