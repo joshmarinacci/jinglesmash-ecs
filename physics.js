@@ -1,19 +1,9 @@
-import {
-    BoxGeometry,
-    CanvasTexture,
-    DoubleSide,
-    Mesh,
-    MeshLambertMaterial,
-    MeshStandardMaterial,
-    PlaneGeometry,
-    Vector3
-} from "./node_modules/three/build/three.module.js"
+import {DoubleSide, Mesh, MeshLambertMaterial, PlaneGeometry, Vector3} from "./node_modules/three/build/three.module.js"
 import {System} from "./node_modules/ecsy/build/ecsy.module.js"
-import {BaseBall, Consts, Globals, toRad} from './common.js'
+import {BaseBall, BaseBlock, Consts, Globals, toRad} from './common.js'
 import {ThreeScene} from './three.js'
 import {ParticlesGroup} from './particles.js'
 import {LevelInfo} from './levels.js'
-import {Anim} from './animation.js'
 
 
 const wallMaterial = new CANNON.Material()
@@ -28,80 +18,11 @@ export class PhysicsBall {
 export class PhysicsFloor {
 }
 export class PhysicsCubeRoom {
-
 }
 
-export class Block {
+export class PhysicsBlock {
     constructor() {
-        this.position = new Vector3(0,0,0)
-        this.rotation = new Vector3(0,0,0)
-        this.width = 1
-        this.height = 2
-        this.depth = 1
-        this.obj = new Mesh(
-            new BoxGeometry(this.width,this.height,this.depth),
-            new MeshLambertMaterial({color:'green'})
-        )
-        this.obj.castShadow = true
-        this.obj.userData.block = this
-        this.physicsType = Consts.BLOCK_TYPES.BLOCK
         this.body = null
-        this.toBeRemoved = false
-    }
-    copy(src) {
-        this.rebuildGeometry()
-        // this.rebuildMaterial()
-        this.toBeRemoved = false
-    }
-
-    syncBack() {
-        this.obj.position.copy(this.body.position)
-        this.obj.quaternion.copy(this.body.quaternion)
-    }
-
-    set(name, value) {
-        if(name === 'width' || name === 'height' || name === 'depth') {
-            this[name] = value
-            this.rebuildGeometry()
-            return
-        }
-        if(name === 'position') {
-            this.position.copy(value)
-            this.obj.position.copy(value)
-            return
-        }
-        if(name === 'rotation') {
-            this.rotation.copy(value)
-            this.obj.rotation.setFromVector3(value)
-            return
-        }
-        if(name === 'physicstype') return this.physicsType = value
-        throw new Error(`unknown property to set ${name}`)
-    }
-
-
-    rebuildGeometry() {
-        this.obj.geometry = new BoxGeometry(this.width,this.height,this.depth)
-    }
-
-    rebuildPhysics() {
-        let type = CANNON.Body.DYNAMIC
-        if(this.physicsType === Consts.BLOCK_TYPES.WALL) type = CANNON.Body.KINEMATIC
-        this.body = new CANNON.Body({
-            mass: 1,//kg
-            type: type,
-            position: new CANNON.Vec3(this.position.x,this.position.y,this.position.z),
-            shape: new CANNON.Box(new CANNON.Vec3(this.width/2,this.height/2,this.depth/2)),
-            material: wallMaterial,
-        })
-        this.body.quaternion.setFromEuler(this.rotation.x,this.rotation.y,this.rotation.z,'XYZ')
-    }
-
-    rebuildMaterial() {
-        let color = 'red'
-        if(this.physicsType === Consts.BLOCK_TYPES.CRYSTAL) color = 'aqua'
-        if(this.physicsType === Consts.BLOCK_TYPES.WALL) color = 'blue'
-        this.obj.material = new MeshLambertMaterial({color:color})
     }
 }
 
@@ -115,14 +36,13 @@ export class PhysicsSystem extends System {
 
 
 
-        this.materials = generateBlockTextures()
 
         return {
             queries: {
                 three: { components: [ThreeScene], },
                 globals: {components:[Globals]},
                 blocks: {
-                    components:[Block],
+                    components:[BaseBlock,PhysicsBlock],
                     events: {
                         added: { event: 'EntityAdded'},
                         removed: { event: 'EntityRemoved'}
@@ -162,16 +82,6 @@ export class PhysicsSystem extends System {
     execute(delta) {
         // console.log(this.cannonWorld.bodies.length)
         const globals = this.queries.globals[0].getMutableComponent(Globals)
-        if(globals.removeBlocks) {
-            globals.removeBlocks = false
-            this.queries.blocks.slice().forEach(ent => {
-                const comp = ent.getMutableComponent(Block)
-                const sc = this.queries.three[0].getComponent(ThreeScene)
-                sc.stage.remove(comp.obj)
-                this.cannonWorld.removeBody(comp.body)
-                ent.removeComponent(Block)
-            })
-        }
         if(globals.removeFloors) {
             globals.removeFloors = false
             this.queries.floors.slice().forEach(ent => {
@@ -185,24 +95,28 @@ export class PhysicsSystem extends System {
 
         const sc = this.queries.three[0].getMutableComponent(ThreeScene)
         this.events.blocks.added.forEach((ent,i) => {
-            const block = ent.getMutableComponent(Block)
-            block.rebuildPhysics()
-            block.obj.material = this.materials[block.physicsType]
-            sc.stage.add(block.obj)
-            this.cannonWorld.addBody(block.body)
-            block.obj.scale.set(0.01,0.01,0.01)
-            ent.addComponent(Anim,{prop:'scale',from:0.01,to:1.0,duration:0.6, lerp:'elastic', delay:0.05*i})
+            const base = ent.getComponent(BaseBlock)
+            const phys = ent.getMutableComponent(PhysicsBlock)
+            let type = CANNON.Body.DYNAMIC
+            if(base.physicsType === Consts.BLOCK_TYPES.WALL) type = CANNON.Body.KINEMATIC
+            phys.body = new CANNON.Body({
+                mass: 1,//kg
+                type: type,
+                position: new CANNON.Vec3(base.position.x,base.position.y,base.position.z),
+                shape: new CANNON.Box(new CANNON.Vec3(base.width/2,base.height/2,base.depth/2)),
+                material: wallMaterial,
+            })
+            phys.body.quaternion.setFromEuler(base.rotation.x,base.rotation.y,base.rotation.z,'XYZ')
 
-            block.body.addEventListener('collide',(e)=>{
+            this.cannonWorld.addBody(phys.body)
+            phys.body.addEventListener('collide',(e)=>{
                 const globals = this.queries.globals[0].getMutableComponent(Globals)
                 if(!globals.collisionsActive) return
                 if(Math.abs(e.contact.getImpactVelocityAlongNormal() < 1.0)) return
-                if((e.target === block.body && block.physicsType === Consts.BLOCK_TYPES.CRYSTAL) ||
-                    (e.body === block.body && block.physicsType === Consts.BLOCK_TYPES.CRYSTAL)) {
+                if((e.target === phys.body && base.physicsType === Consts.BLOCK_TYPES.CRYSTAL) ||
+                    (e.body === phys.body && base.physicsType === Consts.BLOCK_TYPES.CRYSTAL)) {
                     if(Math.abs(e.contact.getImpactVelocityAlongNormal() >= 1.5)) {
-                        if(ent.hasComponent(Block)) {
-                            ent.getMutableComponent(Block).toBeRemoved = true
-                        }
+                        ent.removeComponent(BaseBlock)
                     }
                 }
             })
@@ -211,21 +125,17 @@ export class PhysicsSystem extends System {
         if(globals.physicsActive) this.cannonWorld.step(fixedTimeStep, delta, maxSubSteps)
 
         this.queries.blocks.forEach(ent => {
-            const block = ent.getMutableComponent(Block)
-            block.syncBack()
-            if(block.toBeRemoved) {
-                sc.stage.remove(block.obj)
-                this.cannonWorld.removeBody(block.body)
-                ent.removeComponent(Block)
-            }
+            const phys = ent.getMutableComponent(PhysicsBlock)
+            const base = ent.getMutableComponent(BaseBlock)
+            base.position.copy(phys.body.position)
+            base.quaternion.copy(phys.body.quaternion)
         })
 
-        //remove events seem useless because the component is already removed so I can't
-        //do anything with it.
-        // console.log(this.events.blocks.removed.length)
-        // this.events.blocks.removed.forEach(ent => {
-        //     const block = ent.getMutableComponent(Block)
-        // })
+        this.events.blocks.removed.forEach(ent => {
+            const phys = ent.getMutableComponent(PhysicsBlock)
+            this.cannonWorld.removeBody(phys.body)
+            ent.removeComponent(PhysicsBall)
+        })
 
         this.events.floors.added.forEach(ent => {
             const floor = ent.getMutableComponent(PhysicsFloor)
@@ -339,110 +249,3 @@ export class PhysicsSystem extends System {
 
 
 
-function generateBlockTextures() {
-    const materials = {}
-    const textures = {}
-    {
-        const canvas = document.createElement('canvas')
-        canvas.width = 128
-        canvas.height = 128
-        const c = canvas.getContext('2d')
-
-        //white background
-        c.fillStyle = 'white'
-        c.fillRect(0,0,canvas.width, canvas.height)
-
-
-        //lower left for the sides
-        c.save()
-        c.translate(0,canvas.height/2)
-        c.fillStyle = 'red'
-        c.fillRect(canvas.width/8*1.5, 0, canvas.width/8, canvas.height/2)
-        c.restore()
-
-        //upper left for the bottom and top
-        c.save()
-        c.translate(0,0)
-        c.fillStyle = 'red'
-        c.fillRect(canvas.width/8*1.5, 0, canvas.width/8, canvas.height/2)
-        c.fillStyle = 'red'
-        c.fillRect(0,canvas.height/8*1.5, canvas.width/2, canvas.height/8)
-        c.restore()
-
-        c.fillStyle = 'black'
-        // c.fillRect(0,canvas.height/2,canvas.width,1)
-        // c.fillRect(canvas.width/2,0,1,canvas.height)
-
-        const tex = new CanvasTexture(canvas)
-        textures.present1 = tex
-
-        materials[Consts.BLOCK_TYPES.BLOCK] = new MeshStandardMaterial({
-            color: 'white',
-            metalness: 0.0,
-            roughness: 1.0,
-            // wireframe: true,
-            map:textures.present1,
-        })
-    }
-
-    {
-        const canvas = document.createElement('canvas')
-        canvas.width = 128
-        canvas.height = 128
-        const c = canvas.getContext('2d')
-
-        //white background
-        c.fillStyle = 'white'
-        c.fillRect(0,0,canvas.width, canvas.height)
-        for(let x=0; x<canvas.width; x++) {
-            for(let y =0; y<canvas.height; y++) {
-                let p = Math.random()*255
-                p = Math.max(p,200)
-                // if(p < 128) p = 128
-                c.fillStyle = `rgb(${0.5},${p},${p})`
-                c.fillRect(x,y,1,1)
-            }
-        }
-
-        const tex = new CanvasTexture(canvas)
-        materials[Consts.BLOCK_TYPES.WALL] = new MeshLambertMaterial({
-            color:'white',
-            map:tex
-        })
-    }
-
-    {
-        const canvas = document.createElement('canvas')
-        canvas.width = 128
-        canvas.height = 128
-        const c = canvas.getContext('2d')
-
-        //white background
-        c.fillStyle = '#55aaff'
-        c.fillRect(0,0,canvas.width, canvas.height)
-        c.fillStyle = 'white'
-        const w = 128
-        const h = 128
-        c.fillRect(0,0,3,h)
-        c.fillRect(w-4,0,3,h)
-        c.fillRect(0,0,w,3)
-        c.fillRect(0,h-3,w,3)
-        c.fillRect(w/2-1,0,3,h)
-        c.fillRect(0, h/2-1,w,3)
-
-        const tex = new CanvasTexture(canvas)
-        materials[Consts.BLOCK_TYPES.CRYSTAL] = new MeshStandardMaterial({
-            color: 'white',
-            metalness: 0.0,
-            roughness: 1.0,
-            // wireframe: true,
-            map:tex,
-        })
-    }
-
-
-    // this.materials[BLOCK_TYPES.CRYSTAL] = new MeshLambertMaterial({color:'aqua'})
-    materials[Consts.BLOCK_TYPES.FLOOR] = new MeshLambertMaterial({color:'gray'})
-    // this.materials[BLOCK_TYPES.WALL] = new MeshLambertMaterial({color:'red'})
-    return materials
-}

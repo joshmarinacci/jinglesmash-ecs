@@ -1,6 +1,5 @@
 import {System} from "./node_modules/ecsy/build/ecsy.module.js"
-import {SimpleText, TransitionSphere} from './three.js'
-import {Block} from './physics.js'
+import {SimpleText, ThreeBlock, TransitionSphere} from './three.js'
 
 export const LERP_TYPES = {
     LINEAR:'linear',
@@ -122,7 +121,7 @@ export class AnimationSystem extends System {
     getComponentObject(ent) {
         if(ent.hasComponent(TransitionSphere)) return ent.getMutableComponent(TransitionSphere).obj
         if(ent.hasComponent(SimpleText)) return ent.getMutableComponent(SimpleText).obj
-        if(ent.hasComponent(Block)) return ent.getMutableComponent(Block).obj
+        if(ent.hasComponent(ThreeBlock)) return ent.getMutableComponent(ThreeBlock).obj
         console.error(`id ${ent.id} has`)
         Object.keys(ent._components).forEach(c => console.log('comp:',c))
         console.error(ent)

@@ -1,7 +1,4 @@
-import {
-    Vector3,
-    Quaternion,
-} from "./node_modules/three/build/three.module.js"
+import {Quaternion, Vector3} from "./node_modules/three/build/three.module.js"
 
 export class Globals {
     constructor() {
@@ -90,16 +87,45 @@ export function pickOneKey(obj) {
 
 export class BaseBall {
     constructor() {
-
+        this.radius = 0.25
+        this.position = new Vector3()
+        this.velocity = new Vector3()
+        this.quaternion = new Quaternion()
     }
     copy({
              radius=0.25,
              position=new Vector3(0,0,0),
              velocity=new Vector3(0,0,0)}) {
         this.radius = radius
-        this.position = position
-        this.velocity = velocity
+        this.position.copy(position)
+        this.velocity.copy(velocity)
+    }
+}
+
+export class BaseBlock {
+    constructor() {
+        this.width = 1
+        this.height = 1
+        this.depth = 1
+        this.position = new Vector3()
         this.quaternion = new Quaternion()
-        console.log("ball created with radius",this.radius)
+        this.rotation = new Vector3()
+        this.physicsType = Consts.BLOCK_TYPES.BLOCK
+    }
+    set(name, value) {
+        if(name === 'width' || name === 'height' || name === 'depth') {
+            this[name] = value
+            return
+        }
+        if(name === 'position') {
+            this.position.copy(value)
+            return
+        }
+        if(name === 'rotation') {
+            this.rotation.copy(value)
+            return
+        }
+        if(name === 'physicstype') return this.physicsType = value
+        throw new Error(`unknown property to set ${name}`)
     }
 }

@@ -1,11 +1,7 @@
-import {System} from "./node_modules/ecsy/build/ecsy.module.js"
-import {Consts, toRad} from './common.js'
-import {Block, PhysicsFloor} from './physics.js'
-import {ThreeScene} from './three.js'
-import {Mesh, MeshLambertMaterial, PlaneGeometry, Vector3} from "./node_modules/three/build/three.module.js"
-import {pickOneValue} from './common.js'
-import {Globals} from './common.js'
-import {PhysicsCubeRoom} from './physics.js'
+import {BaseBlock, Consts, pickOneValue} from './common.js'
+import {PhysicsBlock, PhysicsCubeRoom, PhysicsFloor} from './physics.js'
+import {Vector3} from "./node_modules/three/build/three.module.js"
+import {ThreeBlock} from './three.js'
 
 
 export class LevelInfo {
@@ -38,8 +34,8 @@ function  loadFromJSON(doc,world) {
     level.blocks = []
     const newBlocks = doc.data.blocks.map(b => {
         const block = world.createEntity()
-        block.addComponent(Block)
-        const b2 = block.getMutableComponent(Block)
+        block.addComponent(BaseBlock)
+        const b2 = block.getMutableComponent(BaseBlock)
         b2.set('position',b.position)
         b2.set('width',b.size.width)
         b2.set('height',b.size.height)
@@ -48,7 +44,8 @@ function  loadFromJSON(doc,world) {
         if(b.physicstype === "fixed") b.physicstype = Consts.BLOCK_TYPES.BLOCK
         if(b.physicstype === "dynamic") b.physicstype = Consts.BLOCK_TYPES.BLOCK
         b2.set('physicstype',b.physicstype)
-        b2.rebuildMaterial()
+        block.addComponent(PhysicsBlock)
+        block.addComponent(ThreeBlock)
         return block
     })
 

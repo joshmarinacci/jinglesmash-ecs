@@ -1,11 +1,9 @@
 import {System} from "./node_modules/ecsy/build/ecsy.module.js"
-import {Consts, Globals, BaseBall} from './common.js'
-import {SimpleText} from './three.js'
-import {Block, PhysicsBall} from './physics.js'
+import {BaseBall, BaseBlock, Consts, Globals} from './common.js'
+import {SimpleText, TransitionSphere} from './three.js'
 import {Anim, WaitForTime} from './animation.js'
 import {WaitForClick} from './mouse.js'
 import {LevelInfo, loadStructure} from './levels.js'
-import {TransitionSphere} from './three.js'
 
 
 export class GameLogic extends System {
@@ -13,7 +11,7 @@ export class GameLogic extends System {
         return {
             queries: {
                 globals: {components: [Globals]},
-                blocks: {components: [Block]},
+                blocks: {components: [BaseBlock]},
                 balls: {components: [BaseBall]},
                 levels: {components: [LevelInfo]}
             }
@@ -27,7 +25,7 @@ export class GameLogic extends System {
 
         if (globals.playing && globals.physicsActive && globals.collisionsActive) {
             const crystals = this.queries.blocks.filter(ent => {
-                return ent.getComponent(Block).physicsType === Consts.BLOCK_TYPES.CRYSTAL
+                return ent.getComponent(BaseBlock).physicsType === Consts.BLOCK_TYPES.CRYSTAL
             })
             if (crystals.length <= 0 && waited5) {
                 return this.winLevel()
@@ -114,9 +112,9 @@ export class GameLogic extends System {
 
     resetLevelSettings(globals) {
         this.queries.balls.slice().forEach(ent => ent.removeComponent(BaseBall))
+        this.queries.blocks.slice().forEach(ent => ent.removeComponent(BaseBlock))
         globals.balls = 3
         globals.playing = true
-        globals.removeBlocks = true
         globals.removeFloors = true
         globals.transition.addComponent(Anim, {prop: 'opacity', from: 1.0, to: 0.0, duration: 0.5, onDone:()=>{
                 globals.transition.getComponent(TransitionSphere).obj.visible = false

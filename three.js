@@ -1,5 +1,6 @@
 import {
     BackSide,
+    BoxGeometry,
     CanvasTexture,
     CylinderGeometry,
     DefaultLoadingManager,
@@ -21,7 +22,8 @@ import {
     WebGLRenderer
 } from "./node_modules/three/build/three.module.js"
 import {System} from "./node_modules/ecsy/build/ecsy.module.js"
-import {$, BaseBall, Consts, pickOneValue} from './common.js'
+import {$, BaseBall, BaseBlock, Consts, pickOneValue} from './common.js'
+import {Anim} from './animation.js'
 
 export class ThreeGroup {
     constructor() {
@@ -39,6 +41,7 @@ export class ThreeScene {
 export class ThreeSystem extends System {
     init() {
         this.textures = generateBallTextures()
+        this.materials = generateBlockTextures()
 
         return {
             queries: {
@@ -83,6 +86,13 @@ export class ThreeSystem extends System {
                         added: {event:'EntityAdded'},
                         removed: {event:'EntityRemoved'}
                     }
+                },
+                blocks: {
+                    components: [BaseBlock, ThreeBlock],
+                    events: {
+                        added: {event:'EntityAdded'},
+                        removed: {event:'EntityRemoved'}
+                    }
                 }
             }
         }
@@ -112,6 +122,15 @@ export class ThreeSystem extends System {
         this.events.balls.added.forEach(ent => this.setupBall(ent))
         this.queries.balls.forEach(ent => this.syncBall(ent))
         this.events.balls.removed.forEach(ent => this.removeBall(ent))
+
+        this.events.blocks.added.forEach((ent,i) => {
+            this.setupBlock(ent)
+            //bounce it in
+            ent.getComponent(ThreeBlock).obj.scale.set(0.01,0.01,0.01)
+            ent.addComponent(Anim,{prop:'scale',from:0.01,to:1.0,duration:0.6, lerp:'elastic', delay:0.05*i})
+        })
+        this.queries.blocks.forEach(ent => this.syncBlock(ent))
+        this.events.blocks.removed.forEach(ent => this.removeBlock(ent))
     }
 
     initScene(ent) {
@@ -234,6 +253,36 @@ export class ThreeSystem extends System {
         sc.stage.remove(thr.obj)
         ent.removeComponent(ThreeBall)
     }
+
+    setupBlock(ent) {
+        const base = ent.getComponent(BaseBlock)
+        const thr = ent.getMutableComponent(ThreeBlock)
+        const mat = this.materials[base.physicsType]
+        thr.obj = new Mesh(
+            new BoxGeometry(base.width,base.height,base.depth),
+            mat
+        )
+        thr.obj.castShadow = true
+        thr.obj.position.copy(base.position)
+        thr.obj.rotation.copy(base.rotation)
+        base.quaternion.copy(thr.obj.quaternion)
+        const sc = this.queries.three[0].getComponent(ThreeScene)
+        sc.stage.add(thr.obj)
+    }
+
+    syncBlock(ent) {
+        const thr = ent.getMutableComponent(ThreeBlock)
+        const base = ent.getMutableComponent(BaseBlock)
+        thr.obj.position.copy(base.position)
+        thr.obj.quaternion.copy(base.quaternion)
+    }
+
+    removeBlock(ent) {
+        const thr = ent.getMutableComponent(ThreeBlock)
+        const sc = this.queries.three[0].getComponent(ThreeScene)
+        sc.stage.remove(thr.obj)
+        ent.removeComponent(ThreeBlock)
+    }
 }
 
 export class SkyBox {
@@ -319,6 +368,13 @@ export class ThreeBall {
     }
 }
 
+export class ThreeBlock {
+    constructor() {
+        this.obj = null
+        this.tex = null
+        this.type = null
+    }
+}
 function generateBallTextures() {
     const textures = {}
     {
@@ -409,4 +465,111 @@ function generateBallMesh(base,ball) {
     }
 
     throw new Error("unknown ball type",ball.type)
+}
+function generateBlockTextures() {
+    const materials = {}
+    const textures = {}
+    {
+        const canvas = document.createElement('canvas')
+        canvas.width = 128
+        canvas.height = 128
+        const c = canvas.getContext('2d')
+
+        //white background
+        c.fillStyle = 'white'
+        c.fillRect(0,0,canvas.width, canvas.height)
+
+
+        //lower left for the sides
+        c.save()
+        c.translate(0,canvas.height/2)
+        c.fillStyle = 'red'
+        c.fillRect(canvas.width/8*1.5, 0, canvas.width/8, canvas.height/2)
+        c.restore()
+
+        //upper left for the bottom and top
+        c.save()
+        c.translate(0,0)
+        c.fillStyle = 'red'
+        c.fillRect(canvas.width/8*1.5, 0, canvas.width/8, canvas.height/2)
+        c.fillStyle = 'red'
+        c.fillRect(0,canvas.height/8*1.5, canvas.width/2, canvas.height/8)
+        c.restore()
+
+        c.fillStyle = 'black'
+        // c.fillRect(0,canvas.height/2,canvas.width,1)
+        // c.fillRect(canvas.width/2,0,1,canvas.height)
+
+        const tex = new CanvasTexture(canvas)
+        textures.present1 = tex
+
+        materials[Consts.BLOCK_TYPES.BLOCK] = new MeshStandardMaterial({
+            color: 'white',
+            metalness: 0.0,
+            roughness: 1.0,
+            // wireframe: true,
+            map:textures.present1,
+        })
+    }
+
+    {
+        const canvas = document.createElement('canvas')
+        canvas.width = 128
+        canvas.height = 128
+        const c = canvas.getContext('2d')
+
+        //white background
+        c.fillStyle = 'white'
+        c.fillRect(0,0,canvas.width, canvas.height)
+        for(let x=0; x<canvas.width; x++) {
+            for(let y =0; y<canvas.height; y++) {
+                let p = Math.random()*255
+                p = Math.max(p,200)
+                // if(p < 128) p = 128
+                c.fillStyle = `rgb(${0.5},${p},${p})`
+                c.fillRect(x,y,1,1)
+            }
+        }
+
+        const tex = new CanvasTexture(canvas)
+        materials[Consts.BLOCK_TYPES.WALL] = new MeshLambertMaterial({
+            color:'white',
+            map:tex
+        })
+    }
+
+    {
+        const canvas = document.createElement('canvas')
+        canvas.width = 128
+        canvas.height = 128
+        const c = canvas.getContext('2d')
+
+        //white background
+        c.fillStyle = '#55aaff'
+        c.fillRect(0,0,canvas.width, canvas.height)
+        c.fillStyle = 'white'
+        const w = 128
+        const h = 128
+        c.fillRect(0,0,3,h)
+        c.fillRect(w-4,0,3,h)
+        c.fillRect(0,0,w,3)
+        c.fillRect(0,h-3,w,3)
+        c.fillRect(w/2-1,0,3,h)
+        c.fillRect(0, h/2-1,w,3)
+
+        const tex = new CanvasTexture(canvas)
+        materials[Consts.BLOCK_TYPES.CRYSTAL] = new MeshStandardMaterial({
+            color: 'white',
+            metalness: 0.0,
+            roughness: 1.0,
+            // wireframe: true,
+            map:tex,
+        })
+    }
+
+
+    // this.materials[BLOCK_TYPES.CRYSTAL] = new MeshLambertMaterial({color:'aqua'})
+    materials[Consts.BLOCK_TYPES.FLOOR] = new MeshLambertMaterial({color:'gray'})
+    // this.materials[BLOCK_TYPES.WALL] = new MeshLambertMaterial({color:'red'})
+    return materials
 }
