@@ -1,5 +1,5 @@
 import {System} from "./node_modules/ecsy/build/ecsy.module.js"
-import {Consts, Globals} from './common.js'
+import {Consts, Globals, BaseBall} from './common.js'
 import {SimpleText} from './three.js'
 import {Block, PhysicsBall} from './physics.js'
 import {Anim, WaitForTime} from './animation.js'
@@ -14,7 +14,7 @@ export class GameLogic extends System {
             queries: {
                 globals: {components: [Globals]},
                 blocks: {components: [Block]},
-                balls: {components: [PhysicsBall]},
+                balls: {components: [BaseBall]},
                 levels: {components: [LevelInfo]}
             }
         }
@@ -113,9 +113,9 @@ export class GameLogic extends System {
     }
 
     resetLevelSettings(globals) {
+        this.queries.balls.slice().forEach(ent => ent.removeComponent(BaseBall))
         globals.balls = 3
         globals.playing = true
-        globals.removeBalls = true
         globals.removeBlocks = true
         globals.removeFloors = true
         globals.transition.addComponent(Anim, {prop: 'opacity', from: 1.0, to: 0.0, duration: 0.5, onDone:()=>{

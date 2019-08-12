@@ -162,16 +162,6 @@ export class PhysicsSystem extends System {
     execute(delta) {
         // console.log(this.cannonWorld.bodies.length)
         const globals = this.queries.globals[0].getMutableComponent(Globals)
-        if(globals.removeBalls) {
-            globals.removeBalls = false
-            this.queries.balls.slice().forEach(ent => {
-                const ball = ent.getMutableComponent(PhysicsBall)
-                const sc = this.queries.three[0].getComponent(ThreeScene)
-                sc.stage.remove(ball.obj)
-                this.cannonWorld.removeBody(ball.body)
-                ent.removeComponent(PhysicsBall)
-            })
-        }
         if(globals.removeBlocks) {
             globals.removeBlocks = false
             this.queries.blocks.slice().forEach(ent => {
@@ -322,6 +312,12 @@ export class PhysicsSystem extends System {
             const base = ent.getMutableComponent(BaseBall)
             base.position.copy(phys.body.position)
             base.quaternion.copy(phys.body.quaternion)
+        })
+
+        this.events.balls.removed.forEach(ent => {
+            const phys = ent.getMutableComponent(PhysicsBall)
+            this.cannonWorld.removeBody(phys.body)
+            ent.removeComponent(PhysicsBall)
         })
 
         this.events.levels.added.forEach(ent => {

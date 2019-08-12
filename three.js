@@ -111,6 +111,7 @@ export class ThreeSystem extends System {
 
         this.events.balls.added.forEach(ent => this.setupBall(ent))
         this.queries.balls.forEach(ent => this.syncBall(ent))
+        this.events.balls.removed.forEach(ent => this.removeBall(ent))
     }
 
     initScene(ent) {
@@ -225,6 +226,13 @@ export class ThreeSystem extends System {
         const base = ent.getMutableComponent(BaseBall)
         thr.obj.position.copy(base.position)
         thr.obj.quaternion.copy(base.quaternion)
+    }
+
+    removeBall(ent) {
+        const thr = ent.getMutableComponent(ThreeBall)
+        const sc = this.queries.three[0].getComponent(ThreeScene)
+        sc.stage.remove(thr.obj)
+        ent.removeComponent(ThreeBall)
     }
 }
 
