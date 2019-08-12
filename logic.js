@@ -4,6 +4,7 @@ import {SimpleText, TransitionSphere} from './three.js'
 import {Anim, WaitForTime} from './animation.js'
 import {WaitForClick} from './mouse.js'
 import {LevelInfo, loadStructure} from './levels.js'
+import {BaseRoom} from './common.js'
 
 
 export class GameLogic extends System {
@@ -13,6 +14,7 @@ export class GameLogic extends System {
                 globals: {components: [Globals]},
                 blocks: {components: [BaseBlock]},
                 balls: {components: [BaseBall]},
+                rooms: {components: [BaseRoom]},
                 levels: {components: [LevelInfo]}
             }
         }
@@ -115,7 +117,7 @@ export class GameLogic extends System {
         this.queries.blocks.slice().forEach(ent => ent.removeComponent(BaseBlock))
         globals.balls = 3
         globals.playing = true
-        globals.removeFloors = true
+        this.queries.rooms.slice().forEach(ent => ent.removeComponent(BaseRoom))
         globals.transition.addComponent(Anim, {prop: 'opacity', from: 1.0, to: 0.0, duration: 0.5, onDone:()=>{
                 globals.transition.getComponent(TransitionSphere).obj.visible = false
             }})

@@ -1,9 +1,9 @@
-import {DoubleSide, Mesh, MeshLambertMaterial, PlaneGeometry, Vector3} from "./node_modules/three/build/three.module.js"
 import {System} from "./node_modules/ecsy/build/ecsy.module.js"
-import {BaseBall, BaseBlock, Consts, Globals, toRad} from './common.js'
+import {BaseBall, BaseBlock, BaseRoom, Consts, Globals} from './common.js'
 import {ThreeScene} from './three.js'
 import {ParticlesGroup} from './particles.js'
 import {LevelInfo} from './levels.js'
+import {Vector3} from "./node_modules/three/build/three.module.js"
 
 
 const wallMaterial = new CANNON.Material()
@@ -15,10 +15,8 @@ export class PhysicsBall {
     }
 }
 
-export class PhysicsFloor {
-}
-export class PhysicsCubeRoom {
-}
+export class PhysicsFloor {}
+export class PhysicsCubeSide {}
 
 export class PhysicsBlock {
     constructor() {
@@ -48,6 +46,13 @@ export class PhysicsSystem extends System {
                         removed: { event: 'EntityRemoved'}
                     }
                 },
+                rooms: {
+                    components:[BaseRoom],
+                    events: {
+                        added: {event:'EntityAdded'},
+                        removed: {event:'EntityRemoved'}
+                    }
+                },
                 floors: {
                     components:[PhysicsFloor],
                     events: {
@@ -55,8 +60,8 @@ export class PhysicsSystem extends System {
                         removed: {event:'EntityRemoved'}
                     }
                 },
-                cuberooms: {
-                    components:[PhysicsCubeRoom],
+                cubesides: {
+                    components:[PhysicsCubeSide],
                     events: {
                         added: {event:'EntityAdded'},
                         removed: {event:'EntityRemoved'}
@@ -80,20 +85,7 @@ export class PhysicsSystem extends System {
         }
     }
     execute(delta) {
-        // console.log(this.cannonWorld.bodies.length)
         const globals = this.queries.globals[0].getMutableComponent(Globals)
-        if(globals.removeFloors) {
-            globals.removeFloors = false
-            this.queries.floors.slice().forEach(ent => {
-                const comp = ent.getMutableComponent(PhysicsFloor)
-                const sc = this.queries.three[0].getComponent(ThreeScene)
-                sc.stage.remove(comp.obj)
-                this.cannonWorld.removeBody(comp.body)
-                ent.removeComponent(PhysicsFloor)
-            })
-        }
-
-        const sc = this.queries.three[0].getMutableComponent(ThreeScene)
         this.events.blocks.added.forEach((ent,i) => {
             const base = ent.getComponent(BaseBlock)
             const phys = ent.getMutableComponent(PhysicsBlock)
@@ -137,17 +129,33 @@ export class PhysicsSystem extends System {
             ent.removeComponent(PhysicsBall)
         })
 
+        this.events.rooms.added.forEach(ent => {
+            const base = ent.getComponent(BaseRoom)
+            if(base.type === Consts.ROOM_TYPES.FLOOR) {
+                ent.addComponent(PhysicsFloor)
+            }
+            if(base.type === Consts.ROOM_TYPES.CUBE) {
+                const size = 5.5
+                this.world.createEntity().addComponent(PhysicsCubeSide, {axis: new Vector3(0,1,0), angle: +90, pos:new Vector3(-size,0,0) })
+                this.world.createEntity().addComponent(PhysicsCubeSide, {axis: new Vector3(0,1,0), angle: -90, pos:new Vector3(+size,0,0) })
+                this.world.createEntity().addComponent(PhysicsCubeSide, {axis: new Vector3(1,0,0), angle: -90, pos:new Vector3(0,-size,0) })
+                this.world.createEntity().addComponent(PhysicsCubeSide, {axis: new Vector3(1,0,0), angle: +90, pos:new Vector3(0,+size,0) })
+                this.world.createEntity().addComponent(PhysicsCubeSide, {axis: new Vector3(1,0,0), angle:  -0, pos:new Vector3(0,0,-size) })
+                this.world.createEntity().addComponent(PhysicsCubeSide, {axis: new Vector3(1,0,0), angle: 180, pos:new Vector3(0,0,+size) })
+            }
+        })
+        this.events.rooms.removed.forEach(ent =>{
+            this.queries.floors.slice().forEach(ent => {
+                this.cannonWorld.removeBody(ent.getComponent(PhysicsFloor).body)
+                ent.removeComponent(PhysicsFloor)
+            })
+            this.queries.cubesides.slice().forEach(ent => {
+                this.cannonWorld.removeBody(ent.getComponent(PhysicsCubeSide).body)
+                ent.removeComponent(PhysicsCubeSide)
+            })
+        })
         this.events.floors.added.forEach(ent => {
             const floor = ent.getMutableComponent(PhysicsFloor)
-            const floorObj = new Mesh(
-                new PlaneGeometry(100,100,32,32),
-                new MeshLambertMaterial({color:Consts.FLOOR_COLOR})
-            )
-            floorObj.receiveShadow = true
-            floorObj.rotation.x = toRad(-90)
-            const sc = this.queries.three[0].getComponent(ThreeScene)
-            sc.stage.add(floorObj)
-            floor.obj = floorObj
             floor.body = new CANNON.Body({
                 mass: 0 // mass == 0 makes the body static
             });
@@ -156,38 +164,14 @@ export class PhysicsSystem extends System {
             this.cannonWorld.addBody(floor.body);
         })
 
-        this.events.cuberooms.added.forEach(ent => {
-            const room = ent.getMutableComponent(PhysicsCubeRoom)
-
-            const makeFloor = (axis, angle, pos, color) => {
-                const floorBody = new CANNON.Body({ mass:0 })
-                floorBody.quaternion.setFromAxisAngle(new CANNON.Vec3(axis[0],axis[1],axis[2]),angle);
-                floorBody.addShape(new CANNON.Plane())
-                floorBody.position.set(pos[0],pos[1],pos[2])
-                this.cannonWorld.addBody(floorBody);
-
-                const floorObj = new Mesh(
-                    new PlaneGeometry(10,10),
-                    new MeshLambertMaterial({color:color, side: DoubleSide})
-                )
-                floorObj.quaternion.setFromAxisAngle(new Vector3(axis[0],axis[1],axis[2]),angle);
-                floorObj.position.set(pos[0],pos[1],pos[2])
-                const sc = this.queries.three[0].getComponent(ThreeScene)
-                sc.stage.add(floorObj)
-                return floorBody
-            }
-
-            const size = 5.5
-            const floors = []
-            floors.push(makeFloor([0,1,0],toRad(90), [-size,0,0], 'teal'))
-            floors.push(makeFloor([0,1,0],toRad(-90),[+size,0,0], 'teal'))
-
-            floors.push(makeFloor([1,0,0],toRad(-90), [-0,-size,0], 'teal'))
-            floors.push(makeFloor([1,0,0],toRad(90), [+0,+size,0], 'teal'))
-
-            floors.push(makeFloor([1,0,0],toRad(0), [+0,0,-size], 'teal'))
-            floors.push(makeFloor([1,0,0],toRad(180), [+0,0,size], 'teal'))
-
+        this.events.cubesides.added.forEach(ent => {
+            const side = ent.getMutableComponent(PhysicsCubeSide)
+            const floorBody = new CANNON.Body({ mass:0 })
+            floorBody.addShape(new CANNON.Plane())
+            floorBody.quaternion.setFromAxisAngle(side.axis,side.angle);
+            floorBody.position.copy(side.pos)
+            side.body = floorBody
+            this.cannonWorld.addBody(floorBody);
         })
 
         this.events.balls.added.forEach(ent => {

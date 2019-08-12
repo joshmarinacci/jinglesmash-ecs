@@ -232,11 +232,9 @@ function setupGame() {
                 }})
             globals.instructions.getMutableComponent(SimpleText).obj.visible = false
             world.createEntity().addComponent(WaitForTime,{duration:0.1, callback:()=>{
-                    console.log("doing physics")
                     globals.physicsActive = true
                 }})
             world.createEntity().addComponent(WaitForTime,{duration:1.1, callback:()=>{
-                    console.log("doing collisions")
                     globals.collisionsActive = true
                 }})
     }})

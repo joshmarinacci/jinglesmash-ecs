@@ -45,21 +45,21 @@ export const Consts = {
         BLOCK:0x00ff00, //full blue
     },
     SELECTED_COLOR : 0xffff00, //yellow
-    FLOOR_COLOR : 0xffffff,
+    FLOOR_COLOR : 'teal',
 
     POSITION_NAMES : ['x','y','z'],
     ROTATION_NAMES : ['rotx','roty','rotz'],
     LEVEL_NAMES: [
-    "tumble_level1",
-    "tumble_level2",
-    "tumble_level5",
-    "tumble_level6",
-    "tumble_level7",
-    "tumble_level8",
-    "tumble_level10",
-    "tumble_level11",
+    // "tumble_level1",
+    // "tumble_level2",
+    // "tumble_level5",
+    // "tumble_level6",
+    // "tumble_level7",
+    // "tumble_level8",
+    // "tumble_level10",
+    // "tumble_level11",
     // "tumble_level12",
-    "tumble_level13",
+    // "tumble_level13",
     "tumble_level14",
     "tumble_level9",
     "tumble_level15",
@@ -127,5 +127,11 @@ export class BaseBlock {
         }
         if(name === 'physicstype') return this.physicsType = value
         throw new Error(`unknown property to set ${name}`)
+    }
+}
+
+export class BaseRoom {
+    constructor() {
+        this.type = Consts.ROOM_TYPES.FLOOR
     }
 }

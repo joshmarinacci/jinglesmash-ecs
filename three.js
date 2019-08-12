@@ -4,6 +4,7 @@ import {
     CanvasTexture,
     CylinderGeometry,
     DefaultLoadingManager,
+    DoubleSide,
     Geometry,
     Group,
     LatheBufferGeometry,
@@ -19,10 +20,11 @@ import {
     SphereGeometry,
     TextureLoader,
     Vector2,
+    Vector3,
     WebGLRenderer
 } from "./node_modules/three/build/three.module.js"
 import {System} from "./node_modules/ecsy/build/ecsy.module.js"
-import {$, BaseBall, BaseBlock, Consts, pickOneValue} from './common.js'
+import {$, BaseBall, BaseBlock, BaseRoom, Consts, pickOneValue, toRad} from './common.js'
 import {Anim} from './animation.js'
 
 export class ThreeGroup {
@@ -93,6 +95,27 @@ export class ThreeSystem extends System {
                         added: {event:'EntityAdded'},
                         removed: {event:'EntityRemoved'}
                     }
+                },
+                rooms: {
+                    components: [BaseRoom],
+                    events: {
+                        added: {event:'EntityAdded'},
+                        removed: {event:'EntityRemoved'}
+                    }
+                },
+                floors: {
+                    components: [ThreeFloor],
+                    events: {
+                        added: {event:'EntityAdded'},
+                        removed: {event:'EntityRemoved'}
+                    }
+                },
+                sides: {
+                    components: [ThreeCubeSide],
+                    events: {
+                        added: {event:'EntityAdded'},
+                        removed: {event:'EntityRemoved'}
+                    }
                 }
             }
         }
@@ -108,7 +131,7 @@ export class ThreeSystem extends System {
 
         this.events.transitions.added.forEach(ent => {
             const sp = ent.getMutableComponent(TransitionSphere)
-            this.setupTransitionSphere(sp,sc)
+            this.setupTransitionSphere(sp, sc)
         })
 
         this.events.texts.added.forEach(ent => {
@@ -116,21 +139,42 @@ export class ThreeSystem extends System {
             sc.scene.add(st.obj)
         })
 
-        this.events.stats.added.forEach(ent => this.setupVRStats(ent.getMutableComponent(VRStats),sc))
-        this.queries.stats.forEach(ent => this.redrawVRStats(ent.getMutableComponent(VRStats),sc))
+        this.events.stats.added.forEach(ent => this.setupVRStats(ent.getMutableComponent(VRStats), sc))
+        this.queries.stats.forEach(ent => this.redrawVRStats(ent.getMutableComponent(VRStats), sc))
 
         this.events.balls.added.forEach(ent => this.setupBall(ent))
         this.queries.balls.forEach(ent => this.syncBall(ent))
         this.events.balls.removed.forEach(ent => this.removeBall(ent))
 
-        this.events.blocks.added.forEach((ent,i) => {
+        this.events.blocks.added.forEach((ent, i) => {
             this.setupBlock(ent)
             //bounce it in
-            ent.getComponent(ThreeBlock).obj.scale.set(0.01,0.01,0.01)
-            ent.addComponent(Anim,{prop:'scale',from:0.01,to:1.0,duration:0.6, lerp:'elastic', delay:0.05*i})
+            ent.getComponent(ThreeBlock).obj.scale.set(0.01, 0.01, 0.01)
+            ent.addComponent(Anim, {
+                prop: 'scale',
+                from: 0.01,
+                to: 1.0,
+                duration: 0.6,
+                lerp: 'elastic',
+                delay: 0.05 * i
+            })
         })
         this.queries.blocks.forEach(ent => this.syncBlock(ent))
         this.events.blocks.removed.forEach(ent => this.removeBlock(ent))
+
+        this.events.rooms.added.forEach(ent => this.setupRoom(ent))
+        this.events.floors.added.forEach(ent => this.setupFloor(ent))
+        this.events.sides.added.forEach(ent => this.setupCubeSide(ent))
+
+
+        this.events.rooms.removed.forEach(ent => {
+            this.queries.floors.slice().forEach(ent => {
+                this.removeFloor(ent)
+            })
+            this.queries.sides.slice().forEach(ent => {
+                this.removeCubeSide(ent)
+            })
+        })
     }
 
     initScene(ent) {
@@ -283,6 +327,62 @@ export class ThreeSystem extends System {
         sc.stage.remove(thr.obj)
         ent.removeComponent(ThreeBlock)
     }
+
+    setupRoom(ent) {
+        const base = ent.getComponent(BaseRoom)
+        if(base.type === Consts.ROOM_TYPES.FLOOR) {
+            ent.addComponent(ThreeFloor)
+        }
+
+        if(base.type === Consts.ROOM_TYPES.CUBE) {
+            const size = 5.5
+            this.world.createEntity().addComponent(ThreeCubeSide, {axis: new Vector3(0,1,0), angle: +90, pos:new Vector3(-size,0,0) })
+            this.world.createEntity().addComponent(ThreeCubeSide, {axis: new Vector3(0,1,0), angle: -90, pos:new Vector3(+size,0,0) })
+            this.world.createEntity().addComponent(ThreeCubeSide, {axis: new Vector3(1,0,0), angle: -90, pos:new Vector3(0,-size,0) })
+            this.world.createEntity().addComponent(ThreeCubeSide, {axis: new Vector3(1,0,0), angle: +90, pos:new Vector3(0,+size,0) })
+            this.world.createEntity().addComponent(ThreeCubeSide, {axis: new Vector3(1,0,0), angle:  -0, pos:new Vector3(0,0,-size) })
+            this.world.createEntity().addComponent(ThreeCubeSide, {axis: new Vector3(1,0,0), angle: 180, pos:new Vector3(0,0,+size) })
+        }
+    }
+
+    setupFloor(ent) {
+        const thr = ent.getMutableComponent(ThreeFloor)
+        thr.obj = new Mesh(
+            new PlaneGeometry(100,100,32,32),
+            new MeshLambertMaterial({color:Consts.FLOOR_COLOR})
+        )
+        thr.obj.rotation.x = toRad(-90)
+        thr.obj.receiveShadow = true
+        const sc = this.queries.three[0].getComponent(ThreeScene)
+        sc.stage.add(thr.obj)
+    }
+
+    setupCubeSide(ent) {
+        console.log("adding a three cube side")
+        const thr = ent.getMutableComponent(ThreeCubeSide)
+        const floorObj = new Mesh(
+            new PlaneGeometry(12,12),
+            new MeshLambertMaterial({color:Consts.FLOOR_COLOR, side: DoubleSide})
+        )
+        thr.obj = floorObj
+        thr.obj.quaternion.setFromAxisAngle(thr.axis,thr.angle);
+        thr.obj.position.copy(thr.pos)
+        thr.obj.receiveShadow = true
+        const sc = this.queries.three[0].getComponent(ThreeScene)
+        sc.stage.add(thr.obj)
+    }
+
+    removeFloor(ent) {
+        const thr = ent.getMutableComponent(ThreeFloor)
+        const sc = this.queries.three[0].getComponent(ThreeScene)
+        sc.stage.add(thr.obj)
+    }
+
+    removeCubeSide(ent) {
+        const thr = ent.getMutableComponent(ThreeCubeSide)
+        const sc = this.queries.three[0].getComponent(ThreeScene)
+        sc.stage.add(thr.obj)
+    }
 }
 
 export class SkyBox {
@@ -375,6 +475,9 @@ export class ThreeBlock {
         this.type = null
     }
 }
+export class ThreeFloor {}
+export class ThreeCubeSide {}
+
 function generateBallTextures() {
     const textures = {}
     {

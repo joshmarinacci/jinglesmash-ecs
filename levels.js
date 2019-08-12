@@ -1,5 +1,5 @@
-import {BaseBlock, Consts, pickOneValue} from './common.js'
-import {PhysicsBlock, PhysicsCubeRoom, PhysicsFloor} from './physics.js'
+import {BaseBlock, BaseRoom, Consts, pickOneValue} from './common.js'
+import {PhysicsBlock} from './physics.js'
 import {Vector3} from "./node_modules/three/build/three.module.js"
 import {ThreeBlock} from './three.js'
 
@@ -52,11 +52,8 @@ function  loadFromJSON(doc,world) {
     if(!doc.data.ballRadius) level.ballRadius = 0.25
     if(!doc.data.ballMass) level.ballMass = 5
     if(typeof doc.data.wallFriction !== 'undefined') {
-        // console.log("wall friction",doc.data.wallFriction)
-        // console.log("wall restitution",doc.data.wallRestitution)
         level.wallFriction = doc.data.wallFriction
         level.wallRestitution = doc.data.wallRestitution
-    //     this.rebuildWallMaterial()
     }
 
     if(typeof doc.data.gravity !== 'undefined') {
@@ -70,12 +67,7 @@ function  loadFromJSON(doc,world) {
         level.roomType = doc.data.roomType
     }
 
-    if(level.roomType === Consts.ROOM_TYPES.FLOOR) {
-        world.createEntity().addComponent(PhysicsFloor)
-    }
-    if(level.roomType === Consts.ROOM_TYPES.CUBE) {
-        world.createEntity().addComponent(PhysicsCubeRoom)
-    }
+    world.createEntity().addComponent(BaseRoom, {type:level.roomType})
     return newBlocks
 }
 
