@@ -121,6 +121,9 @@ export class ThreeSystem extends System {
         }
     }
 
+    getStage() {
+        return this.queries.three[0].getComponent(ThreeScene).stage
+    }
     execute(delta) {
         this.events.three.added.forEach(this.initScene)
 
@@ -280,8 +283,7 @@ export class ThreeSystem extends System {
         generateBallMesh(base,thr)
         thr.obj.castShadow = true
         thr.obj.position.copy(base.position)
-        const sc = this.queries.three[0].getComponent(ThreeScene)
-        sc.stage.add(thr.obj)
+        this.getStage().add(thr.obj)
     }
 
     syncBall(ent) {
@@ -294,7 +296,7 @@ export class ThreeSystem extends System {
     removeBall(ent) {
         const thr = ent.getMutableComponent(ThreeBall)
         const sc = this.queries.three[0].getComponent(ThreeScene)
-        sc.stage.remove(thr.obj)
+        this.getStage().remove(thr.obj)
         ent.removeComponent(ThreeBall)
     }
 
@@ -310,8 +312,7 @@ export class ThreeSystem extends System {
         thr.obj.position.copy(base.position)
         thr.obj.rotation.copy(base.rotation)
         base.quaternion.copy(thr.obj.quaternion)
-        const sc = this.queries.three[0].getComponent(ThreeScene)
-        sc.stage.add(thr.obj)
+        this.getStage().add(thr.obj)
     }
 
     syncBlock(ent) {
@@ -323,8 +324,7 @@ export class ThreeSystem extends System {
 
     removeBlock(ent) {
         const thr = ent.getMutableComponent(ThreeBlock)
-        const sc = this.queries.three[0].getComponent(ThreeScene)
-        sc.stage.remove(thr.obj)
+        this.getStage().remove(thr.obj)
         ent.removeComponent(ThreeBlock)
     }
 
@@ -353,8 +353,7 @@ export class ThreeSystem extends System {
         )
         thr.obj.rotation.x = toRad(-90)
         thr.obj.receiveShadow = true
-        const sc = this.queries.three[0].getComponent(ThreeScene)
-        sc.stage.add(thr.obj)
+        this.getStage().add(thr.obj)
     }
 
     setupCubeSide(ent) {
@@ -368,20 +367,20 @@ export class ThreeSystem extends System {
         thr.obj.quaternion.setFromAxisAngle(thr.axis,thr.angle);
         thr.obj.position.copy(thr.pos)
         thr.obj.receiveShadow = true
-        const sc = this.queries.three[0].getComponent(ThreeScene)
-        sc.stage.add(thr.obj)
+        this.getStage().add(thr.obj)
     }
 
     removeFloor(ent) {
         const thr = ent.getMutableComponent(ThreeFloor)
-        const sc = this.queries.three[0].getComponent(ThreeScene)
-        sc.stage.add(thr.obj)
+        this.getStage().remove(thr.obj)
+        ent.removeComponent(ThreeFloor)
     }
 
     removeCubeSide(ent) {
         const thr = ent.getMutableComponent(ThreeCubeSide)
         const sc = this.queries.three[0].getComponent(ThreeScene)
-        sc.stage.add(thr.obj)
+        this.getStage().remove(thr.obj)
+        ent.removeComponent(ThreeCubeSide)
     }
 }
 
