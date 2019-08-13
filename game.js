@@ -42,7 +42,7 @@ function setupLights() {
 
     //a standard light
     const light = new DirectionalLight( 0xffffff, 0.5 );
-    light.castShadow = true
+    // light.castShadow = true
     light.shadow.mapSize.width = 512
     light.shadow.mapSize.height = 512
     light.shadow.camera.right = 10

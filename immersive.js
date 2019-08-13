@@ -209,7 +209,7 @@ export class ImmersiveInputSystem extends System {
         const dirPoint = new Vector3(0,0,-1)
         dirPoint.applyQuaternion(conn.vrcontroller.quaternion)
         dirPoint.normalize()
-        dirPoint.multiplyScalar(10)
+        dirPoint.multiplyScalar(15)
 
         const level = this.queries.levels[0].getComponent(LevelInfo)
         ball.addComponent(BaseBall, {
