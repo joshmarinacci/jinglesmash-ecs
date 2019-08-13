@@ -4,6 +4,7 @@ import {ThreeScene} from './three.js'
 import {ParticlesGroup} from './particles.js'
 import {LevelInfo} from './levels.js'
 import {Vector3} from "./node_modules/three/build/three.module.js"
+import {toRad} from './common'
 
 
 const wallMaterial = new CANNON.Material()
@@ -87,12 +88,12 @@ export class PhysicsSystem extends System {
             }
             if(base.type === Consts.ROOM_TYPES.CUBE) {
                 const size = 5.5
-                this.world.createEntity().addComponent(PhysicsCubeSide, {axis: new Vector3(0,1,0), angle: +90, pos:new Vector3(-size,0,0) })
-                this.world.createEntity().addComponent(PhysicsCubeSide, {axis: new Vector3(0,1,0), angle: -90, pos:new Vector3(+size,0,0) })
-                this.world.createEntity().addComponent(PhysicsCubeSide, {axis: new Vector3(1,0,0), angle: -90, pos:new Vector3(0,-size,0) })
-                this.world.createEntity().addComponent(PhysicsCubeSide, {axis: new Vector3(1,0,0), angle: +90, pos:new Vector3(0,+size,0) })
-                this.world.createEntity().addComponent(PhysicsCubeSide, {axis: new Vector3(1,0,0), angle:  -0, pos:new Vector3(0,0,-size) })
-                this.world.createEntity().addComponent(PhysicsCubeSide, {axis: new Vector3(1,0,0), angle: 180, pos:new Vector3(0,0,+size) })
+                this.world.createEntity().addComponent(PhysicsCubeSide, {axis: new Vector3(0,1,0), angle: toRad(+90), pos:new Vector3(-size,0,0) })
+                this.world.createEntity().addComponent(PhysicsCubeSide, {axis: new Vector3(0,1,0), angle: toRad(-90), pos:new Vector3(+size,0,0) })
+                this.world.createEntity().addComponent(PhysicsCubeSide, {axis: new Vector3(1,0,0), angle: toRad(-90), pos:new Vector3(0,-size,0) })
+                this.world.createEntity().addComponent(PhysicsCubeSide, {axis: new Vector3(1,0,0), angle: toRad(+90), pos:new Vector3(0,+size,0) })
+                this.world.createEntity().addComponent(PhysicsCubeSide, {axis: new Vector3(1,0,0), angle: toRad(-0), pos:new Vector3(0,0,-size) })
+                this.world.createEntity().addComponent(PhysicsCubeSide, {axis: new Vector3(1,0,0), angle: toRad(180), pos:new Vector3(0,0,+size) })
             }
         })
         this.events.rooms.removed.forEach(ent =>{
@@ -117,13 +118,12 @@ export class PhysicsSystem extends System {
         })
         this.events.cubesides.added.forEach(ent => {
             const side = ent.getMutableComponent(PhysicsCubeSide)
-            const floorBody = new CANNON.Body({ mass:0 })
-            floorBody.user_entity = ent
-            floorBody.addShape(new CANNON.Plane())
-            floorBody.quaternion.setFromAxisAngle(side.axis,side.angle);
-            floorBody.position.copy(side.pos)
-            side.body = floorBody
-            this.cannonWorld.addBody(floorBody);
+            side.body = new CANNON.Body({ mass:0 })
+            side.body.user_entity = ent
+            side.body.addShape(new CANNON.Plane())
+            side.body.quaternion.setFromAxisAngle(side.axis,side.angle);
+            side.body.position.copy(side.pos)
+            this.cannonWorld.addBody(side.body);
         })
 
         this.events.balls.added.forEach(ent => this.addBall(ent))
