@@ -65,6 +65,8 @@ function  loadFromJSON(doc,world) {
     }
     if(typeof doc.data.roomType !== 'undefined') {
         level.roomType = doc.data.roomType
+    } else {
+        level.roomType = Consts.ROOM_TYPES.FLOOR
     }
 
     world.createEntity().addComponent(BaseRoom, {type:level.roomType})
