@@ -336,12 +336,12 @@ export class ThreeSystem extends System {
 
         if(base.type === Consts.ROOM_TYPES.CUBE) {
             const size = 5.5
-            this.world.createEntity().addComponent(ThreeCubeSide, {axis: new Vector3(0,1,0), angle: +90, pos:new Vector3(-size,0,0) })
-            this.world.createEntity().addComponent(ThreeCubeSide, {axis: new Vector3(0,1,0), angle: -90, pos:new Vector3(+size,0,0) })
-            this.world.createEntity().addComponent(ThreeCubeSide, {axis: new Vector3(1,0,0), angle: -90, pos:new Vector3(0,-size,0) })
-            this.world.createEntity().addComponent(ThreeCubeSide, {axis: new Vector3(1,0,0), angle: +90, pos:new Vector3(0,+size,0) })
-            this.world.createEntity().addComponent(ThreeCubeSide, {axis: new Vector3(1,0,0), angle:  -0, pos:new Vector3(0,0,-size) })
-            this.world.createEntity().addComponent(ThreeCubeSide, {axis: new Vector3(1,0,0), angle: 180, pos:new Vector3(0,0,+size) })
+            this.world.createEntity().addComponent(ThreeCubeSide, {axis: new Vector3(0,1,0), angle: toRad(+90), pos:new Vector3(-size,0,0) })
+            this.world.createEntity().addComponent(ThreeCubeSide, {axis: new Vector3(0,1,0), angle: toRad(-90), pos:new Vector3(+size,0,0) })
+            this.world.createEntity().addComponent(ThreeCubeSide, {axis: new Vector3(1,0,0), angle: toRad(-90), pos:new Vector3(0,-size,0) })
+            this.world.createEntity().addComponent(ThreeCubeSide, {axis: new Vector3(1,0,0), angle: toRad(+90), pos:new Vector3(0,+size,0) })
+            this.world.createEntity().addComponent(ThreeCubeSide, {axis: new Vector3(1,0,0), angle:  toRad(-0), pos:new Vector3(0,0,-size) })
+            this.world.createEntity().addComponent(ThreeCubeSide, {axis: new Vector3(1,0,0), angle: toRad(180), pos:new Vector3(0,0,+size) })
         }
     }
 
@@ -361,8 +361,8 @@ export class ThreeSystem extends System {
         console.log("adding a three cube side")
         const thr = ent.getMutableComponent(ThreeCubeSide)
         const floorObj = new Mesh(
-            new PlaneGeometry(12,12),
-            new MeshLambertMaterial({color:Consts.FLOOR_COLOR, side: DoubleSide})
+            new PlaneGeometry(10,10),
+            new MeshLambertMaterial({color:Consts.CUBE_SIDE_COLOR, side: DoubleSide})
         )
         thr.obj = floorObj
         thr.obj.quaternion.setFromAxisAngle(thr.axis,thr.angle);
