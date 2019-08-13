@@ -1,21 +1,23 @@
 import {System} from "./node_modules/ecsy/build/ecsy.module.js"
-import {ThreeScene} from './three.js'
+import {ThreeBall, ThreeScene} from './three.js'
 import {
-    Vector3,
     BufferGeometry,
+    CylinderGeometry,
     Float32BufferAttribute,
     Line,
     LineBasicMaterial,
     Mesh,
-    CylinderGeometry,
     MeshStandardMaterial,
+    NormalBlending,
     RepeatWrapping,
     TextureLoader,
-    NormalBlending
+    Vector3
 } from "./node_modules/three/build/three.module.js"
 import {WaitForClick} from './mouse.js'
-import {Globals, toRad} from './common.js'
+import {BaseBall, Globals, toRad} from './common.js'
+import {LevelInfo} from './levels.js'
 import {PhysicsBall} from './physics.js'
+import {PlaySoundEffect} from './audio.js'
 
 
 function printError(err) {
@@ -159,6 +161,9 @@ export class ImmersiveInputSystem extends System {
                 },
                 globals: {
                     components: [Globals]
+                },
+                levels:{
+                    components:[LevelInfo],
                 }
             }
         }
@@ -204,12 +209,17 @@ export class ImmersiveInputSystem extends System {
         const dirPoint = new Vector3(0,0,-1)
         dirPoint.applyQuaternion(conn.vrcontroller.quaternion)
         dirPoint.normalize()
-        dirPoint.multiplyScalar(20)
+        dirPoint.multiplyScalar(10)
 
-        ball.addComponent(PhysicsBall, {
-            initialPosition: endPoint,
-            initialVelocity: dirPoint,
+        const level = this.queries.levels[0].getComponent(LevelInfo)
+        ball.addComponent(BaseBall, {
+            position: endPoint,
+            velocity: dirPoint,
+            radius: level.ballRadius
         })
+        ball.addComponent(ThreeBall)
+        ball.addComponent(PhysicsBall)
+        globals.click.addComponent(PlaySoundEffect)
 
 
     }
