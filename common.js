@@ -1,4 +1,4 @@
-import {Quaternion, Vector3} from "./node_modules/three/build/three.module.js"
+import {Quaternion, Euler, Vector3} from "./node_modules/three/build/three.module.js"
 
 export class Globals {
     constructor() {
@@ -45,21 +45,22 @@ export const Consts = {
         BLOCK:0x00ff00, //full blue
     },
     SELECTED_COLOR : 0xffff00, //yellow
-    FLOOR_COLOR : 'teal',
+    FLOOR_COLOR : 0xffffff,
+    CUBE_SIDE_COLOR: 'teal',
 
     POSITION_NAMES : ['x','y','z'],
     ROTATION_NAMES : ['rotx','roty','rotz'],
     LEVEL_NAMES: [
-    // "tumble_level1",
-    // "tumble_level2",
-    // "tumble_level5",
-    // "tumble_level6",
-    // "tumble_level7",
-    // "tumble_level8",
-    // "tumble_level10",
+    "tumble_level1",
+    "tumble_level2",
+    "tumble_level5",
+    "tumble_level6",
+    "tumble_level7",
+    "tumble_level8",
+    "tumble_level10",
     // "tumble_level11",
-    // "tumble_level12",
-    // "tumble_level13",
+    "tumble_level12",
+    "tumble_level13",
     "tumble_level14",
     "tumble_level9",
     "tumble_level15",
@@ -109,7 +110,7 @@ export class BaseBlock {
         this.depth = 1
         this.position = new Vector3()
         this.quaternion = new Quaternion()
-        this.rotation = new Vector3()
+        this.rotation = new Euler()
         this.physicsType = Consts.BLOCK_TYPES.BLOCK
     }
     set(name, value) {
@@ -122,7 +123,7 @@ export class BaseBlock {
             return
         }
         if(name === 'rotation') {
-            this.rotation.copy(value)
+            this.rotation.set(value.x,value.y,value.z,'XYZ')
             return
         }
         if(name === 'physicstype') return this.physicsType = value
