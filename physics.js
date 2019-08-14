@@ -4,7 +4,7 @@ import {ThreeScene} from './three.js'
 import {ParticlesGroup} from './particles.js'
 import {LevelInfo} from './levels.js'
 import {Vector3} from "./node_modules/three/build/three.module.js"
-import {toRad} from './common'
+import {toRad} from './common.js'
 
 
 const wallMaterial = new CANNON.Material()
