@@ -144,5 +144,6 @@ export class BaseRoom {
 export class BaseSlingshot {
     constructor() {
         this.target = new Vector3()
+        this.ballType = Consts.BALL_TYPES.PLAIN
     }
 }

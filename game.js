@@ -184,9 +184,6 @@ function setupGame() {
     game.addComponent(ThreeScene)
     game.addComponent(VRStats)
 
-    const slingshot = world.createEntity()
-    slingshot.addComponent(BaseSlingshot)
-    slingshot.addComponent(ThreeSlingshot)
 
     const globals = game.getMutableComponent(Globals)
     globals.transition = world.createEntity()

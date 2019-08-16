@@ -100,8 +100,16 @@ export class MouseInputSystem extends System {
 
             three.renderer.domElement.addEventListener('mousedown',(e)=>{
                 mouse.pressed = true
+                this.queries.slingshots.forEach(ent => {
+                    const slingshot = ent.getMutableComponent(BaseSlingshot)
+                    slingshot.pressed = true
+                })
             })
             three.renderer.domElement.addEventListener('mouseup',(e)=>{
+                this.queries.slingshots.forEach(ent => {
+                    const slingshot = ent.getMutableComponent(BaseSlingshot)
+                    slingshot.pressed = false
+                })
                 mouse.pressed = false
                 if(this.queries.waits.length>0) {
                     //see if we should block right now

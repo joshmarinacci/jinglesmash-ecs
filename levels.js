@@ -1,7 +1,7 @@
-import {BaseBlock, BaseRoom, Consts, pickOneValue} from './common.js'
+import {BaseBlock, BaseRoom, BaseSlingshot, Consts, pickOneValue} from './common.js'
 import {PhysicsBlock} from './physics.js'
 import {Vector3} from "./node_modules/three/build/three.module.js"
-import {ThreeBlock} from './three.js'
+import {ThreeBlock, ThreeSlingshot} from './three.js'
 
 
 export class LevelInfo {
@@ -70,6 +70,9 @@ function  loadFromJSON(doc,world) {
     }
 
     world.createEntity().addComponent(BaseRoom, {type:level.roomType})
+    const sl = world.createEntity()
+    sl.addComponent(BaseSlingshot, {ballType:level.ballType})
+    sl.addComponent(ThreeSlingshot)
     return newBlocks
 }
 

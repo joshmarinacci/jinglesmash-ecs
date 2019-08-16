@@ -21,6 +21,7 @@ import {
     TextureLoader,
     Vector2,
     Vector3,
+    Object3D,
     WebGLRenderer
 } from "./node_modules/three/build/three.module.js"
 import {System} from "./node_modules/ecsy/build/ecsy.module.js"
@@ -293,7 +294,7 @@ export class ThreeSystem extends System {
         const thr = ent.getMutableComponent(ThreeBall)
         thr.tex = this.textures[base.type]
         thr.type = base.type
-        generateBallMesh(base,thr)
+        thr.obj = this.generateBallMesh(base.type,base.radius)
         thr.obj.castShadow = true
         thr.obj.position.copy(base.position)
         this.getStage().add(thr.obj)
@@ -407,13 +408,20 @@ export class ThreeSystem extends System {
         tex.wrapT = RepeatWrapping
         tex.repeat.set(1,10)
 
-        thr.obj = new Mesh(geo,new MeshStandardMaterial({
+        const cylinder = new Mesh(geo,new MeshStandardMaterial({
             color:'white',
             metalness:0.3,
             roughness:0.3,
             map:tex}))
+
+        thr.obj = new Object3D()
         thr.obj.position.z = 4
         thr.obj.position.y = 1.5
+        thr.obj.add(cylinder)
+
+        thr.ball = this.generateBallMesh(Consts.BALL_TYPES.ORNAMENT2, 0.25)
+        thr.obj.add(thr.ball)
+
         this.getStage().add(thr.obj)
     }
 
@@ -421,6 +429,53 @@ export class ThreeSystem extends System {
         const thr = ent.getMutableComponent(ThreeSlingshot)
         const base = ent.getMutableComponent(BaseSlingshot)
         thr.obj.lookAt(base.target)
+        if(base.pressed) {
+            thr.ball.position.z = 0.0
+        } else {
+            thr.ball.position.z = 1.0
+        }
+    }
+
+    generateBallMesh(type, radius) {
+        const rad = radius
+
+        if(type === Consts.BALL_TYPES.PLAIN) {
+            return new Mesh(
+                new SphereGeometry(rad,6,5),
+                new MeshPhongMaterial({color: Consts.BLOCK_COLORS.BALL, flatShading: true})
+            )
+        }
+
+        if(type === Consts.BALL_TYPES.ORNAMENT1) {
+            let points = [];
+            for (let i = 0; i <= 16; i++) {
+                points.push(new Vector2(Math.sin(i * 0.195) * rad, i * rad / 7));
+            }
+            var geometry = new LatheBufferGeometry(points);
+            geometry.center()
+            return new Mesh(geometry, new MeshStandardMaterial({
+                color: 'white',
+                metalness: 0.3,
+                roughness: 0.3,
+                map: this.textures.ornament1
+            }))
+        }
+
+        if(type === Consts.BALL_TYPES.ORNAMENT2) {
+            const geo = new Geometry()
+            geo.merge(new SphereGeometry(rad,32))
+            const stem = new CylinderGeometry(rad/4,rad/4,0.5,8)
+            stem.translate(0,rad/4,0)
+            geo.merge(stem)
+            return new Mesh(geo, new MeshStandardMaterial({
+                color: 'white',
+                metalness: 0.3,
+                roughness: 0.3,
+                map: this.textures.ornament2
+            }))
+        }
+
+        throw new Error("unknown ball type",ball.type)
     }
 }
 
@@ -568,50 +623,6 @@ function generateBallTextures() {
 
     return textures
 
-}
-function generateBallMesh(base,ball) {
-    const rad = base.radius
-
-    if(ball.type === Consts.BALL_TYPES.PLAIN) {
-        ball.obj = new Mesh(
-            new SphereGeometry(rad,6,5),
-            new MeshPhongMaterial({color: Consts.BLOCK_COLORS.BALL, flatShading: true})
-        )
-        return
-    }
-
-    if(ball.type === Consts.BALL_TYPES.ORNAMENT1) {
-        let points = [];
-        for (let i = 0; i <= 16; i++) {
-            points.push(new Vector2(Math.sin(i * 0.195) * rad, i * rad / 7));
-        }
-        var geometry = new LatheBufferGeometry(points);
-        geometry.center()
-        ball.obj = new Mesh(geometry, new MeshStandardMaterial({
-            color: 'white',
-            metalness: 0.3,
-            roughness: 0.3,
-            map: ball.tex
-        }))
-        return
-    }
-
-    if(ball.type === Consts.BALL_TYPES.ORNAMENT2) {
-        const geo = new Geometry()
-        geo.merge(new SphereGeometry(rad,32))
-        const stem = new CylinderGeometry(rad/4,rad/4,0.5,8)
-        stem.translate(0,rad/4,0)
-        geo.merge(stem)
-        ball.obj = new Mesh(geo, new MeshStandardMaterial({
-            color: 'white',
-            metalness: 0.3,
-            roughness: 0.3,
-            map: ball.tex,
-        }))
-        return
-    }
-
-    throw new Error("unknown ball type",ball.type)
 }
 function generateBlockTextures() {
     const materials = {}
