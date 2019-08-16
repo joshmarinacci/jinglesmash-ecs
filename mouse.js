@@ -140,7 +140,8 @@ export class MouseInputSystem extends System {
         ball.addComponent(BaseBall, {
             position: pos,
             velocity: delta,
-            radius:level.ballRadius
+            radius:level.ballRadius,
+            type:level.ballType,
         })
         ball.addComponent(ThreeBall)
         ball.addComponent(PhysicsBall)

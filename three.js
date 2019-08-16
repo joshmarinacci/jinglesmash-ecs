@@ -278,8 +278,8 @@ export class ThreeSystem extends System {
     setupBall(ent) {
         const base = ent.getComponent(BaseBall)
         const thr = ent.getMutableComponent(ThreeBall)
-        thr.tex = pickOneValue(this.textures)
-        thr.type = pickOneValue(Consts.BALL_TYPES)
+        thr.tex = this.textures[base.type]
+        thr.type = base.type
         generateBallMesh(base,thr)
         thr.obj.castShadow = true
         thr.obj.position.copy(base.position)

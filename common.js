@@ -92,14 +92,18 @@ export class BaseBall {
         this.position = new Vector3()
         this.velocity = new Vector3()
         this.quaternion = new Quaternion()
+        this.type = Consts.BALL_TYPES.PLAIN
     }
     copy({
              radius=0.25,
              position=new Vector3(0,0,0),
-             velocity=new Vector3(0,0,0)}) {
+             velocity=new Vector3(0,0,0),
+            type=Consts.BALL_TYPES.PLAIN
+         }) {
         this.radius = radius
         this.position.copy(position)
         this.velocity.copy(velocity)
+        this.type = type
     }
 }
 
