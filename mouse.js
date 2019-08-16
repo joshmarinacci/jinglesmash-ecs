@@ -46,7 +46,7 @@ export class MouseInputSystem extends System {
                     }
                 },
                 slingshots: {
-                    components: [BaseSlingshot],
+                    components: [BaseSlingshot, ThreeSlingshot],
                     events: {
                         added: {event:'EntityAdded'},
                         removed: {event:'EntityRemoved'}
@@ -60,6 +60,10 @@ export class MouseInputSystem extends System {
                 },
                 levels:{
                     components:[LevelInfo],
+                    events: {
+                        added: {event: 'EntityAdded'},
+                        removed: {event: 'EntityRemoved'}
+                    }
                 }
             }
         }
@@ -146,6 +150,20 @@ export class MouseInputSystem extends System {
             } else {
                 mat.opacity = Math.min(mat.opacity + 0.10,1.0)
             }
+        })
+
+        this.events.levels.added.forEach(ent => {
+            const level = ent.getComponent(LevelInfo)
+            const slingshot = this.world.createEntity()
+            slingshot.addComponent(BaseSlingshot, {ballType:level.ballType})
+        })
+        this.queries.slingshots.forEach(ent => {
+            const thr = ent.getMutableComponent(ThreeSlingshot)
+            const base = ent.getMutableComponent(BaseSlingshot)
+            thr.obj.lookAt(base.target)
+        })
+        this.events.levels.removed.forEach(ent => {
+            ent.removeComponent(BaseSlingshot)
         })
     }
 

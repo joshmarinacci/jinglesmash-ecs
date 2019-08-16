@@ -98,7 +98,7 @@ export class ThreeSystem extends System {
                     }
                 },
                 slingshots: {
-                    components: [BaseSlingshot, ThreeSlingshot],
+                    components: [BaseSlingshot],
                     events: {
                         added: {event:'EntityAdded'},
                         removed: {event:'EntityRemoved'}
@@ -400,6 +400,7 @@ export class ThreeSystem extends System {
 
     setupSlingshot(ent) {
         const base = ent.getMutableComponent(BaseSlingshot)
+        ent.addComponent(ThreeSlingshot)
         const thr = ent.getMutableComponent(ThreeSlingshot)
         const geo = new CylinderGeometry(0.05,0.05,1.0,16)
         geo.rotateX(toRad(90))

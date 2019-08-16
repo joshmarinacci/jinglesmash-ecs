@@ -70,9 +70,6 @@ function  loadFromJSON(doc,world) {
     }
 
     world.createEntity().addComponent(BaseRoom, {type:level.roomType})
-    const sl = world.createEntity()
-    sl.addComponent(BaseSlingshot, {ballType:level.ballType})
-    sl.addComponent(ThreeSlingshot)
     return newBlocks
 }
 
