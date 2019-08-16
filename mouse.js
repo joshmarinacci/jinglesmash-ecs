@@ -1,18 +1,24 @@
 import {System} from "./node_modules/ecsy/build/ecsy.module.js"
-import {ThreeBall, ThreeScene, ThreeSlingshot} from './three.js'
+import {ThreeBall, ThreeScene} from './three.js'
 import {
+    CylinderGeometry,
     DoubleSide,
     Mesh,
     MeshLambertMaterial,
+    MeshStandardMaterial,
+    Object3D,
     Raycaster,
+    RepeatWrapping,
     SphereGeometry,
+    TextureLoader,
     Vector2,
     Vector3
 } from "./node_modules/three/build/three.module.js"
-import {BaseBall, BaseSlingshot, Globals} from './common.js'
+import {BaseBall, BaseSlingshot, Globals, toRad} from './common.js'
 import {PlaySoundEffect} from './audio.js'
 import {PhysicsBall} from './physics.js'
 import {LevelInfo} from './levels.js'
+import {generateBallMesh} from './gfxutils.js'
 
 
 export class MouseState {
@@ -25,6 +31,10 @@ export class MouseState {
         this.raycaster = new Raycaster()
         this.pressed = false
     }
+}
+
+export class MouseSlingshot {
+
 }
 
 export class MouseInputSystem extends System {
@@ -46,7 +56,7 @@ export class MouseInputSystem extends System {
                     }
                 },
                 slingshots: {
-                    components: [BaseSlingshot, ThreeSlingshot],
+                    components: [BaseSlingshot, MouseSlingshot],
                     events: {
                         added: {event:'EntityAdded'},
                         removed: {event:'EntityRemoved'}
@@ -126,7 +136,7 @@ export class MouseInputSystem extends System {
                     const pos = mouse.mouseSphere.getWorldPosition()
                     three.stage.worldToLocal(pos)
 
-                    const slingshot = this.queries.slingshots[0].getComponent(ThreeSlingshot)
+                    const slingshot = this.queries.slingshots[0].getComponent(MouseSlingshot)
                     const delta = new Vector3()
                     delta.copy(mouse.mouseSphere.getWorldPosition())
                     delta.sub(slingshot.obj.getWorldPosition())
@@ -156,9 +166,11 @@ export class MouseInputSystem extends System {
             const level = ent.getComponent(LevelInfo)
             const slingshot = this.world.createEntity()
             slingshot.addComponent(BaseSlingshot, {ballType:level.ballType})
+            slingshot.addComponent(MouseSlingshot)
+            this.setupMouseSlingshot(slingshot)
         })
         this.queries.slingshots.forEach(ent => {
-            const thr = ent.getMutableComponent(ThreeSlingshot)
+            const thr = ent.getMutableComponent(MouseSlingshot)
             const base = ent.getMutableComponent(BaseSlingshot)
             thr.obj.lookAt(base.target)
         })
@@ -184,6 +196,38 @@ export class MouseInputSystem extends System {
         ball.addComponent(ThreeBall)
         ball.addComponent(PhysicsBall)
         globals.click.addComponent(PlaySoundEffect)
+    }
+
+    getStage() {
+        return this.queries.three[0].getComponent(ThreeScene).stage
+    }
+
+    setupMouseSlingshot(ent) {
+        const globals = this.queries.globals[0].getComponent(Globals)
+        const base = ent.getMutableComponent(BaseSlingshot)
+        const thr = ent.getMutableComponent(MouseSlingshot)
+        const geo = new CylinderGeometry(0.05,0.05,1.0,16)
+        geo.rotateX(toRad(-90))
+        geo.translate(0,0,0.5)
+
+        const tex = new TextureLoader().load('./textures/candycane.png')
+        tex.wrapS = RepeatWrapping
+        tex.wrapT = RepeatWrapping
+        tex.repeat.set(1,10)
+
+        const cylinder = new Mesh(geo,new MeshStandardMaterial({
+            color:'white',
+            metalness:0.3,
+            roughness:0.3,
+            map:tex}))
+
+        thr.obj = new Object3D()
+        thr.obj.add(cylinder)
+        thr.ball = generateBallMesh(base.ballType, 0.25, globals)
+        thr.obj.add(thr.ball)
+        thr.obj.position.z = 4
+        thr.obj.position.y = 1.5
+        this.getStage().add(thr.obj)
     }
 }
 

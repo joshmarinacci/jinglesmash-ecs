@@ -15,6 +15,7 @@ export class Globals {
     }
 }
 
+
 export const Consts = {
     BASE_URL :  "https://vr.josh.earth/360/doc/",
     docid : "tumble_level5",

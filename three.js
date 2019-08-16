@@ -5,28 +5,26 @@ import {
     CylinderGeometry,
     DefaultLoadingManager,
     DoubleSide,
-    Geometry,
     Group,
-    LatheBufferGeometry,
     Mesh,
     MeshBasicMaterial,
     MeshLambertMaterial,
-    MeshPhongMaterial,
     MeshStandardMaterial,
+    Object3D,
     PerspectiveCamera,
     PlaneGeometry,
     RepeatWrapping,
     Scene,
     SphereGeometry,
     TextureLoader,
-    Vector2,
     Vector3,
-    Object3D,
     WebGLRenderer
 } from "./node_modules/three/build/three.module.js"
 import {System} from "./node_modules/ecsy/build/ecsy.module.js"
-import {$, BaseBall, BaseBlock, BaseRoom, BaseSlingshot, Consts, pickOneValue, toRad} from './common.js'
+import {$, BaseBall, BaseBlock, BaseRoom, BaseSlingshot, Consts, Globals, toRad} from './common.js'
 import {Anim} from './animation.js'
+import {MouseSlingshot} from './mouse.js'
+import {generateBallMesh} from './gfxutils.js'
 
 export class ThreeGroup {
     constructor() {
@@ -43,11 +41,13 @@ export class ThreeScene {
 }
 export class ThreeSystem extends System {
     init() {
-        this.textures = generateBallTextures()
         this.materials = generateBlockTextures()
 
         return {
             queries: {
+                globals: {
+                    components: [Globals]
+                },
                 three: {
                     components: [ThreeScene],
                     events: {
@@ -98,7 +98,14 @@ export class ThreeSystem extends System {
                     }
                 },
                 slingshots: {
-                    components: [BaseSlingshot],
+                    components: [BaseSlingshot, ThreeSlingshot],
+                    events: {
+                        added: {event:'EntityAdded'},
+                        removed: {event:'EntityRemoved'}
+                    }
+                },
+                mouseslingshots: {
+                    components: [BaseSlingshot, MouseSlingshot],
                     events: {
                         added: {event:'EntityAdded'},
                         removed: {event:'EntityRemoved'}
@@ -153,9 +160,6 @@ export class ThreeSystem extends System {
             sc.scene.add(st.obj)
         })
 
-        this.events.slingshots.added.forEach(ent => this.setupSlingshot(ent))
-        this.queries.slingshots.forEach(ent => this.syncSlingshot(ent))
-        this.events.slingshots.removed.forEach(ent => this.removeSlingshot(ent))
 
         this.events.stats.added.forEach(ent => this.setupVRStats(ent.getMutableComponent(VRStats), sc))
         this.queries.stats.forEach(ent => this.redrawVRStats(ent.getMutableComponent(VRStats), sc))
@@ -293,9 +297,10 @@ export class ThreeSystem extends System {
     setupBall(ent) {
         const base = ent.getComponent(BaseBall)
         const thr = ent.getMutableComponent(ThreeBall)
-        thr.tex = this.textures[base.type]
+        const globals = this.queries.globals[0].getMutableComponent(Globals)
+        thr.tex = globals.textures[base.type]
         thr.type = base.type
-        thr.obj = this.generateBallMesh(base.type,base.radius)
+        thr.obj = generateBallMesh(base.type,base.radius,globals)
         thr.obj.castShadow = true
         thr.obj.position.copy(base.position)
         this.getStage().add(thr.obj)
@@ -398,94 +403,6 @@ export class ThreeSystem extends System {
         ent.removeComponent(ThreeCubeSide)
     }
 
-    setupSlingshot(ent) {
-        const base = ent.getMutableComponent(BaseSlingshot)
-        ent.addComponent(ThreeSlingshot)
-        const thr = ent.getMutableComponent(ThreeSlingshot)
-        const geo = new CylinderGeometry(0.05,0.05,1.0,16)
-        geo.rotateX(toRad(90))
-        geo.translate(0,0,0.5)
-
-        const tex = new TextureLoader().load('./textures/candycane.png')
-        tex.wrapS = RepeatWrapping
-        tex.wrapT = RepeatWrapping
-        tex.repeat.set(1,10)
-
-        const cylinder = new Mesh(geo,new MeshStandardMaterial({
-            color:'white',
-            metalness:0.3,
-            roughness:0.3,
-            map:tex}))
-
-        thr.obj = new Object3D()
-        thr.obj.position.z = 4
-        thr.obj.position.y = 1.5
-        thr.obj.add(cylinder)
-
-        thr.ball = this.generateBallMesh(base.ballType, 0.25)
-        thr.obj.add(thr.ball)
-
-        this.getStage().add(thr.obj)
-    }
-
-    syncSlingshot(ent) {
-        const thr = ent.getMutableComponent(ThreeSlingshot)
-        const base = ent.getMutableComponent(BaseSlingshot)
-        thr.obj.lookAt(base.target)
-        if(base.pressed) {
-            thr.ball.position.z = 0.0
-        } else {
-            thr.ball.position.z = 1.0
-        }
-    }
-
-    removeSlingshot(ent) {
-        const thr = ent.getMutableComponent(ThreeSlingshot)
-        this.getStage().remove(thr.obj)
-        ent.removeComponent(ThreeSlingshot)
-    }
-
-    generateBallMesh(type, radius) {
-        const rad = radius
-
-        if(type === Consts.BALL_TYPES.PLAIN) {
-            return new Mesh(
-                new SphereGeometry(rad,6,5),
-                new MeshPhongMaterial({color: Consts.BLOCK_COLORS.BALL, flatShading: true})
-            )
-        }
-
-        if(type === Consts.BALL_TYPES.ORNAMENT1) {
-            let points = [];
-            for (let i = 0; i <= 16; i++) {
-                points.push(new Vector2(Math.sin(i * 0.195) * rad, i * rad / 7));
-            }
-            var geometry = new LatheBufferGeometry(points);
-            geometry.center()
-            return new Mesh(geometry, new MeshStandardMaterial({
-                color: 'white',
-                metalness: 0.3,
-                roughness: 0.3,
-                map: this.textures.ornament1
-            }))
-        }
-
-        if(type === Consts.BALL_TYPES.ORNAMENT2) {
-            const geo = new Geometry()
-            geo.merge(new SphereGeometry(rad,32))
-            const stem = new CylinderGeometry(rad/4,rad/4,0.5,8)
-            stem.translate(0,rad/4,0)
-            geo.merge(stem)
-            return new Mesh(geo, new MeshStandardMaterial({
-                color: 'white',
-                metalness: 0.3,
-                roughness: 0.3,
-                map: this.textures.ornament2
-            }))
-        }
-
-        throw new Error("unknown ball type",ball.type)
-    }
 }
 
 export class SkyBox {
@@ -586,53 +503,6 @@ export class ThreeSlingshot {
     }
 }
 
-function generateBallTextures() {
-    const textures = {}
-    {
-        const canvas = document.createElement('canvas')
-        canvas.width = 64
-        canvas.height = 16
-        const c = canvas.getContext('2d')
-
-
-        c.fillStyle = 'black'
-        c.fillRect(0, 0, canvas.width, canvas.height)
-        c.fillStyle = 'red'
-        c.fillRect(0, 0, 30, canvas.height)
-        c.fillStyle = 'white'
-        c.fillRect(30, 0, 4, canvas.height)
-        c.fillStyle = 'green'
-        c.fillRect(34, 0, 30, canvas.height)
-
-        textures.ornament1 = new CanvasTexture(canvas)
-        textures.ornament1.wrapS = RepeatWrapping
-        textures.ornament1.repeat.set(8, 1)
-    }
-
-
-    {
-        const canvas = document.createElement('canvas')
-        canvas.width = 128
-        canvas.height = 128
-        const c = canvas.getContext('2d')
-        c.fillStyle = 'black'
-        c.fillRect(0,0,canvas.width, canvas.height)
-
-        c.fillStyle = 'red'
-        c.fillRect(0, 0, canvas.width, canvas.height/2)
-        c.fillStyle = 'white'
-        c.fillRect(0, canvas.height/2, canvas.width, canvas.height/2)
-
-        const tex = new CanvasTexture(canvas)
-        tex.wrapS = RepeatWrapping
-        tex.wrapT = RepeatWrapping
-        tex.repeat.set(6,6)
-        textures.ornament2 = tex
-    }
-
-    return textures
-
-}
 function generateBlockTextures() {
     const materials = {}
     const textures = {}

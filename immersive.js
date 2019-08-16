@@ -1,5 +1,5 @@
 import {System} from "./node_modules/ecsy/build/ecsy.module.js"
-import {ThreeBall, ThreeScene} from './three.js'
+import {ThreeBall, ThreeScene, ThreeSlingshot} from './three.js'
 import {
     BufferGeometry,
     CylinderGeometry,
@@ -9,15 +9,17 @@ import {
     Mesh,
     MeshStandardMaterial,
     NormalBlending,
+    Object3D,
     RepeatWrapping,
     TextureLoader,
     Vector3
 } from "./node_modules/three/build/three.module.js"
 import {WaitForClick} from './mouse.js'
-import {BaseBall, Globals, toRad} from './common.js'
+import {BaseBall, BaseSlingshot, Globals, toRad} from './common.js'
 import {LevelInfo} from './levels.js'
 import {PhysicsBall} from './physics.js'
 import {PlaySoundEffect} from './audio.js'
+import {generateBallMesh} from './gfxutils.js'
 
 
 function printError(err) {
@@ -156,6 +158,13 @@ export class ImmersiveInputSystem extends System {
                         removed: {event:'EntityRemoved'}
                     }
                 },
+                slingshots: {
+                    components: [BaseSlingshot, ThreeSlingshot, VRController],
+                    events: {
+                        added: {event:'EntityAdded'},
+                        removed: {event:'EntityRemoved'}
+                    }
+                },
                 waits: {
                     components: [WaitForClick]
                 },
@@ -164,6 +173,10 @@ export class ImmersiveInputSystem extends System {
                 },
                 levels:{
                     components:[LevelInfo],
+                    events: {
+                        added: {event: 'EntityAdded'},
+                        removed: {event: 'EntityRemoved'}
+                    }
                 }
             }
         }
@@ -189,8 +202,11 @@ export class ImmersiveInputSystem extends System {
             });
             controller.vrcontroller.add(this.makeLaser())
 
-            controller.slingshot = this.makeSlingshot()
-            controller.vrcontroller.add(controller.slingshot)
+            const level = this.queries.levels[0].getComponent(LevelInfo)
+            ent.addComponent(BaseSlingshot, {ballType:level.ballType})
+            ent.addComponent(ThreeSlingshot)
+            this.makeImmersiveSlingshot(ent)
+            controller.vrcontroller.add(ent.getMutableComponent(ThreeSlingshot).obj)
             three.scene.add(controller.vrcontroller)
         })
     }
@@ -243,25 +259,30 @@ export class ImmersiveInputSystem extends System {
         return new Line(geometry, material)
     }
 
-    makeSlingshot() {
+
+    makeImmersiveSlingshot(ent) {
+        const base = ent.getMutableComponent(BaseSlingshot)
+        const thr = ent.getMutableComponent(ThreeSlingshot)
         const geo = new CylinderGeometry(0.05,0.05,1.0,16)
-        geo.rotateX(toRad(90))
+        geo.rotateX(toRad(-90))
+        geo.translate(0,0,-0.5)
+
         const tex = new TextureLoader().load('./textures/candycane.png')
         tex.wrapS = RepeatWrapping
         tex.wrapT = RepeatWrapping
         tex.repeat.set(1,10)
 
-        const launcher = new Mesh(
-            geo,
-            new MeshStandardMaterial({
-                color:'white',
-                metalness:0.3,
-                roughness:0.3,
-                map:tex
-            })
-        )
-        launcher.position.z = -0.5
-        return launcher
+        const cylinder = new Mesh(geo,new MeshStandardMaterial({
+            color:'white',
+            metalness:0.3,
+            roughness:0.3,
+            map:tex}))
+
+        thr.obj = new Object3D()
+        thr.obj.add(cylinder)
+        const globals = this.queries.globals[0].getMutableComponent(Globals)
+        thr.ball = generateBallMesh(base.ballType, 0.25, globals)
+        thr.obj.add(thr.ball)
     }
 }
 
