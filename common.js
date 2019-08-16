@@ -140,3 +140,9 @@ export class BaseRoom {
         this.type = Consts.ROOM_TYPES.FLOOR
     }
 }
+
+export class BaseSlingshot {
+    constructor() {
+        this.target = new Vector3()
+    }
+}

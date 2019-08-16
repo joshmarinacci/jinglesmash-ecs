@@ -14,9 +14,18 @@ import {
     Vector3
 } from "./node_modules/three/build/three.module.js"
 import {World} from "./node_modules/ecsy/build/ecsy.module.js"
-import {$, Consts, Globals, on} from './common.js'
-import {AudioSystem, SoundEffect} from './audio.js'
-import {SimpleText, SkyBox, ThreeGroup, ThreeScene, ThreeSystem, TransitionSphere} from './three.js'
+import {$, BaseSlingshot, Consts, Globals, on} from './common.js'
+import {SoundEffect} from './audio.js'
+import {
+    SimpleText,
+    SkyBox,
+    ThreeGroup,
+    ThreeScene,
+    ThreeSlingshot,
+    ThreeSystem,
+    TransitionSphere,
+    VRStats
+} from './three.js'
 import {loadStructure} from './levels.js'
 import {PhysicsSystem} from './physics.js'
 import {MouseInputSystem, MouseState, WaitForClick} from "./mouse.js"
@@ -24,7 +33,6 @@ import {ParticlesGroup, ParticlesSystem} from './particles.js'
 import {Anim, AnimationSystem, WaitForTime} from './animation.js'
 import {GameLogic} from './logic.js'
 import {ImmersiveInputSystem, VR_DETECTED, VR_PRESENTCHANGE, VRController, VRManager} from './immersive.js'
-import {VRStats} from './three.js'
 
 
 let game
@@ -175,6 +183,10 @@ function setupGame() {
     game.addComponent(Globals)
     game.addComponent(ThreeScene)
     game.addComponent(VRStats)
+
+    const slingshot = world.createEntity()
+    slingshot.addComponent(BaseSlingshot)
+    slingshot.addComponent(ThreeSlingshot)
 
     const globals = game.getMutableComponent(Globals)
     globals.transition = world.createEntity()

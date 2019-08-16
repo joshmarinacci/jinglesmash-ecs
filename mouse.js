@@ -1,5 +1,5 @@
 import {System} from "./node_modules/ecsy/build/ecsy.module.js"
-import {ThreeBall, ThreeScene} from './three.js'
+import {ThreeBall, ThreeScene, ThreeSlingshot} from './three.js'
 import {
     DoubleSide,
     Mesh,
@@ -9,7 +9,7 @@ import {
     Vector2,
     Vector3
 } from "./node_modules/three/build/three.module.js"
-import {BaseBall, Globals} from './common.js'
+import {BaseBall, BaseSlingshot, Globals} from './common.js'
 import {PlaySoundEffect} from './audio.js'
 import {PhysicsBall} from './physics.js'
 import {LevelInfo} from './levels.js'
@@ -40,6 +40,13 @@ export class MouseInputSystem extends System {
                 },
                 mouse: {
                     components: [MouseState],
+                    events: {
+                        added: {event:'EntityAdded'},
+                        removed: {event:'EntityRemoved'}
+                    }
+                },
+                slingshots: {
+                    components: [BaseSlingshot],
                     events: {
                         added: {event:'EntityAdded'},
                         removed: {event:'EntityRemoved'}
@@ -84,6 +91,10 @@ export class MouseInputSystem extends System {
                 if(intersects.length >= 1) {
                     const first = intersects[0]
                     mouse.mouseSphere.position.copy(first.point)
+                    this.queries.slingshots.forEach(ent => {
+                        const base = ent.getMutableComponent(BaseSlingshot)
+                        base.target.copy(first.point)
+                    })
                 }
             })
 
@@ -103,9 +114,10 @@ export class MouseInputSystem extends System {
                     const pos = mouse.mouseSphere.getWorldPosition()
                     three.stage.worldToLocal(pos)
 
+                    const slingshot = this.queries.slingshots[0].getComponent(ThreeSlingshot)
                     const delta = new Vector3()
                     delta.copy(mouse.mouseSphere.getWorldPosition())
-                    delta.sub(three.camera.getWorldPosition())
+                    delta.sub(slingshot.obj.getWorldPosition())
                     delta.normalize()
                     delta.multiplyScalar(10)
                     this.fireBall(pos,delta)

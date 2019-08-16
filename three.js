@@ -24,7 +24,7 @@ import {
     WebGLRenderer
 } from "./node_modules/three/build/three.module.js"
 import {System} from "./node_modules/ecsy/build/ecsy.module.js"
-import {$, BaseBall, BaseBlock, BaseRoom, Consts, pickOneValue, toRad} from './common.js'
+import {$, BaseBall, BaseBlock, BaseRoom, BaseSlingshot, Consts, pickOneValue, toRad} from './common.js'
 import {Anim} from './animation.js'
 
 export class ThreeGroup {
@@ -96,6 +96,13 @@ export class ThreeSystem extends System {
                         removed: {event:'EntityRemoved'}
                     }
                 },
+                slingshots: {
+                    components: [BaseSlingshot, ThreeSlingshot],
+                    events: {
+                        added: {event:'EntityAdded'},
+                        removed: {event:'EntityRemoved'}
+                    }
+                },
                 rooms: {
                     components: [BaseRoom],
                     events: {
@@ -124,6 +131,9 @@ export class ThreeSystem extends System {
     getStage() {
         return this.queries.three[0].getComponent(ThreeScene).stage
     }
+    getCamera() {
+        return this.queries.three[0].getComponent(ThreeScene).camera
+    }
     execute(delta) {
         this.events.three.added.forEach(this.initScene)
 
@@ -141,6 +151,9 @@ export class ThreeSystem extends System {
             const st = ent.getMutableComponent(SimpleText)
             sc.scene.add(st.obj)
         })
+
+        this.events.slingshots.added.forEach(ent => this.setupSlingshot(ent))
+        this.queries.slingshots.forEach(ent => this.syncSlingshot(ent))
 
         this.events.stats.added.forEach(ent => this.setupVRStats(ent.getMutableComponent(VRStats), sc))
         this.queries.stats.forEach(ent => this.redrawVRStats(ent.getMutableComponent(VRStats), sc))
@@ -382,6 +395,33 @@ export class ThreeSystem extends System {
         this.getStage().remove(thr.obj)
         ent.removeComponent(ThreeCubeSide)
     }
+
+    setupSlingshot(ent) {
+        const thr = ent.getMutableComponent(ThreeSlingshot)
+        const geo = new CylinderGeometry(0.05,0.05,1.0,16)
+        geo.rotateX(toRad(90))
+        geo.translate(0,0,0.5)
+
+        const tex = new TextureLoader().load('./textures/candycane.png')
+        tex.wrapS = RepeatWrapping
+        tex.wrapT = RepeatWrapping
+        tex.repeat.set(1,10)
+
+        thr.obj = new Mesh(geo,new MeshStandardMaterial({
+            color:'white',
+            metalness:0.3,
+            roughness:0.3,
+            map:tex}))
+        thr.obj.position.z = 4
+        thr.obj.position.y = 1.5
+        this.getStage().add(thr.obj)
+    }
+
+    syncSlingshot(ent) {
+        const thr = ent.getMutableComponent(ThreeSlingshot)
+        const base = ent.getMutableComponent(BaseSlingshot)
+        thr.obj.lookAt(base.target)
+    }
 }
 
 export class SkyBox {
@@ -476,6 +516,11 @@ export class ThreeBlock {
 }
 export class ThreeFloor {}
 export class ThreeCubeSide {}
+export class ThreeSlingshot {
+    constructor() {
+        this.obj = null
+    }
+}
 
 function generateBallTextures() {
     const textures = {}
