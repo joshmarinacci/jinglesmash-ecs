@@ -155,6 +155,7 @@ export class ThreeSystem extends System {
 
         this.events.slingshots.added.forEach(ent => this.setupSlingshot(ent))
         this.queries.slingshots.forEach(ent => this.syncSlingshot(ent))
+        this.events.slingshots.removed.forEach(ent => this.removeSlingshot(ent))
 
         this.events.stats.added.forEach(ent => this.setupVRStats(ent.getMutableComponent(VRStats), sc))
         this.queries.stats.forEach(ent => this.redrawVRStats(ent.getMutableComponent(VRStats), sc))
@@ -435,6 +436,12 @@ export class ThreeSystem extends System {
         } else {
             thr.ball.position.z = 1.0
         }
+    }
+
+    removeSlingshot(ent) {
+        const thr = ent.getMutableComponent(ThreeSlingshot)
+        this.getStage().remove(thr.obj)
+        ent.removeComponent(ThreeSlingshot)
     }
 
     generateBallMesh(type, radius) {

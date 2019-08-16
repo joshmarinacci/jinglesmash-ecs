@@ -1,10 +1,9 @@
 import {System} from "./node_modules/ecsy/build/ecsy.module.js"
-import {BaseBall, BaseBlock, Consts, Globals} from './common.js'
+import {BaseBall, BaseBlock, BaseRoom, BaseSlingshot, Consts, Globals} from './common.js'
 import {SimpleText, TransitionSphere} from './three.js'
 import {Anim, WaitForTime} from './animation.js'
 import {WaitForClick} from './mouse.js'
 import {LevelInfo, loadStructure} from './levels.js'
-import {BaseRoom} from './common.js'
 
 
 export class GameLogic extends System {
@@ -15,7 +14,8 @@ export class GameLogic extends System {
                 blocks: {components: [BaseBlock]},
                 balls: {components: [BaseBall]},
                 rooms: {components: [BaseRoom]},
-                levels: {components: [LevelInfo]}
+                levels: {components: [LevelInfo]},
+                slingshots: {components: [BaseSlingshot]},
             }
         }
     }
@@ -115,6 +115,7 @@ export class GameLogic extends System {
     resetLevelSettings(globals) {
         this.queries.balls.slice().forEach(ent => ent.removeComponent(BaseBall))
         this.queries.blocks.slice().forEach(ent => ent.removeComponent(BaseBlock))
+        this.queries.slingshots.slice().forEach(ent => ent.removeComponent(BaseSlingshot))
         globals.balls = 3
         globals.playing = true
         this.queries.rooms.slice().forEach(ent => ent.removeComponent(BaseRoom))
