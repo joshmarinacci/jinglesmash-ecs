@@ -398,6 +398,7 @@ export class ThreeSystem extends System {
     }
 
     setupSlingshot(ent) {
+        const base = ent.getMutableComponent(BaseSlingshot)
         const thr = ent.getMutableComponent(ThreeSlingshot)
         const geo = new CylinderGeometry(0.05,0.05,1.0,16)
         geo.rotateX(toRad(90))
@@ -419,7 +420,7 @@ export class ThreeSystem extends System {
         thr.obj.position.y = 1.5
         thr.obj.add(cylinder)
 
-        thr.ball = this.generateBallMesh(Consts.BALL_TYPES.ORNAMENT2, 0.25)
+        thr.ball = this.generateBallMesh(base.ballType, 0.25)
         thr.obj.add(thr.ball)
 
         this.getStage().add(thr.obj)
