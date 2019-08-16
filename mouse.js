@@ -100,26 +100,15 @@ export class MouseInputSystem extends System {
                         ent.removeComponent(WaitForClick)
                     })
                 } else {
-                    const globals = this.queries.globals[0].getMutableComponent(Globals)
-                    if(globals.balls <= 0) return
-                    globals.balls += -1
-                    const ball = this.world.createEntity()
+                    const pos = mouse.mouseSphere.getWorldPosition()
+                    three.stage.worldToLocal(pos)
+
                     const delta = new Vector3()
                     delta.copy(mouse.mouseSphere.getWorldPosition())
                     delta.sub(three.camera.getWorldPosition())
+                    delta.normalize()
                     delta.multiplyScalar(10)
-                    const pos = mouse.mouseSphere.getWorldPosition()
-                    three.stage.worldToLocal(pos)
-                    const level = this.queries.levels[0].getComponent(LevelInfo)
-
-                    ball.addComponent(BaseBall, {
-                        position: pos,
-                        velocity: delta,
-                        radius:level.ballRadius
-                    })
-                    ball.addComponent(ThreeBall)
-                    ball.addComponent(PhysicsBall)
-                    globals.click.addComponent(PlaySoundEffect)
+                    this.fireBall(pos,delta)
                 }
             })
         })
@@ -138,6 +127,24 @@ export class MouseInputSystem extends System {
                 mat.opacity = Math.min(mat.opacity + 0.10,1.0)
             }
         })
+    }
+
+    fireBall(pos,delta) {
+        const globals = this.queries.globals[0].getMutableComponent(Globals)
+        if(globals.balls <= 0) return
+        globals.balls += -1
+
+        const level = this.queries.levels[0].getComponent(LevelInfo)
+
+        const ball = this.world.createEntity()
+        ball.addComponent(BaseBall, {
+            position: pos,
+            velocity: delta,
+            radius:level.ballRadius
+        })
+        ball.addComponent(ThreeBall)
+        ball.addComponent(PhysicsBall)
+        globals.click.addComponent(PlaySoundEffect)
     }
 }
 
