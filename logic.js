@@ -115,7 +115,7 @@ export class GameLogic extends System {
     resetLevelSettings(globals) {
         this.queries.balls.slice().forEach(ent => ent.removeComponent(BaseBall))
         this.queries.blocks.slice().forEach(ent => ent.removeComponent(BaseBlock))
-        this.queries.slingshots.slice().forEach(ent => ent.removeComponent(BaseSlingshot))
+        // this.queries.slingshots.slice().forEach(ent => ent.getMutableComponent(BaseSlingshot))
         globals.balls = 3
         globals.playing = true
         this.queries.rooms.slice().forEach(ent => ent.removeComponent(BaseRoom))

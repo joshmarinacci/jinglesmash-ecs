@@ -12,6 +12,7 @@ export class Globals {
         this.collisionsActive = false
         this.immersive = false
         this.timeOfLastShot = 0
+        this.inputMode = Consts.INPUT_MODES.UNSELECTED
     }
 }
 
@@ -19,6 +20,11 @@ export class Globals {
 export const Consts = {
     BASE_URL :  "https://vr.josh.earth/360/doc/",
     docid : "tumble_level5",
+    INPUT_MODES: {
+        MOUSE:'MOUSE',
+        VR:'VR',
+        UNSELECTED:'UNSELECTED',
+    },
     BLOCK_TYPES : {
         FLOOR:'FLOOR',
         WALL:'WALL',

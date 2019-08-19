@@ -20,6 +20,7 @@ import {LevelInfo} from './levels.js'
 import {PhysicsBall} from './physics.js'
 import {PlaySoundEffect} from './audio.js'
 import {generateBallMesh} from './gfxutils.js'
+import {Consts} from './common'
 
 
 function printError(err) {
@@ -183,6 +184,10 @@ export class ImmersiveInputSystem extends System {
     }
 
     execute(delta) {
+        if(this.queries.globals.length < 1) return
+        const globals = this.queries.globals[0].getComponent(Globals)
+        if(globals.inputMode !== Consts.INPUT_MODES.VR) return
+
         this.events.controllers.added.forEach(ent => {
             const three = this.queries.three[0].getComponent(ThreeScene)
             const controller = ent.getMutableComponent(VRController)
@@ -200,10 +205,9 @@ export class ImmersiveInputSystem extends System {
                     this.controllerSelectEnd(ent)
                 }
             });
-            controller.vrcontroller.add(this.makeLaser())
 
-            const level = this.queries.levels[0].getComponent(LevelInfo)
-            ent.addComponent(BaseSlingshot, {ballType:level.ballType})
+            // const level = this.queries.levels[0].getComponent(LevelInfo)
+            ent.addComponent(BaseSlingshot, {ballType:Consts.BALL_TYPES.PLAIN})
             ent.addComponent(ThreeSlingshot)
             this.makeImmersiveSlingshot(ent)
             controller.vrcontroller.add(ent.getMutableComponent(ThreeSlingshot).obj)
@@ -241,7 +245,6 @@ export class ImmersiveInputSystem extends System {
     }
 
     controllerSelectStart(evt) {
-        console.log('unselected')
     }
 
     makeLaser() {

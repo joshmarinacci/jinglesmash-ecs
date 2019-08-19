@@ -14,7 +14,7 @@ import {
     Vector2,
     Vector3
 } from "./node_modules/three/build/three.module.js"
-import {BaseBall, BaseSlingshot, Globals, toRad} from './common.js'
+import {BaseBall, BaseSlingshot, Consts, Globals, toRad} from './common.js'
 import {PlaySoundEffect} from './audio.js'
 import {PhysicsBall} from './physics.js'
 import {LevelInfo} from './levels.js'
@@ -81,6 +81,7 @@ export class MouseInputSystem extends System {
     execute(delta) {
         if(this.queries.globals.length < 1) return
         const globals = this.queries.globals[0].getComponent(Globals)
+        if(globals.inputMode !== Consts.INPUT_MODES.MOUSE) return
         //hook up the mouse events
         this.events.mouse.added.forEach(ent => {
             const three = this.queries.three[0].getMutableComponent(ThreeScene)
@@ -145,6 +146,12 @@ export class MouseInputSystem extends System {
                     this.fireBall(pos,delta)
                 }
             })
+
+            const slingshot = this.world.createEntity()
+            slingshot.addComponent(BaseSlingshot, {ballType:Consts.BALL_TYPES.ORNAMENT1})
+            slingshot.addComponent(MouseSlingshot)
+            this.setupMouseSlingshot(slingshot)
+
         })
 
         //update the mouse indicator
@@ -162,20 +169,10 @@ export class MouseInputSystem extends System {
             }
         })
 
-        this.events.levels.added.forEach(ent => {
-            const level = ent.getComponent(LevelInfo)
-            const slingshot = this.world.createEntity()
-            slingshot.addComponent(BaseSlingshot, {ballType:level.ballType})
-            slingshot.addComponent(MouseSlingshot)
-            this.setupMouseSlingshot(slingshot)
-        })
         this.queries.slingshots.forEach(ent => {
             const thr = ent.getMutableComponent(MouseSlingshot)
             const base = ent.getMutableComponent(BaseSlingshot)
             thr.obj.lookAt(base.target)
-        })
-        this.events.levels.removed.forEach(ent => {
-            ent.removeComponent(BaseSlingshot)
         })
     }
 

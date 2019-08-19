@@ -123,10 +123,13 @@ function setupAudio(world) {
 
 function setupGui(core) {
     let detected = false
+    game.getMutableComponent(Globals).inputMode = Consts.INPUT_MODES.UNSELECTED
     on($("#enter-button"),'click',(e)=> {
+        const globals = game.getMutableComponent(Globals)
         e.preventDefault()
         e.stopPropagation()
         if(detected) {
+            globals.inputMode = Consts.INPUT_MODES.VR
             core.vrmanager.enterVR()
             //hook up the VR controllers
             world.createEntity().addComponent(VRController,{index:0})
@@ -135,8 +138,13 @@ function setupGui(core) {
             console.log("starting without VR")
             $("#overlay").style.visibility = 'hidden'
             //hook up the mouse state component
+            globals.inputMode = Consts.INPUT_MODES.MOUSE
             game.addComponent(MouseState)
         }
+
+        loadStructure(Consts.LEVEL_NAMES[globals.levelIndex],world).then(()=>{
+            console.log("loaded the level")
+        })
     })
 
     core.vrmanager = new VRManager(core.renderer)
@@ -154,7 +162,6 @@ function setupGui(core) {
         }
     })
     $("#enter-button").disabled = false
-
 }
 
 function setupGame() {
@@ -200,9 +207,6 @@ function setupGame() {
     setupGui(core)
 
 
-    loadStructure(Consts.LEVEL_NAMES[globals.levelIndex],world).then(()=>{
-        console.log("loaded the level")
-    })
 
 
     const parts = world.createEntity()
