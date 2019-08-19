@@ -95,6 +95,7 @@ export class GameLogic extends System {
         const globals = this.queries.globals[0].getMutableComponent(Globals)
         globals.playing = false
         globals.balls = 3
+        globals.levelIndex = -1
         globals.transition.getComponent(TransitionSphere).obj.visible = true
         globals.transition.addComponent(Anim, {prop: 'opacity', from: 0.0, to: 1.0, duration: 0.5})
         globals.instructions.getMutableComponent(SimpleText).obj.visible = true
