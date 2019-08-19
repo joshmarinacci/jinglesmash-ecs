@@ -1,4 +1,4 @@
-import {Quaternion, Euler, Vector3} from "./node_modules/three/build/three.module.js"
+import {Euler, Quaternion, Vector3} from "./node_modules/three/build/three.module.js"
 
 export class Globals {
     constructor() {

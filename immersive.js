@@ -15,12 +15,10 @@ import {
     Vector3
 } from "./node_modules/three/build/three.module.js"
 import {WaitForClick} from './mouse.js'
-import {BaseBall, BaseSlingshot, Globals, toRad} from './common.js'
+import {BaseBall, BaseSlingshot, Consts, Globals, toRad} from './common.js'
 import {LevelInfo} from './levels.js'
 import {PhysicsBall} from './physics.js'
 import {PlaySoundEffect} from './audio.js'
-import {generateBallMesh} from './gfxutils.js'
-import {Consts} from './common'
 
 
 function printError(err) {
