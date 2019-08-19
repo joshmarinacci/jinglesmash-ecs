@@ -220,8 +220,8 @@ export class MouseInputSystem extends System {
 
         thr.obj = new Object3D()
         thr.obj.add(cylinder)
-        thr.ball = generateBallMesh(base.ballType, 0.25, globals)
-        thr.obj.add(thr.ball)
+        // thr.ball = generateBallMesh(base.ballType, 0.25, globals)
+        // thr.obj.add(thr.ball)
         thr.obj.position.z = 4
         thr.obj.position.y = 1.5
         this.getStage().add(thr.obj)

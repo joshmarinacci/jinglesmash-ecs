@@ -284,8 +284,8 @@ export class ImmersiveInputSystem extends System {
         thr.obj = new Object3D()
         thr.obj.add(cylinder)
         const globals = this.queries.globals[0].getMutableComponent(Globals)
-        thr.ball = generateBallMesh(base.ballType, 0.25, globals)
-        thr.obj.add(thr.ball)
+        // thr.ball = generateBallMesh(base.ballType, 0.25, globals)
+        // thr.obj.add(thr.ball)
     }
 }
 
