@@ -38,23 +38,18 @@ export class GameLogic extends System {
                 return this.loseLevel()
             }
         }
+    }
 
-        if (globals.restart) {
-            // globals.physicsActive = true
-            globals.restart = false
-            this.resetLevelSettings(globals)
-        }
-        if (globals.nextLevel) {
-            globals.nextLevel = false
-            globals.levelIndex += 1
-            if (globals.levelIndex >= Consts.LEVEL_NAMES.length) {
-                this.wonGame()
-            } else {
-                //remove the old level
-                this.queries.levels.slice().forEach(ent => ent.removeComponent(LevelInfo))
-                this.resetLevelSettings(globals)
-            }
-        }
+    clickToRestartLevel() {
+        this.waitForClick(()=>{
+            this.resetLevelSettings()
+        })
+    }
+
+    clickToStartNextLevel() {
+        this.waitForClick(()=>{
+            this.startNextLevel()
+        })
     }
 
     loseLevel() {
@@ -64,12 +59,11 @@ export class GameLogic extends System {
         globals.collisionsActive = false
         globals.playing = false
         globals.transition.getComponent(TransitionSphere).obj.visible = true
-        globals.transition.addComponent(Anim, {prop: 'opacity', from: 0.0, to: 1.0, duration: 0.5})
+        globals.transition.addComponent(Anim, {prop: 'opacity',
+            from: 0.0, to: 1.0, duration: 0.5,
+            onDone:()=>this.clickToRestartLevel() })
         globals.instructions.getMutableComponent(SimpleText).obj.visible = true
         globals.instructions.getMutableComponent(SimpleText).setText("try again")
-        this.waitForClick(()=>{
-            this.queries.globals[0].getMutableComponent(Globals).restart = true
-        })
     }
 
     winLevel() {
@@ -79,15 +73,11 @@ export class GameLogic extends System {
         globals.playing = false
         globals.balls = 3
         globals.transition.getComponent(TransitionSphere).obj.visible = true
-        globals.transition.addComponent(Anim, {prop: 'opacity', from: 0.0, to: 1.0, duration: 0.5})
+        globals.transition.addComponent(Anim, {prop: 'opacity',
+            from: 0.0, to: 1.0, duration: 0.5,
+            onDone:()=> this.clickToStartNextLevel()})
         globals.instructions.getMutableComponent(SimpleText).obj.visible = true
         globals.instructions.getMutableComponent(SimpleText).setText("You won.\nNext Level")
-        const click = this.world.createEntity()
-        click.addComponent(WaitForClick, {
-            callback: () => {
-                this.queries.globals[0].getMutableComponent(Globals).nextLevel = true
-            }
-        })
     }
 
     wonGame() {
@@ -97,23 +87,25 @@ export class GameLogic extends System {
         globals.balls = 3
         globals.levelIndex = -1
         globals.transition.getComponent(TransitionSphere).obj.visible = true
-        globals.transition.addComponent(Anim, {prop: 'opacity', from: 0.0, to: 1.0, duration: 0.5})
+        globals.transition.addComponent(Anim, {prop: 'opacity',
+            from: 0.0, to: 1.0, duration: 0.5,
+            onDone:()=> this.clickToStartNextLevel()})
         globals.instructions.getMutableComponent(SimpleText).obj.visible = true
         globals.instructions.getMutableComponent(SimpleText).setText("You won the game")
-        const click = this.world.createEntity()
-        click.addComponent(WaitForClick, {
-            callback: () => {
-                this.queries.globals[0].getMutableComponent(Globals).nextLevel = true
-            }
-        })
     }
 
-    doWait(number, f) {
+    waitForTime(number, f) {
         const wait = this.world.createEntity()
         wait.addComponent(WaitForTime, { duration:number,callback: f})
     }
 
-    resetLevelSettings(globals) {
+    waitForClick(f) {
+        const click2 = this.world.createEntity()
+        click2.addComponent(WaitForClick, {callback: f})
+    }
+
+    resetLevelSettings() {
+        const globals = this.queries.globals[0].getMutableComponent(Globals)
         this.queries.balls.slice().forEach(ent => ent.removeComponent(BaseBall))
         this.queries.blocks.slice().forEach(ent => ent.removeComponent(BaseBlock))
         // this.queries.slingshots.slice().forEach(ent => ent.getMutableComponent(BaseSlingshot))
@@ -124,21 +116,26 @@ export class GameLogic extends System {
                 globals.transition.getComponent(TransitionSphere).obj.visible = false
             }})
         globals.instructions.getMutableComponent(SimpleText).obj.visible = false
-        this.doWait(0.5,()=>{
+        //stagger starting physics then collisions so the scene can settle first
+        this.waitForTime(0.5,()=>{
             loadStructure(Consts.LEVEL_NAMES[globals.levelIndex],this.world).then(()=>{
-                console.log("got the next level")
-                //turn on physics
                 globals.physicsActive = true
-                this.doWait(1.8,()=>{
-                    console.log("doing collisions")
+                this.waitForTime(1.8,()=>{
                     globals.collisionsActive = true
                 })
             })
         })
     }
 
-    waitForClick(f) {
-        const click2 = this.world.createEntity()
-        click2.addComponent(WaitForClick, {callback: f})
+    startNextLevel() {
+        const globals = this.queries.globals[0].getMutableComponent(Globals)
+        globals.levelIndex += 1
+        if (globals.levelIndex >= Consts.LEVEL_NAMES.length) {
+            this.wonGame()
+        } else {
+            //remove the old level
+            this.queries.levels.slice().forEach(ent => ent.removeComponent(LevelInfo))
+            this.resetLevelSettings()
+        }
     }
 }
