@@ -190,6 +190,7 @@ function setupGame() {
     globals.transition.addComponent(TransitionSphere,{color:'red'})
 
     //execute one tick to properly init everything
+    console.log("doing one tick")
     world.execute(0.1,0)
 
     const clock = new Clock();

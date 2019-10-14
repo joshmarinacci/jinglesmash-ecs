@@ -44,17 +44,21 @@ export class VRManager {
         if(!this.renderer) throw new Error("VR Manager requires a valid ThreeJS renderer instance")
         this.listeners = {}
 
-        if ('xr' in navigator) {
-            console.log("has webxr")
-            navigator.xr.requestDevice().then((device) => {
-                device.supportsSession({immersive: true, exclusive: true /* DEPRECATED */})
-                    .then(() => {
-                        this.device = device
-                        this.fire(VR_DETECTED,{})
-                    })
-                    .catch(printError);
-
+        if ( 'xr' in navigator && 'supportsSession' in navigator.xr ) {
+            this.isXR = true
+            navigator.xr.supportsSession( 'immersive-vr' ).then(()=>{
+                this.fire(VR_DETECTED,{})
             }).catch(printError);
+            // console.log("has webxr")
+            // navigator.xr.requestDevice().then((device) => {
+            //     device.supportsSession({immersive: true, exclusive: true /* DEPRECATED */})
+            //         .then(() => {
+                        // this.device = device
+                        // this.fire(VR_DETECTED,{})
+                    // })
+                    // .catch(printError);
+            //
+            // }).catch(printError);
         } else if ('getVRDisplays' in navigator) {
             console.log("has webvr")
 
@@ -96,6 +100,7 @@ export class VRManager {
                 } ).catch(printError);
 
         } else {
+            this.isXR = false
             // no vr
             console.log("no vr at all")
         }
@@ -114,6 +119,33 @@ export class VRManager {
     }
 
     enterVR() {
+        let currentSession = null
+        let renderer = this.renderer
+        const self = this
+        function onSessionStarted(session) {
+            console.log("session has started")
+            session.addEventListener('end',onSessionEnded)
+            renderer.vr.setSession(session)
+            currentSession = session
+            self.fire(VR_PRESENTCHANGE,{isPresenting:true})
+        }
+        function onSessionEnded() {
+            console.log("the session ended")
+            currentSession.removeEventListener('end',onSessionEnded)
+            renderer.vr.setSession(null)
+            self.fire(VR_PRESENTCHANGE,{isPresenting:false})
+            currentSession = null
+        }
+        if(this.isXR) {
+            console.log("doing xr enter")
+            if(currentSession === null) {
+                navigator.xr.requestSession('immersive-vr').then(onSessionStarted)
+            } else {
+                currentSession.end()
+            }
+            return
+        }
+
         if(!this.device) {
             console.warn("tried to connect VR on an invalid device")
             return
