@@ -25,6 +25,7 @@ import {Anim, AnimationSystem, WaitForTime} from './animation.js'
 import {GameLogic} from './logic.js'
 import {ImmersiveInputSystem, VR_DETECTED, VR_PRESENTCHANGE, VRController, VRManager} from './immersive.js'
 import {generateBallTextures} from './gfxutils.js'
+import {AudioSystem} from './audio.js'
 
 
 let game
@@ -169,7 +170,7 @@ function setupGame() {
 
     world.registerSystem(ThreeSystem)
     world.registerSystem(ImmersiveInputSystem)
-    // world.registerSystem(AudioSystem)
+    world.registerSystem(AudioSystem)
     world.registerSystem(PhysicsSystem)
     world.registerSystem(MouseInputSystem)
     world.registerSystem(ParticlesSystem)
