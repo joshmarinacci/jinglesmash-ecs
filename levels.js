@@ -1,22 +1,9 @@
-import {BaseBlock, BaseRoom, BaseSlingshot, Consts, pickOneValue} from './common.js'
+import {BaseBlock, BaseRoom, BaseSlingshot, Consts, LevelInfo, pickOneValue} from './common.js'
 import {PhysicsBlock} from './physics.js'
 import {Vector3} from "./node_modules/three/build/three.module.js"
 import {ThreeBlock, ThreeSlingshot} from './three.js'
 
 
-export class LevelInfo {
-    constructor() {
-        this.name = 'foo'
-        this.ballRadius = 0.25
-        this.ballMass = 5
-        this.ballType = pickOneValue(Consts.BALL_TYPES)
-        this.wallFriction = 0.0
-        this.wallRestitution = 0.0
-        this.gravity = new Vector3()
-        this.hasGravity = true
-        this.roomType = 'roomType'
-    }
-}
 
 export function loadStructure(name,world) {
     console.log("fetching",name)

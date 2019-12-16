@@ -15,8 +15,7 @@ import {
     Vector3
 } from "./node_modules/three/build/three.module.js"
 import {WaitForClick} from './mouse.js'
-import {BaseBall, BaseSlingshot, Consts, Globals, toRad} from './common.js'
-import {LevelInfo} from './levels.js'
+import {BaseBall, BaseSlingshot, Consts, Globals, LevelInfo, toRad} from './common.js'
 import {PhysicsBall} from './physics.js'
 import {PlaySoundEffect} from './audio.js'
 
@@ -172,61 +171,21 @@ export class VRController {
 
 }
 export class ImmersiveInputSystem extends System {
-    init() {
-        return {
-            queries:{
-                three: {
-                    components: [ThreeScene],
-                    events: {
-                        added: {event:'EntityAdded'},
-                        removed: {event:'EntityRemoved'}
-                    }
-                },
-                controllers: {
-                    components: [VRController],
-                    events: {
-                        added: {event:'EntityAdded'},
-                        removed: {event:'EntityRemoved'}
-                    }
-                },
-                slingshots: {
-                    components: [BaseSlingshot, ThreeSlingshot, VRController],
-                    events: {
-                        added: {event:'EntityAdded'},
-                        removed: {event:'EntityRemoved'}
-                    }
-                },
-                waits: {
-                    components: [WaitForClick]
-                },
-                globals: {
-                    components: [Globals]
-                },
-                levels:{
-                    components:[LevelInfo],
-                    events: {
-                        added: {event: 'EntityAdded'},
-                        removed: {event: 'EntityRemoved'}
-                    }
-                }
-            }
-        }
-    }
 
     execute(delta) {
-        if(this.queries.globals.length < 1) return
-        const globals = this.queries.globals[0].getComponent(Globals)
+        if(this.queries.globals.results.length < 1) return
+        const globals = this.queries.globals.results[0].getComponent(Globals)
         if(globals.inputMode !== Consts.INPUT_MODES.VR) return
 
-        this.events.controllers.added.forEach(ent => {
+        this.queries.controllers.added.forEach(ent => {
             const three = this.queries.three[0].getComponent(ThreeScene)
             const controller = ent.getMutableComponent(VRController)
             controller.vrcontroller = three.renderer.vr.getController(controller.index)
             controller.vrcontroller.addEventListener('selectstart', this.controllerSelectStart.bind(this));
             controller.vrcontroller.addEventListener('selectend', (evt)=>{
-                if(this.queries.waits.length>0) {
+                if(this.queries.waits.results.length>0) {
                     //see if we should block right now
-                    this.queries.waits.forEach(ent => {
+                    this.queries.waits.results.forEach(ent => {
                         const waiter = ent.getMutableComponent(WaitForClick)
                         if (waiter.callback) waiter.callback()
                         ent.removeComponent(WaitForClick)
@@ -236,7 +195,7 @@ export class ImmersiveInputSystem extends System {
                 }
             });
 
-            // const level = this.queries.levels[0].getComponent(LevelInfo)
+            // const level = this.queries.levels.results[0].getComponent(LevelInfo)
             ent.addComponent(BaseSlingshot, {ballType:Consts.BALL_TYPES.PLAIN})
             ent.addComponent(ThreeSlingshot)
             this.makeImmersiveSlingshot(ent)
@@ -261,7 +220,7 @@ export class ImmersiveInputSystem extends System {
         dirPoint.normalize()
         dirPoint.multiplyScalar(15)
 
-        const level = this.queries.levels[0].getComponent(LevelInfo)
+        const level = this.queries.levels.results[0].getComponent(LevelInfo)
         ball.addComponent(BaseBall, {
             position: endPoint,
             velocity: dirPoint,
@@ -313,9 +272,45 @@ export class ImmersiveInputSystem extends System {
 
         thr.obj = new Object3D()
         thr.obj.add(cylinder)
-        const globals = this.queries.globals[0].getMutableComponent(Globals)
+        const globals = this.queries.globals.results[0].getMutableComponent(Globals)
         // thr.ball = generateBallMesh(base.ballType, 0.25, globals)
         // thr.obj.add(thr.ball)
     }
 }
 
+ImmersiveInputSystem.queries = {
+    three: {
+        components: [ThreeScene],
+        listen: {
+            added: true,
+            removed: true
+        }
+    },
+    controllers: {
+        components: [VRController],
+        listen: {
+            added: true,
+            removed: true
+        }
+    },
+    slingshots: {
+        components: [BaseSlingshot, ThreeSlingshot, VRController],
+        listen: {
+            added: true,
+            removed: true
+        }
+    },
+    waits: {
+        components: [WaitForClick]
+    },
+    globals: {
+        components: [Globals]
+    },
+    levels:{
+        components:[LevelInfo],
+        listen: {
+            added: true,
+            removed: true,
+        }
+    }
+}

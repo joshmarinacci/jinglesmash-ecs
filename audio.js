@@ -16,43 +16,14 @@ export class PlaySoundEffect {
 }
 
 export class AudioSystem extends System {
-    init() {
-        // this.context = new window.AudioContext()
-        return {
-            queries: {
-                three: {
-                    components: [ThreeScene],
-                    events: {
-                        added: {event:'EntityAdded'},
-                        removed: {event:'EntityRemoved'}
-                    }
-                },
-                sounds: {
-                    components:[SoundEffect],
-                    events: {
-                        added: {event:'EntityAdded'},
-                        removed: {event:'EntityRemoved'}
-                    }
-                },
-                playing: {
-                    components: [SoundEffect, PlaySoundEffect],
-                    events: {
-                        added: {event: 'EntityAdded'},
-                        removed: {event: 'EntityRemoved'}
-                    }
-                }
-            }
-        }
-    }
-
     execute(delta) {
-        this.events.three.added.forEach(ent => {
+        this.queries.three.added.forEach(ent => {
             this.listener = new AudioListener()
             this.loader = new AudioLoader()
             const core = ent.getMutableComponent(ThreeScene)
             core.camera.add(this.listener)
         })
-        this.events.sounds.added.forEach(ent => {
+        this.queries.sounds.added.forEach(ent => {
             const effect = ent.getMutableComponent(SoundEffect)
             const sound = new Audio(this.listener)
             effect.sound = sound
@@ -81,7 +52,7 @@ export class AudioSystem extends System {
 
              */
         })
-        this.events.playing.added.forEach(ent => {
+        this.queries.playing.added.forEach(ent => {
             const sound = ent.getMutableComponent(SoundEffect)
             sound.sound.play()
             setTimeout(()=>{
@@ -98,4 +69,29 @@ export class AudioSystem extends System {
     //     source.start(0)
     //     return source
     // }
+}
+
+AudioSystem.queries = {
+    three: {
+        components: [ThreeScene],
+        listen: {
+            added: true,
+            removed: true
+        }
+    },
+    sounds: {
+        components:[SoundEffect],
+        listen: {
+            added: true,
+            removed: true
+        }
+    },
+    playing: {
+        components: [SoundEffect, PlaySoundEffect],
+        listen: {
+            added: true,
+            removed: true
+
+        }
+    }
 }

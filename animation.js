@@ -56,33 +56,12 @@ export class WaitForTime {
     }
 }
 export class AnimationSystem extends System {
-    init() {
-        return {
-            queries: {
-                anims: {
-                    components: [Anim],
-                    events: {
-                        added: {event:'EntityAdded'},
-                        removed: {event:'EntityRemoved'}
-                    }
-                },
-                waits: {
-                    components: [WaitForTime],
-                    events: {
-                        added: {event:'EntityAdded'},
-                        removed: {event:'EntityRemoved'}
-                    }
-                }
-            }
-        }
-    }
-
     execute(delta) {
-        this.events.anims.added.forEach(ent => {
+        this.queries.anims.added.forEach(ent => {
             const anim = ent.getMutableComponent(Anim)
             anim.startTime = performance.now()/1000
         })
-        this.queries.anims.forEach(ent => {
+        this.queries.anims.results.forEach(ent => {
             const anim = ent.getMutableComponent(Anim)
             const soFar = performance.now()/1000 - anim.startTime - anim.delay
             if(soFar < 0) return
@@ -102,12 +81,12 @@ export class AnimationSystem extends System {
 
         })
 
-        this.events.waits.added.forEach(ent => {
+        this.queries.waits.added.forEach(ent => {
             const wait = ent.getMutableComponent(WaitForTime)
             wait.startTime = performance.now()/1000
         })
 
-        this.queries.waits.forEach(ent => {
+        this.queries.waits.results.forEach(ent => {
             const wait = ent.getMutableComponent(WaitForTime)
             const soFar = performance.now()/1000 - wait.startTime
             if(soFar > wait.duration) {
@@ -140,5 +119,21 @@ export class AnimationSystem extends System {
         }
         throw new Error(`don't know how to set the property ${anim.prop}`)
 
+    }
+}
+AnimationSystem.queries = {
+    anims: {
+        components: [Anim],
+        listen: {
+            added: true,
+            removed: true
+        }
+    },
+    waits: {
+        components: [WaitForTime],
+        listen: {
+            added: true,
+            removed: true
+        }
     }
 }

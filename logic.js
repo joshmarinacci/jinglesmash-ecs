@@ -1,32 +1,19 @@
 import {System} from "./node_modules/ecsy/build/ecsy.module.js"
-import {BaseBall, BaseBlock, BaseRoom, BaseSlingshot, Consts, Globals} from './common.js'
+import {BaseBall, BaseBlock, BaseRoom, BaseSlingshot, Consts, Globals, LevelInfo} from './common.js'
 import {SimpleText, TransitionSphere} from './three.js'
 import {Anim, WaitForTime} from './animation.js'
 import {WaitForClick} from './mouse.js'
-import {LevelInfo, loadStructure} from './levels.js'
+import {loadStructure} from './levels.js'
 
 
 export class GameLogic extends System {
-    init() {
-        return {
-            queries: {
-                globals: {components: [Globals]},
-                blocks: {components: [BaseBlock]},
-                balls: {components: [BaseBall]},
-                rooms: {components: [BaseRoom]},
-                levels: {components: [LevelInfo]},
-                slingshots: {components: [BaseSlingshot]},
-            }
-        }
-    }
-
     execute(delta) {
-        const globals = this.queries.globals[0].getMutableComponent(Globals)
+        const globals = this.queries.globals.results[0].getMutableComponent(Globals)
         const time = performance.now()
         const waited5 = (time - globals.timeOfLastShot > 3000)
 
         if (globals.playing && globals.physicsActive && globals.collisionsActive) {
-            const crystals = this.queries.blocks.filter(ent => {
+            const crystals = this.queries.blocks.results.filter(ent => {
                 return ent.getComponent(BaseBlock).physicsType === Consts.BLOCK_TYPES.CRYSTAL
             })
             if (crystals.length <= 0 && waited5) {
@@ -54,7 +41,7 @@ export class GameLogic extends System {
 
     loseLevel() {
         console.log("you lost. must restart the level")
-        const globals = this.queries.globals[0].getMutableComponent(Globals)
+        const globals = this.queries.globals.results[0].getMutableComponent(Globals)
         globals.physicsActive = false
         globals.collisionsActive = false
         globals.playing = false
@@ -67,7 +54,7 @@ export class GameLogic extends System {
     }
 
     winLevel() {
-        const globals = this.queries.globals[0].getMutableComponent(Globals)
+        const globals = this.queries.globals.results[0].getMutableComponent(Globals)
         globals.physicsActive = false
         globals.collisionsActive = false
         globals.playing = false
@@ -82,7 +69,7 @@ export class GameLogic extends System {
 
     wonGame() {
         console.log("you won the game")
-        const globals = this.queries.globals[0].getMutableComponent(Globals)
+        const globals = this.queries.globals.results[0].getMutableComponent(Globals)
         globals.playing = false
         globals.balls = 3
         globals.levelIndex = -1
@@ -105,13 +92,13 @@ export class GameLogic extends System {
     }
 
     resetLevelSettings() {
-        const globals = this.queries.globals[0].getMutableComponent(Globals)
-        this.queries.balls.slice().forEach(ent => ent.removeComponent(BaseBall))
-        this.queries.blocks.slice().forEach(ent => ent.removeComponent(BaseBlock))
-        // this.queries.slingshots.slice().forEach(ent => ent.getMutableComponent(BaseSlingshot))
+        const globals = this.queries.globals.results[0].getMutableComponent(Globals)
+        this.queries.balls.results.slice().forEach(ent => ent.removeComponent(BaseBall))
+        this.queries.blocks.results.slice().forEach(ent => ent.removeComponent(BaseBlock))
+        // this.queries.slingshots.results.slice().forEach(ent => ent.getMutableComponent(BaseSlingshot))
         globals.balls = 3
         globals.playing = true
-        this.queries.rooms.slice().forEach(ent => ent.removeComponent(BaseRoom))
+        this.queries.rooms.results.slice().forEach(ent => ent.removeComponent(BaseRoom))
         globals.transition.addComponent(Anim, {prop: 'opacity', from: 1.0, to: 0.0, duration: 0.5, onDone:()=>{
                 globals.transition.getComponent(TransitionSphere).obj.visible = false
             }})
@@ -128,14 +115,23 @@ export class GameLogic extends System {
     }
 
     startNextLevel() {
-        const globals = this.queries.globals[0].getMutableComponent(Globals)
+        const globals = this.queries.globals.results[0].getMutableComponent(Globals)
         globals.levelIndex += 1
         if (globals.levelIndex >= Consts.LEVEL_NAMES.length) {
             this.wonGame()
         } else {
             //remove the old level
-            this.queries.levels.slice().forEach(ent => ent.removeComponent(LevelInfo))
+            this.queries.levels.results.slice().forEach(ent => ent.removeComponent(LevelInfo))
             this.resetLevelSettings()
         }
     }
+}
+
+GameLogic.queries = {
+    globals: {components: [Globals]},
+    blocks: {components: [BaseBlock]},
+    balls: {components: [BaseBall]},
+    rooms: {components: [BaseRoom]},
+    levels: {components: [LevelInfo]},
+    slingshots: {components: [BaseSlingshot]},
 }

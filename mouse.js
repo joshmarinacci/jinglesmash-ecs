@@ -14,11 +14,9 @@ import {
     Vector2,
     Vector3
 } from "./node_modules/three/build/three.module.js"
-import {BaseBall, BaseSlingshot, Consts, Globals, toRad} from './common.js'
+import {BaseBall, BaseSlingshot, Consts, Globals, LevelInfo, MouseSlingshot, toRad} from './common.js'
 import {PlaySoundEffect} from './audio.js'
 import {PhysicsBall} from './physics.js'
-import {LevelInfo} from './levels.js'
-import {generateBallMesh} from './gfxutils.js'
 
 
 export class MouseState {
@@ -33,58 +31,15 @@ export class MouseState {
     }
 }
 
-export class MouseSlingshot {
-
-}
 
 export class MouseInputSystem extends System {
-    init() {
-        return {
-            queries: {
-                three: {
-                    components: [ThreeScene],
-                    events: {
-                        added: {event:'EntityAdded'},
-                        removed: {event:'EntityRemoved'}
-                    }
-                },
-                mouse: {
-                    components: [MouseState],
-                    events: {
-                        added: {event:'EntityAdded'},
-                        removed: {event:'EntityRemoved'}
-                    }
-                },
-                slingshots: {
-                    components: [BaseSlingshot, MouseSlingshot],
-                    events: {
-                        added: {event:'EntityAdded'},
-                        removed: {event:'EntityRemoved'}
-                    }
-                },
-                waits: {
-                    components: [WaitForClick]
-                },
-                globals: {
-                    components: [Globals]
-                },
-                levels:{
-                    components:[LevelInfo],
-                    events: {
-                        added: {event: 'EntityAdded'},
-                        removed: {event: 'EntityRemoved'}
-                    }
-                }
-            }
-        }
-    }
     execute(delta) {
-        if(this.queries.globals.length < 1) return
-        const globals = this.queries.globals[0].getComponent(Globals)
+        if(this.queries.globals.results.length < 1) return
+        const globals = this.queries.globals.results[0].getComponent(Globals)
         if(globals.inputMode !== Consts.INPUT_MODES.MOUSE) return
         //hook up the mouse events
-        this.events.mouse.added.forEach(ent => {
-            const three = this.queries.three[0].getMutableComponent(ThreeScene)
+        this.queries.mouse.added.forEach(ent => {
+            const three = this.queries.three.results[0].getMutableComponent(ThreeScene)
             const mouse = ent.getMutableComponent(MouseState)
             mouse.position.set(0,1.5,5)
             three.scene.add(mouse.mouseSphere)
@@ -106,7 +61,7 @@ export class MouseInputSystem extends System {
                 if(intersects.length >= 1) {
                     const first = intersects[0]
                     mouse.mouseSphere.position.copy(first.point)
-                    this.queries.slingshots.forEach(ent => {
+                    this.queries.slingshots.results.forEach(ent => {
                         const base = ent.getMutableComponent(BaseSlingshot)
                         base.target.copy(first.point)
                     })
@@ -115,20 +70,20 @@ export class MouseInputSystem extends System {
 
             three.renderer.domElement.addEventListener('mousedown',(e)=>{
                 mouse.pressed = true
-                this.queries.slingshots.forEach(ent => {
+                this.queries.slingshots.results.forEach(ent => {
                     const slingshot = ent.getMutableComponent(BaseSlingshot)
                     slingshot.pressed = true
                 })
             })
             three.renderer.domElement.addEventListener('mouseup',(e)=>{
-                this.queries.slingshots.forEach(ent => {
+                this.queries.slingshots.results.forEach(ent => {
                     const slingshot = ent.getMutableComponent(BaseSlingshot)
                     slingshot.pressed = false
                 })
                 mouse.pressed = false
-                if(this.queries.waits.length>0) {
+                if(this.queries.waits.results.length>0) {
                     //see if we should block right now
-                    this.queries.waits.forEach(ent => {
+                    this.queries.waits.results.forEach(ent => {
                         const waiter = ent.getMutableComponent(WaitForClick)
                         if (waiter.callback) waiter.callback()
                         ent.removeComponent(WaitForClick)
@@ -137,7 +92,7 @@ export class MouseInputSystem extends System {
                     const pos = mouse.mouseSphere.getWorldPosition()
                     three.stage.worldToLocal(pos)
 
-                    const slingshot = this.queries.slingshots[0].getComponent(MouseSlingshot)
+                    const slingshot = this.queries.slingshots.results[0].getComponent(MouseSlingshot)
                     const delta = new Vector3()
                     delta.copy(mouse.mouseSphere.getWorldPosition())
                     delta.sub(slingshot.obj.getWorldPosition())
@@ -155,7 +110,7 @@ export class MouseInputSystem extends System {
         })
 
         //update the mouse indicator
-        this.queries.mouse.forEach(ent => {
+        this.queries.mouse.results.forEach(ent => {
             const mouse = ent.getMutableComponent(MouseState)
             if(globals.immersive === true) {
                 mouse.mouseSphere.visible = false
@@ -169,7 +124,7 @@ export class MouseInputSystem extends System {
             }
         })
 
-        this.queries.slingshots.forEach(ent => {
+        this.queries.slingshots.results.forEach(ent => {
             const thr = ent.getMutableComponent(MouseSlingshot)
             const base = ent.getMutableComponent(BaseSlingshot)
             thr.obj.lookAt(base.target)
@@ -177,11 +132,11 @@ export class MouseInputSystem extends System {
     }
 
     fireBall(pos,delta) {
-        const globals = this.queries.globals[0].getMutableComponent(Globals)
+        const globals = this.queries.globals.results[0].getMutableComponent(Globals)
         if(globals.balls <= 0) return
         globals.balls += -1
 
-        const level = this.queries.levels[0].getComponent(LevelInfo)
+        const level = this.queries.levels.results[0].getComponent(LevelInfo)
 
         const ball = this.world.createEntity()
         ball.addComponent(BaseBall, {
@@ -196,11 +151,11 @@ export class MouseInputSystem extends System {
     }
 
     getStage() {
-        return this.queries.three[0].getComponent(ThreeScene).stage
+        return this.queries.three.results[0].getComponent(ThreeScene).stage
     }
 
     setupMouseSlingshot(ent) {
-        const globals = this.queries.globals[0].getComponent(Globals)
+        const globals = this.queries.globals.results[0].getComponent(Globals)
         const base = ent.getMutableComponent(BaseSlingshot)
         const thr = ent.getMutableComponent(MouseSlingshot)
         const geo = new CylinderGeometry(0.05,0.05,1.0,16)
@@ -227,9 +182,45 @@ export class MouseInputSystem extends System {
         this.getStage().add(thr.obj)
     }
 }
-
 export class WaitForClick {
     constructor() {
         this.callback = null //function to be called when the click happens
+    }
+}
+
+MouseInputSystem.queries = {
+    three: {
+        components: [ThreeScene],
+        listen: {
+            added: true,
+            removed: true
+        }
+    },
+    mouse: {
+        components: [MouseState],
+        listen: {
+            added: true,
+            removed: true
+        }
+    },
+    slingshots: {
+        components: [BaseSlingshot, MouseSlingshot],
+        listen: {
+            added: true,
+            removed: true
+        }
+    },
+    waits: {
+        components: [WaitForClick]
+    },
+    globals: {
+        components: [Globals]
+    },
+    levels:{
+        components:[LevelInfo],
+        listen: {
+            added: true,
+            removed: true
+        }
     }
 }

@@ -10,7 +10,7 @@
   "license": "ISC",
   "dependencies": {
     "cannon": "^0.6.2",
-    "ecsy": "^0.1.0",
+    "ecsy": "^0.1.4",
     "three": "^0.107.0"
   }
 }

@@ -21,9 +21,8 @@ import {
     WebGLRenderer
 } from "./node_modules/three/build/three.module.js"
 import {System} from "./node_modules/ecsy/build/ecsy.module.js"
-import {$, BaseBall, BaseBlock, BaseRoom, BaseSlingshot, Consts, Globals, toRad} from './common.js'
+import {$, BaseBall, BaseBlock, BaseRoom, BaseSlingshot, Consts, Globals, MouseSlingshot, toRad} from './common.js'
 import {Anim} from './animation.js'
-import {MouseSlingshot} from './mouse.js'
 import {generateBallMesh} from './gfxutils.js'
 
 export class ThreeGroup {
@@ -42,133 +41,41 @@ export class ThreeScene {
 export class ThreeSystem extends System {
     init() {
         this.materials = generateBlockTextures()
-
-        return {
-            queries: {
-                globals: {
-                    components: [Globals]
-                },
-                three: {
-                    components: [ThreeScene],
-                    events: {
-                        added: {event:'EntityAdded'},
-                        removed: {event:'EntityRemoved'}
-                    }
-                },
-                skyboxes: {
-                    components: [SkyBox],
-                    events: {
-                        added: {event:'EntityAdded'},
-                        removed: {event:'EntityRemoved'}
-                    }
-                },
-                transitions: {
-                    components: [TransitionSphere],
-                    events: {
-                        added: {event:'EntityAdded'},
-                        removed: {event:'EntityRemoved'}
-                    }
-                },
-                stats: {
-                    components: [VRStats],
-                    events: {
-                        added: {event:'EntityAdded'},
-                        removed: {event:'EntityRemoved'}
-                    }
-                },
-                texts: {
-                    components: [SimpleText],
-                    events: {
-                        added: {event:'EntityAdded'},
-                        removed: {event:'EntityRemoved'}
-                    }
-                },
-                balls: {
-                    components: [BaseBall, ThreeBall],
-                    events: {
-                        added: {event:'EntityAdded'},
-                        removed: {event:'EntityRemoved'}
-                    }
-                },
-                blocks: {
-                    components: [BaseBlock, ThreeBlock],
-                    events: {
-                        added: {event:'EntityAdded'},
-                        removed: {event:'EntityRemoved'}
-                    }
-                },
-                slingshots: {
-                    components: [BaseSlingshot, ThreeSlingshot],
-                    events: {
-                        added: {event:'EntityAdded'},
-                        removed: {event:'EntityRemoved'}
-                    }
-                },
-                mouseslingshots: {
-                    components: [BaseSlingshot, MouseSlingshot],
-                    events: {
-                        added: {event:'EntityAdded'},
-                        removed: {event:'EntityRemoved'}
-                    }
-                },
-                rooms: {
-                    components: [BaseRoom],
-                    events: {
-                        added: {event:'EntityAdded'},
-                        removed: {event:'EntityRemoved'}
-                    }
-                },
-                floors: {
-                    components: [ThreeFloor],
-                    events: {
-                        added: {event:'EntityAdded'},
-                        removed: {event:'EntityRemoved'}
-                    }
-                },
-                sides: {
-                    components: [ThreeCubeSide],
-                    events: {
-                        added: {event:'EntityAdded'},
-                        removed: {event:'EntityRemoved'}
-                    }
-                }
-            }
-        }
     }
 
     getStage() {
-        return this.queries.three[0].getComponent(ThreeScene).stage
+        return this.queries.three.results[0].getComponent(ThreeScene).stage
     }
     getCamera() {
-        return this.queries.three[0].getComponent(ThreeScene).camera
+        return this.queries.three.results[0].getComponent(ThreeScene).camera
     }
     execute(delta) {
-        this.events.three.added.forEach(this.initScene)
+        this.queries.three.added.forEach(this.initScene)
 
-        const sc = this.queries.three[0].getMutableComponent(ThreeScene)
-        this.events.skyboxes.added.forEach(ent => {
+        const sc = this.queries.three.results[0].getMutableComponent(ThreeScene)
+        this.queries.skyboxes.added.forEach(ent => {
             sc.scene.add(ent.getComponent(SkyBox).obj)
         })
 
-        this.events.transitions.added.forEach(ent => {
+        this.queries.transitions.added.forEach(ent => {
             const sp = ent.getMutableComponent(TransitionSphere)
             this.setupTransitionSphere(sp, sc)
         })
 
-        this.events.texts.added.forEach(ent => {
+        this.queries.texts.added.forEach(ent => {
             const st = ent.getMutableComponent(SimpleText)
             sc.scene.add(st.obj)
         })
 
 
-        this.events.stats.added.forEach(ent => this.setupVRStats(ent.getMutableComponent(VRStats), sc))
-        this.queries.stats.forEach(ent => this.redrawVRStats(ent.getMutableComponent(VRStats), sc))
+        this.queries.stats.added.forEach(ent => this.setupVRStats(ent.getMutableComponent(VRStats), sc))
+        this.queries.stats.results.forEach(ent => this.redrawVRStats(ent.getMutableComponent(VRStats), sc))
 
-        this.events.balls.added.forEach(ent => this.setupBall(ent))
-        this.queries.balls.forEach(ent => this.syncBall(ent))
-        this.events.balls.removed.forEach(ent => this.removeBall(ent))
+        this.queries.balls.added.forEach(ent => this.setupBall(ent))
+        this.queries.balls.results.forEach(ent => this.syncBall(ent))
+        this.queries.balls.removed.forEach(ent => this.removeBall(ent))
 
-        this.events.blocks.added.forEach((ent, i) => {
+        this.queries.blocks.added.forEach((ent, i) => {
             this.setupBlock(ent)
             //bounce it in
             ent.getComponent(ThreeBlock).obj.scale.set(0.01, 0.01, 0.01)
@@ -181,19 +88,19 @@ export class ThreeSystem extends System {
                 delay: 0.05 * i
             })
         })
-        this.queries.blocks.forEach(ent => this.syncBlock(ent))
-        this.events.blocks.removed.forEach(ent => this.removeBlock(ent))
+        this.queries.blocks.results.forEach(ent => this.syncBlock(ent))
+        this.queries.blocks.removed.forEach(ent => this.removeBlock(ent))
 
-        this.events.rooms.added.forEach(ent => this.setupRoom(ent))
-        this.events.floors.added.forEach(ent => this.setupFloor(ent))
-        this.events.sides.added.forEach(ent => this.setupCubeSide(ent))
+        this.queries.rooms.added.forEach(ent => this.setupRoom(ent))
+        this.queries.floors.added.forEach(ent => this.setupFloor(ent))
+        this.queries.sides.added.forEach(ent => this.setupCubeSide(ent))
 
 
-        this.events.rooms.removed.forEach(ent => {
-            this.queries.floors.slice().forEach(ent => {
+        this.queries.rooms.removed.forEach(ent => {
+            this.queries.floors.results.slice().forEach(ent => {
                 this.removeFloor(ent)
             })
-            this.queries.sides.slice().forEach(ent => {
+            this.queries.sides.results.slice().forEach(ent => {
                 this.removeCubeSide(ent)
             })
         })
@@ -297,7 +204,7 @@ export class ThreeSystem extends System {
     setupBall(ent) {
         const base = ent.getComponent(BaseBall)
         const thr = ent.getMutableComponent(ThreeBall)
-        const globals = this.queries.globals[0].getMutableComponent(Globals)
+        const globals = this.queries.globals.results[0].getMutableComponent(Globals)
         thr.tex = globals.textures[base.type]
         thr.type = base.type
         thr.obj = generateBallMesh(base.type,base.radius,globals)
@@ -315,7 +222,7 @@ export class ThreeSystem extends System {
 
     removeBall(ent) {
         const thr = ent.getMutableComponent(ThreeBall)
-        const sc = this.queries.three[0].getComponent(ThreeScene)
+        const sc = this.queries.three.results[0].getComponent(ThreeScene)
         this.getStage().remove(thr.obj)
         ent.removeComponent(ThreeBall)
     }
@@ -398,7 +305,7 @@ export class ThreeSystem extends System {
 
     removeCubeSide(ent) {
         const thr = ent.getMutableComponent(ThreeCubeSide)
-        const sc = this.queries.three[0].getComponent(ThreeScene)
+        const sc = this.queries.three.results[0].getComponent(ThreeScene)
         this.getStage().remove(thr.obj)
         ent.removeComponent(ThreeCubeSide)
     }
@@ -610,3 +517,95 @@ function generateBlockTextures() {
     // this.materials[BLOCK_TYPES.WALL] = new MeshLambertMaterial({color:'red'})
     return materials
 }
+
+
+ThreeSystem.queries = {
+    globals: {
+        components: [Globals]
+    },
+    three: {
+        components: [ThreeScene],
+        listen: {
+            added: true,
+            removed: true,
+        }
+    },
+    skyboxes: {
+        components: [SkyBox],
+        listen: {
+            added: true,
+            removed: true
+        }
+    },
+    transitions: {
+        components: [TransitionSphere],
+        listen: {
+            added: true,
+            removed: true
+        }
+    },
+    stats: {
+        components: [VRStats],
+        listen: {
+            added: true,
+            removed: true
+        }
+    },
+    texts: {
+        components: [SimpleText],
+        listen: {
+            added: true,
+            removed: true
+        }
+    },
+    balls: {
+        components: [BaseBall, ThreeBall],
+        listen: {
+            added: true,
+            removed: true
+        }
+    },
+    blocks: {
+        components: [BaseBlock, ThreeBlock],
+        listen: {
+            added: true,
+            removed: true
+        }
+    },
+    slingshots: {
+        components: [BaseSlingshot, ThreeSlingshot],
+        listen: {
+            added: true,
+            removed: true
+        }
+    },
+    mouseslingshots: {
+        components: [BaseSlingshot, MouseSlingshot],
+        listen: {
+            added: true,
+            removed: true
+        }
+    },
+    rooms: {
+        components: [BaseRoom],
+        listen: {
+            added: true,
+            removed: true
+        }
+    },
+    floors: {
+        components: [ThreeFloor],
+        listen: {
+            added: true,
+            removed: true
+        }
+    },
+    sides: {
+        components: [ThreeCubeSide],
+        listen: {
+            added: true,
+            removed: true
+        }
+    }
+}
+

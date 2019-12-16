@@ -162,6 +162,7 @@ function setupGui(core) {
             $("#overlay").style.visibility = 'visible'
         }
     })
+
     $("#enter-button").disabled = false
 }
 

@@ -48,39 +48,39 @@ export class ParticlesSystem extends System {
             }
         }
         this.psystem = new GPUParticleSystem(options)
-        return {
-            queries: {
-                three: {
-                    components: [ThreeScene],
-                    events: {
-                        added: {event:'EntityAdded'},
-                        removed: {event:'EntityRemoved'}
-                    }
-                },
-                groups: {
-                    components: [ParticlesGroup],
-                    events: {
-                        added: {event:'EntityAdded'},
-                        removed: {event:'EntityRemoved'}
-                    }
-                }
-            }
-        }
     }
 
     execute(delta) {
         this.totalTime += delta
 
-        this.events.three.added.forEach(ent => {
+        this.queries.three.added.forEach(ent => {
             const three = ent.getMutableComponent(ThreeScene)
             if (!three.scene) return
             three.stage.add(this.psystem)
         })
 
-        this.events.groups.added.forEach(ent => {
+        this.queries.groups.added.forEach(ent => {
             const group = ent.getMutableComponent(ParticlesGroup)
             this.pendingParticles.push(group.position)
         })
         this.psystem.update(this.totalTime)
+    }
+}
+
+
+ParticlesSystem.queries =  {
+    three: {
+        components: [ThreeScene],
+        listen: {
+            added: true,
+            removed: true
+        }
+    },
+    groups: {
+        components: [ParticlesGroup],
+        listen: {
+            added: true,
+            removed: true
+        }
     }
 }

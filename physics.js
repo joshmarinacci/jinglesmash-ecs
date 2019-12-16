@@ -1,8 +1,7 @@
 import {System} from "./node_modules/ecsy/build/ecsy.module.js"
-import {BaseBall, BaseBlock, BaseRoom, Consts, Globals} from './common.js'
+import {BaseBall, BaseBlock, BaseRoom, Consts, Globals, LevelInfo} from './common.js'
 import {ThreeScene} from './three.js'
 import {ParticlesGroup} from './particles.js'
-import {LevelInfo} from './levels.js'
 import {Vector3} from "./node_modules/three/build/three.module.js"
 import {toRad} from './common.js'
 
@@ -24,64 +23,16 @@ export class PhysicsSystem extends System {
         this.blockCollide_handler = this.blockCollided.bind(this)
         this.cannonWorld = new CANNON.World();
         this.cannonWorld.gravity.set(0, -9.82, 0);
-        return {
-            queries: {
-                three: { components: [ThreeScene], },
-                globals: {components:[Globals]},
-                blocks: {
-                    components:[BaseBlock,PhysicsBlock],
-                    events: {
-                        added: { event: 'EntityAdded'},
-                        removed: { event: 'EntityRemoved'}
-                    }
-                },
-                rooms: {
-                    components:[BaseRoom],
-                    events: {
-                        added: {event:'EntityAdded'},
-                        removed: {event:'EntityRemoved'}
-                    }
-                },
-                floors: {
-                    components:[PhysicsFloor],
-                    events: {
-                        added: {event:'EntityAdded'},
-                        removed: {event:'EntityRemoved'}
-                    }
-                },
-                cubesides: {
-                    components:[PhysicsCubeSide],
-                    events: {
-                        added: {event:'EntityAdded'},
-                        removed: {event:'EntityRemoved'}
-                    }
-                },
-                balls: {
-                    components:[BaseBall,PhysicsBall],
-                    events: {
-                        added: {event:'EntityAdded'},
-                        removed: {event:'EntityRemoved'}
-                    }
-                },
-                levels:{
-                    components:[LevelInfo],
-                    events: {
-                        added: {event:'EntityAdded'},
-                        removed: {event:'EntityRemoved'}
-                    }
-                }
-            }
-        }
     }
     execute(delta) {
-        const globals = this.queries.globals[0].getMutableComponent(Globals)
+        const globals = this.queries.globals.results[0].getMutableComponent(Globals)
 
-        this.events.blocks.added.forEach((ent,i) => this.addBlock(ent,i))
+        this.queries.blocks.added.forEach((ent,i) => this.addBlock(ent,i))
         if(globals.physicsActive) this.cannonWorld.step(fixedTimeStep, delta, maxSubSteps)
-        this.queries.blocks.forEach(ent => this.syncBlock(ent))
-        this.events.blocks.removed.forEach(ent => this.removeBlock(ent))
+        this.queries.blocks.results.forEach(ent => this.syncBlock(ent))
+        this.queries.blocks.removed.forEach(ent => this.removeBlock(ent))
 
-        this.events.rooms.added.forEach(ent => {
+        this.queries.rooms.added.forEach(ent => {
             const base = ent.getComponent(BaseRoom)
             if(base.type === Consts.ROOM_TYPES.FLOOR) {
                 ent.addComponent(PhysicsFloor)
@@ -96,17 +47,17 @@ export class PhysicsSystem extends System {
                 this.world.createEntity().addComponent(PhysicsCubeSide, {axis: new Vector3(1,0,0), angle: toRad(180), pos:new Vector3(0,0,+size) })
             }
         })
-        this.events.rooms.removed.forEach(ent =>{
-            this.queries.floors.slice().forEach(ent => {
+        this.queries.rooms.removed.forEach(ent =>{
+            this.queries.floors.results.slice().forEach(ent => {
                 this.cannonWorld.removeBody(ent.getComponent(PhysicsFloor).body)
                 ent.removeComponent(PhysicsFloor)
             })
-            this.queries.cubesides.slice().forEach(ent => {
+            this.queries.cubesides.results.slice().forEach(ent => {
                 this.cannonWorld.removeBody(ent.getComponent(PhysicsCubeSide).body)
                 ent.removeComponent(PhysicsCubeSide)
             })
         })
-        this.events.floors.added.forEach(ent => {
+        this.queries.floors.added.forEach(ent => {
             const floor = ent.getMutableComponent(PhysicsFloor)
             floor.body = new CANNON.Body({
                 mass: 0 // mass == 0 makes the body static
@@ -116,7 +67,7 @@ export class PhysicsSystem extends System {
             floor.body.addShape(new CANNON.Plane());
             this.cannonWorld.addBody(floor.body);
         })
-        this.events.cubesides.added.forEach(ent => {
+        this.queries.cubesides.added.forEach(ent => {
             const side = ent.getMutableComponent(PhysicsCubeSide)
             side.body = new CANNON.Body({ mass:0 })
             side.body.user_entity = ent
@@ -126,11 +77,11 @@ export class PhysicsSystem extends System {
             this.cannonWorld.addBody(side.body);
         })
 
-        this.events.balls.added.forEach(ent => this.addBall(ent))
-        this.queries.balls.forEach(ent => this.syncBall(ent))
-        this.events.balls.removed.forEach(ent => this.removeBall(ent))
+        this.queries.balls.added.forEach(ent => this.addBall(ent))
+        this.queries.balls.results.forEach(ent => this.syncBall(ent))
+        this.queries.balls.removed.forEach(ent => this.removeBall(ent))
 
-        this.events.levels.added.forEach(ent => this.addLevel(ent))
+        this.queries.levels.added.forEach(ent => this.addLevel(ent))
     }
     rebuildWallMaterial(info) {
         // console.log("rebuilding the wall material",info.wallFriction, info.wallRestitution)
@@ -173,7 +124,7 @@ export class PhysicsSystem extends System {
     }
 
     blockCollided(e){
-        const globals = this.queries.globals[0].getMutableComponent(Globals)
+        const globals = this.queries.globals.results[0].getMutableComponent(Globals)
         if(!globals.collisionsActive) return
         if(Math.abs(e.contact.getImpactVelocityAlongNormal() < 1.0)) return
         if(Math.abs(e.contact.getImpactVelocityAlongNormal() < 1.5)) return
@@ -199,8 +150,8 @@ export class PhysicsSystem extends System {
 
 
     addBall(ent) {
-        const globals = this.queries.globals[0].getMutableComponent(Globals)
-        const level = this.queries.levels[0].getComponent(LevelInfo)
+        const globals = this.queries.globals.results[0].getMutableComponent(Globals)
+        const level = this.queries.levels.results[0].getComponent(LevelInfo)
         globals.timeOfLastShot = performance.now()
 
         const phys = ent.getMutableComponent(PhysicsBall)
@@ -253,5 +204,51 @@ export class PhysicsSystem extends System {
     }
 }
 
+PhysicsSystem.queries = {
+    three: {components: [ThreeScene],},
+    globals: {components: [Globals]},
+    blocks: {
+        components: [BaseBlock, PhysicsBlock],
+        listen: {
+            added: true,
+            removed: true
+        }
+    },
+    rooms: {
+        components: [BaseRoom],
+        listen: {
+            added: true,
+            removed: true
+        }
+    },
+    floors: {
+        components: [PhysicsFloor],
+        listen: {
+            added: true,
+            removed: true
+        }
+    },
+    cubesides: {
+        components: [PhysicsCubeSide],
+        listen: {
+            added: true,
+            removed: true
+        }
+    },
+    balls: {
+        components: [BaseBall, PhysicsBall],
+        listen: {
+            added: true,
+            removed: true
+        }
+    },
+    levels: {
+        components: [LevelInfo],
+        listen: {
+            added: true,
+            removed: true
+        }
+    }
+}
 
 

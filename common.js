@@ -154,3 +154,17 @@ export class BaseSlingshot {
         this.ballType = Consts.BALL_TYPES.PLAIN
     }
 }
+export class MouseSlingshot {}
+export class LevelInfo {
+    constructor() {
+        this.name = 'foo'
+        this.ballRadius = 0.25
+        this.ballMass = 5
+        this.ballType = pickOneValue(Consts.BALL_TYPES)
+        this.wallFriction = 0.0
+        this.wallRestitution = 0.0
+        this.gravity = new Vector3()
+        this.hasGravity = true
+        this.roomType = 'roomType'
+    }
+}
