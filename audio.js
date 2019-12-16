@@ -5,7 +5,7 @@ import {
 } from "./node_modules/three/build/three.module.js"
 
 import {System} from "./node_modules/ecsy/build/ecsy.module.js"
-import {ThreeScene} from './three'
+import {ThreeScene} from './three.js'
 
 
 export class SoundEffect {
