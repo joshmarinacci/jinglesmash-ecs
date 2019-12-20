@@ -171,7 +171,7 @@ export class ThreeSystem extends System {
         )
         stats.obj.position.z = -2
         stats.obj.position.y = 2
-        stats.obj.position.x = -2
+        stats.obj.position.x = 0
         stats.obj.material.depthTest = false
         stats.obj.material.depthWrite = false
         sc.scene.add(stats.obj)
