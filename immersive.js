@@ -178,7 +178,7 @@ export class ImmersiveInputSystem extends System {
         if(globals.inputMode !== Consts.INPUT_MODES.VR) return
 
         this.queries.controllers.added.forEach(ent => {
-            const three = this.queries.three[0].getComponent(ThreeScene)
+            const three = this.queries.three.results[0].getComponent(ThreeScene)
             const controller = ent.getMutableComponent(VRController)
             controller.vrcontroller = three.renderer.vr.getController(controller.index)
             controller.vrcontroller.addEventListener('selectstart', this.controllerSelectStart.bind(this));
@@ -204,11 +204,11 @@ export class ImmersiveInputSystem extends System {
         })
     }
     controllerSelectEnd(ent) {
-        const globals = this.queries.globals[0].getMutableComponent(Globals)
+        const globals = this.queries.globals.results[0].getMutableComponent(Globals)
         if(globals.balls <= 0) return
         globals.balls += -1
 
-        const three = this.queries.three[0].getComponent(ThreeScene)
+        const three = this.queries.three.results[0].getComponent(ThreeScene)
 
         const ball = this.world.createEntity()
         const endPoint = new Vector3(0,0,-1)
