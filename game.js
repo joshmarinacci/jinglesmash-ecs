@@ -183,7 +183,7 @@ function setupGame() {
     game = world.createEntity()
     game.addComponent(Globals)
     game.addComponent(ThreeScene)
-    game.addComponent(VRStats)
+    // game.addComponent(VRStats)
 
 
     const globals = game.getMutableComponent(Globals)
