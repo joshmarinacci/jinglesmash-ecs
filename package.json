@@ -11,6 +11,6 @@
   "dependencies": {
     "cannon": "^0.6.2",
     "ecsy": "^0.1.4",
-    "three": "^0.107.0"
+    "three": "^0.137.0"
   }
 }
