@@ -18,7 +18,8 @@ export class Globals {
 
 
 export const Consts = {
-    BASE_URL :  "https://vr.josh.earth/360/doc/",
+    // Levels ship with the game; they used to load from https://vr.josh.earth/360/doc/
+    BASE_URL :  "./levels/",
     docid : "tumble_level5",
     INPUT_MODES: {
         MOUSE:'MOUSE',

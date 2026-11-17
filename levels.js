@@ -7,7 +7,7 @@ import {ThreeBlock, ThreeSlingshot} from './three.js'
 
 export function loadStructure(name,world) {
     console.log("fetching",name)
-    return fetch(`${Consts.BASE_URL}${name}?cachebust=${Math.random()}`)
+    return fetch(`${Consts.BASE_URL}${name}.json`)
         .then(res => res.json())
         .then(res => {
             return loadFromJSON(res,world)

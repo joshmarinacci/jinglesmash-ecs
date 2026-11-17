@@ -1,0 +1,171 @@
+{
+    "id": "tumble_level13",
+    "type": "tumble-v1",
+    "data": {
+        "blocks": [
+            {
+                "type": "block",
+                "physicstype": "BLOCK",
+                "position": {
+                    "x": -2.2000000000000006,
+                    "y": 1,
+                    "z": -0.30000000000000004
+                },
+                "size": {
+                    "width": 0.10000000000000014,
+                    "height": 2,
+                    "depth": 1
+                },
+                "rotation": {
+                    "x": 0,
+                    "y": 0.30000000000000004,
+                    "z": 0
+                }
+            },
+            {
+                "type": "block",
+                "physicstype": "BLOCK",
+                "position": {
+                    "x": -0.8000000000000002,
+                    "y": 1,
+                    "z": -0.2
+                },
+                "size": {
+                    "width": 0.10000000000000014,
+                    "height": 2,
+                    "depth": 1
+                },
+                "rotation": {
+                    "x": 0,
+                    "y": 0,
+                    "z": 0
+                }
+            },
+            {
+                "type": "block",
+                "physicstype": "BLOCK",
+                "position": {
+                    "x": 0.6999999999999988,
+                    "y": 1,
+                    "z": 0.6
+                },
+                "size": {
+                    "width": 0.10000000000000014,
+                    "height": 2,
+                    "depth": 1
+                },
+                "rotation": {
+                    "x": 0,
+                    "y": -0.4,
+                    "z": 0
+                }
+            },
+            {
+                "type": "block",
+                "physicstype": "BLOCK",
+                "position": {
+                    "x": 1.8999999999999981,
+                    "y": 1,
+                    "z": 1.9000000000000006
+                },
+                "size": {
+                    "width": 0.10000000000000014,
+                    "height": 2,
+                    "depth": 1
+                },
+                "rotation": {
+                    "x": 0,
+                    "y": -0.9999999999999999,
+                    "z": 0
+                }
+            },
+            {
+                "type": "block",
+                "physicstype": "WALL",
+                "position": {
+                    "x": -2.9000000000000012,
+                    "y": 1,
+                    "z": 0.8999999999999999
+                },
+                "size": {
+                    "width": 0.30000000000000016,
+                    "height": 1.9,
+                    "depth": 0.30000000000000016
+                },
+                "rotation": {
+                    "x": 0,
+                    "y": 0,
+                    "z": 0
+                }
+            },
+            {
+                "type": "block",
+                "physicstype": "CRYSTAL",
+                "position": {
+                    "x": -3.800000000000002,
+                    "y": 0.5000000000000001,
+                    "z": -0.6
+                },
+                "size": {
+                    "width": 1,
+                    "height": 0.9999999999999992,
+                    "depth": 1
+                },
+                "rotation": {
+                    "x": 0,
+                    "y": 0,
+                    "z": 0
+                }
+            },
+            {
+                "type": "block",
+                "physicstype": "WALL",
+                "position": {
+                    "x": -3.600000000000003,
+                    "y": 1,
+                    "z": 0.8999999999999999
+                },
+                "size": {
+                    "width": 0.30000000000000016,
+                    "height": 1.9,
+                    "depth": 0.30000000000000016
+                },
+                "rotation": {
+                    "x": 0,
+                    "y": 0,
+                    "z": 0
+                }
+            },
+            {
+                "type": "block",
+                "physicstype": "WALL",
+                "position": {
+                    "x": -2.2000000000000033,
+                    "y": 1,
+                    "z": 0.8999999999999999
+                },
+                "size": {
+                    "width": 0.30000000000000016,
+                    "height": 1.9,
+                    "depth": 0.30000000000000016
+                },
+                "rotation": {
+                    "x": 0,
+                    "y": 0,
+                    "z": 0
+                }
+            }
+        ],
+        "ballMass": 5,
+        "ballRadius": 0.25,
+        "wallFriction": 0,
+        "wallRestitution": 0,
+        "hasGravity": true,
+        "gravity": {
+            "x": 0,
+            "y": -9.8,
+            "z": 0
+        },
+        "roomType": "FLOOR"
+    }
+}

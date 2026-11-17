@@ -1,0 +1,283 @@
+{
+    "id": "tumble_level7",
+    "type": "tumble-v1",
+    "data": {
+        "blocks": [
+            {
+                "type": "block",
+                "physicstype": "BLOCK",
+                "position": {
+                    "x": -2,
+                    "y": 1,
+                    "z": 1
+                },
+                "size": {
+                    "width": 0.20000000000000015,
+                    "height": 2,
+                    "depth": 1
+                },
+                "rotation": {
+                    "x": 0,
+                    "y": 0,
+                    "z": 0
+                }
+            },
+            {
+                "type": "block",
+                "physicstype": "BLOCK",
+                "position": {
+                    "x": 0,
+                    "y": 1,
+                    "z": 0.9999999999999999
+                },
+                "size": {
+                    "width": 0.30000000000000016,
+                    "height": 2,
+                    "depth": 1
+                },
+                "rotation": {
+                    "x": 0,
+                    "y": 0,
+                    "z": 0
+                }
+            },
+            {
+                "type": "block",
+                "physicstype": "BLOCK",
+                "position": {
+                    "x": 2,
+                    "y": 1,
+                    "z": 0.9999999999999992
+                },
+                "size": {
+                    "width": 0.10000000000000014,
+                    "height": 2,
+                    "depth": 1
+                },
+                "rotation": {
+                    "x": 0,
+                    "y": 0,
+                    "z": 0
+                }
+            },
+            {
+                "type": "block",
+                "physicstype": "BLOCK",
+                "position": {
+                    "x": 0,
+                    "y": 2.2,
+                    "z": 0.9999999999999999
+                },
+                "size": {
+                    "width": 4.500000000000001,
+                    "height": 0.19999999999999937,
+                    "depth": 1
+                },
+                "rotation": {
+                    "x": 0,
+                    "y": 0,
+                    "z": 0
+                }
+            },
+            {
+                "type": "block",
+                "physicstype": "CRYSTAL",
+                "position": {
+                    "x": -1.1,
+                    "y": 2.6,
+                    "z": 0.9999999999999991
+                },
+                "size": {
+                    "width": 0.5000000000000001,
+                    "height": 0.49999999999999933,
+                    "depth": 0.5000000000000001
+                },
+                "rotation": {
+                    "x": 0,
+                    "y": 0,
+                    "z": 0
+                }
+            },
+            {
+                "type": "block",
+                "physicstype": "CRYSTAL",
+                "position": {
+                    "x": -0.5,
+                    "y": 2.6,
+                    "z": 0.9999999999999991
+                },
+                "size": {
+                    "width": 0.5000000000000001,
+                    "height": 0.49999999999999933,
+                    "depth": 0.5000000000000001
+                },
+                "rotation": {
+                    "x": 0,
+                    "y": 0,
+                    "z": 0
+                }
+            },
+            {
+                "type": "block",
+                "physicstype": "CRYSTAL",
+                "position": {
+                    "x": 0.1,
+                    "y": 2.6,
+                    "z": 0.9999999999999991
+                },
+                "size": {
+                    "width": 0.5000000000000001,
+                    "height": 0.49999999999999933,
+                    "depth": 0.5000000000000001
+                },
+                "rotation": {
+                    "x": 0,
+                    "y": 0,
+                    "z": 0
+                }
+            },
+            {
+                "type": "block",
+                "physicstype": "CRYSTAL",
+                "position": {
+                    "x": 0.7000000000000001,
+                    "y": 2.6,
+                    "z": 0.9999999999999991
+                },
+                "size": {
+                    "width": 0.5000000000000001,
+                    "height": 0.49999999999999933,
+                    "depth": 0.5000000000000001
+                },
+                "rotation": {
+                    "x": 0,
+                    "y": 0,
+                    "z": 0
+                }
+            },
+            {
+                "type": "block",
+                "physicstype": "CRYSTAL",
+                "position": {
+                    "x": -0.8,
+                    "y": 3.1,
+                    "z": 0.9999999999999991
+                },
+                "size": {
+                    "width": 0.5000000000000001,
+                    "height": 0.49999999999999933,
+                    "depth": 0.5000000000000001
+                },
+                "rotation": {
+                    "x": 0,
+                    "y": 0,
+                    "z": 0
+                }
+            },
+            {
+                "type": "block",
+                "physicstype": "CRYSTAL",
+                "position": {
+                    "x": -0.2,
+                    "y": 3.1,
+                    "z": 0.9999999999999991
+                },
+                "size": {
+                    "width": 0.5000000000000001,
+                    "height": 0.49999999999999933,
+                    "depth": 0.5000000000000001
+                },
+                "rotation": {
+                    "x": 0,
+                    "y": 0,
+                    "z": 0
+                }
+            },
+            {
+                "type": "block",
+                "physicstype": "CRYSTAL",
+                "position": {
+                    "x": 0.4,
+                    "y": 3.1,
+                    "z": 0.9999999999999991
+                },
+                "size": {
+                    "width": 0.5000000000000001,
+                    "height": 0.49999999999999933,
+                    "depth": 0.5000000000000001
+                },
+                "rotation": {
+                    "x": 0,
+                    "y": 0,
+                    "z": 0
+                }
+            },
+            {
+                "type": "block",
+                "physicstype": "CRYSTAL",
+                "position": {
+                    "x": -0.6000000000000001,
+                    "y": 3.6,
+                    "z": 0.9999999999999991
+                },
+                "size": {
+                    "width": 0.5000000000000001,
+                    "height": 0.49999999999999933,
+                    "depth": 0.5000000000000001
+                },
+                "rotation": {
+                    "x": 0,
+                    "y": 0,
+                    "z": 0
+                }
+            },
+            {
+                "type": "block",
+                "physicstype": "CRYSTAL",
+                "position": {
+                    "x": 0,
+                    "y": 3.6,
+                    "z": 0.9999999999999991
+                },
+                "size": {
+                    "width": 0.5000000000000001,
+                    "height": 0.49999999999999933,
+                    "depth": 0.5000000000000001
+                },
+                "rotation": {
+                    "x": 0,
+                    "y": 0,
+                    "z": 0
+                }
+            },
+            {
+                "type": "block",
+                "physicstype": "CRYSTAL",
+                "position": {
+                    "x": -0.30000000000000004,
+                    "y": 4.1000000000000005,
+                    "z": 0.9999999999999991
+                },
+                "size": {
+                    "width": 0.5000000000000001,
+                    "height": 0.49999999999999933,
+                    "depth": 0.5000000000000001
+                },
+                "rotation": {
+                    "x": 0,
+                    "y": 0,
+                    "z": 0
+                }
+            }
+        ],
+        "ballMass": 5,
+        "ballRadius": 0.25,
+        "wallFriction": 0,
+        "wallRestitution": 0,
+        "gravity": {
+            "x": 0,
+            "y": -9.8,
+            "z": 0
+        }
+    }
+}
