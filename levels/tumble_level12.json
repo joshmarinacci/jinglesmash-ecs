@@ -1,0 +1,76 @@
+{
+    "id": "tumble_level12",
+    "type": "tumble-v1",
+    "data": {
+        "blocks": [
+            {
+                "type": "block",
+                "physicstype": "CRYSTAL",
+                "position": {
+                    "x": -0.1,
+                    "y": 9.700000000000001,
+                    "z": -0.6000000000000001
+                },
+                "size": {
+                    "width": 1,
+                    "height": 0.9999999999999992,
+                    "depth": 1
+                },
+                "rotation": {
+                    "x": 0,
+                    "y": 0,
+                    "z": 0
+                }
+            },
+            {
+                "type": "block",
+                "physicstype": "WALL",
+                "position": {
+                    "x": 0,
+                    "y": 9.099999999999998,
+                    "z": 0
+                },
+                "size": {
+                    "width": 3.9000000000000026,
+                    "height": 0.39999999999999936,
+                    "depth": 1.5000000000000004
+                },
+                "rotation": {
+                    "x": 0,
+                    "y": 0,
+                    "z": 0
+                }
+            },
+            {
+                "type": "block",
+                "physicstype": "BLOCK",
+                "position": {
+                    "x": -0.2,
+                    "y": 10.3,
+                    "z": 0.6000000000000001
+                },
+                "size": {
+                    "width": 1,
+                    "height": 2.2,
+                    "depth": 1
+                },
+                "rotation": {
+                    "x": 0,
+                    "y": 0,
+                    "z": 0
+                }
+            }
+        ],
+        "ballMass": 5,
+        "ballRadius": 0.25,
+        "wallFriction": 0,
+        "wallRestitution": 0,
+        "hasGravity": true,
+        "gravity": {
+            "x": 0,
+            "y": -9.8,
+            "z": 0
+        },
+        "roomType": "FLOOR"
+    }
+}

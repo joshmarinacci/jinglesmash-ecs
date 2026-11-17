@@ -1,0 +1,152 @@
+{
+    "id": "tumble_level14",
+    "type": "tumble-v1",
+    "data": {
+        "blocks": [
+            {
+                "type": "block",
+                "physicstype": "WALL",
+                "position": {
+                    "x": -2,
+                    "y": -2,
+                    "z": 0
+                },
+                "size": {
+                    "width": 1,
+                    "height": 6.999999999999991,
+                    "depth": 1
+                },
+                "rotation": {
+                    "x": 0,
+                    "y": 0,
+                    "z": 0
+                }
+            },
+            {
+                "type": "block",
+                "physicstype": "CRYSTAL",
+                "position": {
+                    "x": -2,
+                    "y": 2,
+                    "z": 0
+                },
+                "size": {
+                    "width": 1,
+                    "height": 0.9999999999999992,
+                    "depth": 1
+                },
+                "rotation": {
+                    "x": 0,
+                    "y": 0,
+                    "z": 0
+                }
+            },
+            {
+                "type": "block",
+                "physicstype": "WALL",
+                "position": {
+                    "x": -0.5,
+                    "y": -2,
+                    "z": 0
+                },
+                "size": {
+                    "width": 1,
+                    "height": 6.999999999999991,
+                    "depth": 1
+                },
+                "rotation": {
+                    "x": 0,
+                    "y": 0,
+                    "z": 0
+                }
+            },
+            {
+                "type": "block",
+                "physicstype": "WALL",
+                "position": {
+                    "x": 1,
+                    "y": -2,
+                    "z": 0
+                },
+                "size": {
+                    "width": 1,
+                    "height": 6.999999999999991,
+                    "depth": 1
+                },
+                "rotation": {
+                    "x": 0,
+                    "y": 0,
+                    "z": 0
+                }
+            },
+            {
+                "type": "block",
+                "physicstype": "CRYSTAL",
+                "position": {
+                    "x": -0.5,
+                    "y": 2,
+                    "z": 0
+                },
+                "size": {
+                    "width": 1,
+                    "height": 0.9999999999999992,
+                    "depth": 1
+                },
+                "rotation": {
+                    "x": 0,
+                    "y": 0,
+                    "z": 0
+                }
+            },
+            {
+                "type": "block",
+                "physicstype": "CRYSTAL",
+                "position": {
+                    "x": 1,
+                    "y": 2,
+                    "z": 0
+                },
+                "size": {
+                    "width": 1,
+                    "height": 0.9999999999999992,
+                    "depth": 1
+                },
+                "rotation": {
+                    "x": 0,
+                    "y": 0,
+                    "z": 0
+                }
+            },
+            {
+                "type": "block",
+                "physicstype": "WALL",
+                "position": {
+                    "x": -0.5,
+                    "y": -2,
+                    "z": 0
+                },
+                "size": {
+                    "width": 1,
+                    "height": 6.999999999999991,
+                    "depth": 1
+                },
+                "rotation": {
+                    "x": 0,
+                    "y": 0,
+                    "z": 0
+                }
+            }
+        ],
+        "ballMass": 5,
+        "ballRadius": 0.25,
+        "wallFriction": 0,
+        "wallRestitution": 0,
+        "hasGravity": true,
+        "gravity": {
+            "x": 0,
+            "y": -9.8,
+            "z": 0
+        },
+        "roomType": "CUBE"
+    }
+}
